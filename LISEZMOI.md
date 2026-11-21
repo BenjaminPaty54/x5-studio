@@ -12,7 +12,7 @@ L'interface existe en **français, anglais, italien, espagnol et allemand** : cl
 
 ---
 
-## Ce qu'il faut
+## Materiel Necessaire
 
 - Un Korg X5, X5D, X5DR ou 05R/W (ils partagent le même moteur et le même format SysEx).
 - Une interface MIDI reliée à l'ordinateur, branchée dans les deux sens :
@@ -102,7 +102,7 @@ Messages Korg SysEx, Model ID `36h` :
 
 ## Remerciements
 
-La carte des paramètres s'appuie sur l'étude du panel Ctrlr « 05R/W » de Mauro De Carolis (en corrigeant plusieurs erreurs d'encodage), complétée par le manuel de référence Korg X2/X3.
+La carte des paramètres s'appuie sur l'étude attentive du panel Ctrlr « 05R/W » de Mauro De Carolis (en corrigeant plusieurs erreurs d'encodage), complétée par le manuel de référence Korg X2/X3 et 05/RW qui décrit précisément (mais pas intégralement) les messages sysex du KORG X5.
 
 ## Copyright
 
