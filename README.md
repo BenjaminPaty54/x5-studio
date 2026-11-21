@@ -102,7 +102,7 @@ Korg SysEx messages, Model ID `36h`:
 
 ## Acknowledgements
 
-The parameter map is based on a study of Mauro De Carolis's "05R/W" Ctrlr panel (fixing several encoding errors along the way), checked against the Korg X2/X3 reference manual.
+The parameter map is based on a deep study of Mauro De Carolis's "05R/W" Ctrlr panel (fixing several encoding errors along the way), checked against the Korg X2/X3 and the 05/RW reference manuals.
 
 ## Copyright
 
