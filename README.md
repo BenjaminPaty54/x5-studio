@@ -8,6 +8,8 @@ The whole app is a single file, `x5studio.html`. Nothing to install, and no Inte
 
 The interface is available in **English, French, Italian, Spanish and German**: click a flag at the top right. On first launch, the app uses your browser's language.
 
+Two themes: **Atelier** (light, inspired by the look of Eurorack modules) and **Nuit** (dark), switched with the ☾ / ☀ button.
+
 © 2026 Benjamin PATY (BenjaminPaty54)
 
 ---
@@ -63,6 +65,7 @@ Always-visible tools:
 
 - **Keyboard** on screen or on your computer keyboard (middle row = white keys), **▶ Test** to play a note, a chord or an arpeggio, and **Replay after each change**.
 - **↶ / ↷** to undo or redo (Ctrl/⌘+Z), **A/B** (hold it down to hear the original sound), and **Revert to original**.
+- **● Editing / ○ Play**: shows whether the X5 is in edit mode. One click hands control back to the synth (Program mode); this also happens automatically when you close the page. If the X5 rejects a change (for example after you used its front panel), the app puts it back in edit mode and resends the sound.
 - **SysEx**: a small window that shows every message sent ↑ or received ↓, decoded in plain words with its bytes. The **Delay** slider adds a pause after each SysEx message (20 ms by default).
 - Double-click a slider to restore its original value; use the mouse wheel for fine adjustment.
 
@@ -102,7 +105,7 @@ Korg SysEx messages, Model ID `36h`:
 
 ## Acknowledgements
 
-The parameter map is based on a deep study of Mauro De Carolis's "05R/W" Ctrlr panel (fixing several encoding errors along the way), checked against the Korg X2/X3 and the 05/RW reference manuals.
+The parameter map is based on a study of Mauro De Carolis's "05R/W" Ctrlr panel (fixing several encoding errors along the way), checked against the Korg X2/X3 reference manual, then corrected using the official X5DR MIDI implementation tables transcribed in Mark Baylis's [x5dr-editor](https://github.com/Baylo1/x5dr-editor) (MIT License). The edit-mode handling (handing control back to the synth, recovery after a rejected change) follows the behaviour documented in that project. For editing Combinations, Multi, Global and drum kits, that editor is a good complement to X5 Studio.
 
 ## Copyright
 

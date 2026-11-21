@@ -8,11 +8,13 @@ L'application tient en un seul fichier : `x5studio.html`. Rien à installer, auc
 
 L'interface existe en **français, anglais, italien, espagnol et allemand** : clique sur un drapeau en haut à droite. Au premier lancement, l'application prend la langue du navigateur.
 
+Deux thèmes : **Atelier** (clair, inspiré de l'esthétique des modules Eurorack) et **Nuit** (sombre), à basculer avec le bouton ☾ / ☀.
+
 © 2026 Benjamin PATY (BenjaminPaty54)
 
 ---
 
-## Materiel Necessaire
+## Ce qu'il faut
 
 - Un Korg X5, X5D, X5DR ou 05R/W (ils partagent le même moteur et le même format SysEx).
 - Une interface MIDI reliée à l'ordinateur, branchée dans les deux sens :
@@ -63,6 +65,7 @@ Outils toujours visibles :
 
 - **Clavier** à l'écran ou clavier de l'ordinateur (rangée du milieu = touches blanches), **▶ Tester** pour jouer une note, un accord ou un arpège, option **Rejouer à chaque réglage**.
 - **↶ / ↷** pour annuler ou rétablir (Ctrl/⌘+Z), **A/B** à maintenir appuyé pour réentendre le son d'origine, et **Revenir à l'origine**.
+- **● Édition / ○ Jeu** : indique si le synthé est en mode édition. Un clic lui rend la main (mode Program) ; c'est aussi fait automatiquement quand tu fermes la page. Si le X5 refuse un réglage (par exemple après un passage par sa face avant), l'appli le remet en édition et lui renvoie le son.
 - **SysEx** : petite fenêtre qui affiche chaque message envoyé ↑ ou reçu ↓, traduit en clair avec ses octets. Le curseur **Délai** ajoute une pause après chaque message SysEx (20 ms par défaut).
 - Double-clic sur un curseur pour retrouver sa valeur d'origine, molette pour un réglage fin.
 
@@ -102,7 +105,7 @@ Messages Korg SysEx, Model ID `36h` :
 
 ## Remerciements
 
-La carte des paramètres s'appuie sur l'étude attentive du panel Ctrlr « 05R/W » de Mauro De Carolis (en corrigeant plusieurs erreurs d'encodage), complétée par le manuel de référence Korg X2/X3 et 05/RW qui décrit précisément (mais pas intégralement) les messages sysex du KORG X5.
+La carte des paramètres s'appuie sur l'étude du panel Ctrlr « 05R/W » de Mauro De Carolis (en corrigeant plusieurs erreurs d'encodage), complétée par le manuel de référence Korg X2/X3, puis corrigée grâce aux tables MIDI officielles du X5DR transcrites dans le projet [x5dr-editor](https://github.com/Baylo1/x5dr-editor) de Mark Baylis (licence MIT). La gestion du mode édition (rendre la main au synthé, reprise après un refus) suit le comportement documenté dans ce projet. Pour éditer les Combinations, le mode Multi, les réglages Global et les kits de batterie, cet éditeur est un bon complément à X5 Studio.
 
 ## Copyright
 
