@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<!--
+  X5 Studio — éditeur de Programs SysEx pour Korg X5 / X5D / X5DR / 05R/W
+  Web MIDI program editor for Korg X5 / X5D / X5DR / 05R/W
+
+  Copyright (c) 2026 Benjamin PATY (BenjaminPaty54)
+  Distribué sous licence MIT — voir le fichier LICENSE.
+  Released under the MIT License — see the LICENSE file.
+  SPDX-License-Identifier: MIT
+
+  Korg, X5, X5D, X5DR et 05R/W sont des marques de Korg Inc. Projet indépendant, non affilié à Korg.
+  Korg, X5, X5D, X5DR and 05R/W are trademarks of Korg Inc. Independent project, not affiliated with Korg.
+-->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="author" content="Benjamin PATY (BenjaminPaty54)">
+<meta name="copyright" content="© 2026 Benjamin PATY">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>X5 Studio — éditeur SysEx pour Korg X5 / 05R/W / X5DR</title>
+<style>
+:root{
+  --bg:#15171a; --panel:#1d2024; --panel2:#24282d; --line:#33383f; --txt:#e6e3dc; --mute:#9a9890;
+  --acc:#e9a23b; --acc2:#5fc4b8; --neg:#e0645a; --lcd:#b9d97a; --lcdbg:#1f2a17;
+  --r:10px; --font: ui-sans-serif, -apple-system, "Segoe UI", Inter, Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:14px/1.35 var(--font)}
+button,select,input{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer}
+button:hover{border-color:#4b525b}
+button.pri{background:var(--acc);color:#1a1405;border-color:var(--acc);font-weight:600}
+button.warn{border-color:#7a3b35;color:#f2b0a9}
+button:disabled{opacity:.45;cursor:default}
+header select{max-width:170px}
+#midiState{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+select,input[type=text],input[type=number]{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.app{display:grid;grid-template-rows:auto auto 1fr auto;height:100vh}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;background:#101214;border-bottom:1px solid var(--line)}
+.brand{font-weight:800;letter-spacing:.5px;font-size:17px;margin-right:6px}
+.brand b{color:var(--acc)}
+.grp{display:flex;gap:6px;align-items:center}
+.sep{width:1px;height:26px;background:var(--line);margin:0 4px}
+.pill{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--mute)}
+.pill.ok{color:var(--acc2);border-color:#2f5f59}
+.pill.bad{color:var(--neg);border-color:#6b2f2a}
+.led{width:9px;height:9px;border-radius:50%;background:#333;display:inline-block;transition:background .08s}
+.led.on{background:var(--acc2);box-shadow:0 0 6px var(--acc2)}
+.led.in.on{background:var(--acc);box-shadow:0 0 6px var(--acc)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:5px 10px;background:var(--panel2)}
+.seg button.on{background:var(--acc);color:#1a1405;font-weight:600}
+.progbar{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.lcd{font-family:var(--mono);background:var(--lcdbg);color:var(--lcd);border:1px solid #384a2a;border-radius:6px;padding:6px 10px;font-size:18px;letter-spacing:2px;width:12.5ch;text-transform:none}
+.dirty{color:var(--acc);font-size:12px}
+nav.tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+nav.tabs button{background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;padding:8px 12px;color:var(--mute)}
+nav.tabs button.on{color:var(--txt);border-bottom-color:var(--acc)}
+main{overflow:auto;padding:14px}
+.page{display:none}
+.page.on{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.card h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--mute);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card.wide{grid-column:1/-1}
+.row{display:grid;grid-template-columns:132px 1fr 52px;gap:8px;align-items:center;margin:5px 0}
+.row label{color:#cfccc4;font-size:13px}
+.row .val{font-family:var(--mono);text-align:right;font-size:13px;color:var(--acc)}
+.row.dis,.card.dis{opacity:.4;pointer-events:none}
+input[type=range]{width:100%;accent-color:var(--acc);height:20px;cursor:pointer}
+.tri{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.tri button{border:0;border-radius:0;padding:2px 9px;background:var(--panel2);font-family:var(--mono)}
+.tri button.on{background:var(--acc2);color:#082220;font-weight:700}
+.tri button.on.n{background:var(--neg);color:#260b08}
+.tris{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 2px}
+.tris>span{font-size:12px;color:var(--mute);margin-right:4px;align-self:center}
+.trik{display:inline-flex;gap:5px;align-items:center;white-space:nowrap}.trik b{font-size:12px}
+.tri button.on.z{background:#3a3f46;color:var(--txt)}
+.note{font-size:12px;color:var(--mute);margin:6px 0 0}
+.note.warn{color:#e7b57a}
+.scope{display:flex;gap:8px;align-items:center;margin:0 0 12px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:900px){.cols2{grid-template-columns:1fr}}
+/* macros */
+.macros{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.macro{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;user-select:none}
+.macro .t{font-weight:700;display:flex;justify-content:space-between}
+.macro .d{font-size:12px;color:var(--mute);min-height:30px;margin:3px 0 9px}
+.track{position:relative;height:38px;border-radius:8px;background:linear-gradient(90deg,#2a2224,#24282d 50%,#1f2b29);border:1px solid var(--line);cursor:ew-resize;touch-action:none}
+.track .mid{position:absolute;left:50%;top:4px;bottom:4px;width:1px;background:#555}
+.track .thumb{position:absolute;top:3px;width:30px;height:30px;margin-left:-15px;left:50%;border-radius:7px;background:var(--acc);box-shadow:0 2px 8px #0008;transition:left .25s cubic-bezier(.3,1.4,.6,1)}
+.track.drag .thumb{transition:none}
+.track .lo,.track .hi{position:absolute;top:10px;font-size:11px;color:var(--mute)}
+.track .lo{left:8px}.track .hi{right:8px}
+.macro .r{font-family:var(--mono);font-size:11px;color:var(--acc2);min-height:15px;margin-top:6px}
+.macro.dis{opacity:.4;pointer-events:none}
+/* EG */
+.eg{width:100%;height:190px;display:block;background:#17191c;border:1px solid var(--line);border-radius:8px;touch-action:none}
+.eg .h{cursor:grab}
+.eg text{fill:var(--mute);font-size:10px;font-family:var(--mono)}
+/* wave picker */
+.wave{display:grid;gap:6px}
+.wave{grid-template-columns:minmax(0,1fr)}
+.wlist{position:relative;height:190px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:#17191c;font:12px/1.5 var(--mono)}
+.wlist .c{position:sticky;top:0;background:#23272c;color:var(--mute);padding:2px 8px;font-family:var(--font);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+.wlist .w{padding:1px 10px;cursor:pointer;white-space:nowrap}
+.wlist .w:hover{background:#2a2e34}
+.wlist .w.sel{background:#3a2e17;color:var(--acc)}
+.wave .top{display:flex;gap:6px;align-items:center}.wave .top .wname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card{min-width:0;overflow:hidden}
+.wave .nav{display:flex;gap:6px}
+.wave .nav input{flex:1;min-width:0}
+.wname{font-family:var(--mono);color:var(--lcd);font-size:15px}
+/* keyboard bar */
+footer{background:#101214;border-top:1px solid var(--line);padding:8px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+.kbctl{display:flex;flex-direction:column;gap:6px;min-width:250px}
+.kbctl .grp{flex-wrap:wrap}
+.keys{position:relative;height:86px;user-select:none;touch-action:none}
+.key{position:absolute;top:0;border:1px solid #111;border-radius:0 0 5px 5px;display:flex;align-items:flex-end;justify-content:center;font-size:10px;padding-bottom:4px;font-family:var(--mono)}
+.key.w{background:#e9e6df;color:#666;height:86px;z-index:1}
+.key.b{background:#222;color:#aaa;height:52px;z-index:2}
+.key.down{background:var(--acc)!important;color:#1a1405}
+/* library */
+.bank{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px;max-height:420px;overflow:auto}
+.slot{font-family:var(--mono);font-size:12px;padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot:hover{border-color:var(--acc)}
+.slot.sel{background:#3a2e17;border-color:var(--acc)}
+.slot b{color:var(--mute);font-weight:400;margin-right:6px}
+.list{max-height:300px;overflow:auto;display:grid;gap:4px}
+.item{display:flex;gap:6px;align-items:center;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)}
+.item span{flex:1;font-family:var(--mono);font-size:13px}
+/* log + toast */
+#mon{position:fixed;left:12px;bottom:118px;width:min(620px,94vw);height:230px;min-height:120px;min-width:320px;resize:both;overflow:hidden;background:#0d0f11;border:1px solid var(--line);border-radius:10px;display:none;flex-direction:column;z-index:55;box-shadow:0 10px 30px #0009}
+#mon.on{display:flex}
+#mon .mh{display:flex;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line);cursor:move;user-select:none;flex-wrap:wrap;font-size:12px}
+#mon .mh b{margin-right:auto;font-size:12px;letter-spacing:.4px}
+#mon .mh button{padding:2px 7px;font-size:12px}
+#mon .mh input[type=range]{width:80px;vertical-align:middle}
+#mon .mh .v{font-family:var(--mono);color:var(--acc);display:inline-block;width:46px}
+#mon .mb{overflow:auto;flex:1;font:11px/1.5 var(--mono);padding:4px 8px}
+#mon .r{display:grid;grid-template-columns:64px 14px 1fr;gap:6px;border-bottom:1px solid #1e2226;padding:2px 0}
+#mon .r .t{color:var(--mute)}
+#mon .r.o .a{color:var(--acc2)} #mon .r.i .a{color:var(--acc)}
+#mon .r .x{color:#7d8794;grid-column:3;word-break:break-all}
+#mon .r .d{color:var(--txt)}
+#mon.hidehex .r .x{display:none}
+#btnMon.on{border-color:var(--acc2);color:var(--acc2)}
+.flags{display:flex;gap:4px}
+.flags button{padding:3px;border-radius:4px;line-height:0;border:2px solid transparent;background:transparent}
+.flags button.on{border-color:var(--acc)}
+.flags button:not(.on){opacity:.55}
+.flags button:hover{opacity:1}
+.flags svg{width:24px;height:16px;display:block;border-radius:2px}
+#log{position:fixed;right:12px;bottom:118px;width:min(560px,92vw);max-height:40vh;overflow:auto;background:#0d0f11ee;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:11px/1.45 var(--mono);display:none;z-index:50}
+#log.on{display:block}
+#log .o{color:var(--acc2)} #log .i{color:var(--acc)} #log .e{color:var(--neg)} #log .m{color:var(--mute)}
+#toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:#2b2f35;border:1px solid var(--line);border-radius:10px;padding:9px 16px;box-shadow:0 8px 30px #000a;z-index:60;display:none;max-width:80vw}
+#toast.on{display:block}
+#toast.bad{border-color:var(--neg)} #toast.ok{border-color:var(--acc2)}
+dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:12px;max-width:460px}
+dialog::backdrop{background:#000a}
+.help{font-size:13px;color:#cfccc4}
+.help li{margin:4px 0}
+kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand" title="X5 Studio v1.2 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
+  <span id="midiState" class="pill">MIDI : en attente</span>
+  <div class="grp">
+    <span class="led" id="ledOut" title="Sortie MIDI"></span><select id="outSel" title="Sortie MIDI vers le X5"></select>
+    <span class="led in" id="ledIn" title="Entrée MIDI"></span><select id="inSel" title="Entrée MIDI depuis le X5"></select>
+    <label title="Canal MIDI global du X5 (Global 2A)">Canal <select id="chSel"></select></label>
+    <button id="btnDetect" title="Cherche le X5 sur les 16 canaux (Identity Request)">Détecter</button>
+  </div>
+  <div class="sep"></div>
+  <div class="grp">
+    <div class="seg" title="Direct : chaque réglage part tout de suite. Manuel : tu envoies quand tu veux.">
+      <button id="modeLive" class="on">Direct</button><button id="modeMan">Manuel</button>
+    </div>
+    <button id="btnRead" title="Lit le son affiché sur le X5 (Program Dump Request)">⇩ Lire le X5</button>
+    <button id="btnSend" title="Envoie le son entier dans la mémoire tampon d'édition du X5">⇧ Envoyer</button>
+  </div>
+  <div class="sep"></div>
+  <div class="grp">
+    <select id="slotSel" title="Emplacement de destination sur le X5"></select>
+    <button id="btnWrite" class="pri" title="Écrit le son dans la mémoire du X5">Écrire</button>
+  </div>
+  <div class="grp" style="margin-left:auto">
+    <button id="btnMon" title="Moniteur SysEx (messages envoyés et reçus)">SysEx</button>
+    <button id="btnLog" title="Journal des messages MIDI">≡</button>
+    <button id="btnHelp">?</button>
+    <div class="flags" id="flags"></div>
+  </div>
+</header>
+
+<div class="progbar">
+  <input id="pname" class="lcd" maxlength="10" spellcheck="false" title="Nom du son (10 caractères)">
+  <span id="dirty" class="dirty"></span>
+  <div class="grp">
+    <button id="btnUndo" title="Annuler (Ctrl+Z)">↶</button>
+    <button id="btnRedo" title="Rétablir (Ctrl+Maj+Z)">↷</button>
+    <button id="btnAB" title="Maintiens appuyé pour entendre le son d'origine">A/B : maintenir = origine</button>
+    <button id="btnRevert" title="Revenir au son tel qu'il a été chargé">Revenir à l'origine</button>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-p="quick" class="on">Rapide</button>
+    <button data-p="osc">Oscillateurs</button>
+    <button data-p="vdf">Filtre (VDF)</button>
+    <button data-p="vda">Ampli (VDA)</button>
+    <button data-p="mod">Hauteur & LFO</button>
+    <button data-p="ctl">Contrôleurs</button>
+    <button data-p="fx">Effets</button>
+    <button data-p="lib">Librairie</button>
+  </nav>
+</div>
+
+<main id="main">
+  <section class="page on" id="p-quick"></section>
+  <section class="page" id="p-osc"></section>
+  <section class="page" id="p-vdf"></section>
+  <section class="page" id="p-vda"></section>
+  <section class="page" id="p-mod"></section>
+  <section class="page" id="p-ctl"></section>
+  <section class="page" id="p-fx"></section>
+  <section class="page" id="p-lib"></section>
+</main>
+
+<footer>
+  <div class="kbctl">
+    <div class="grp">
+      <button id="octDn" title="Octave − (touche W/Z)">Oct −</button><span id="octLbl" class="pill">C3–C5</span><button id="octUp" title="Octave + (touche X)">Oct +</button>
+      <label title="Vélocité des notes de test">Vél <input id="vel" type="range" min="1" max="127" value="96" style="width:80px"></label>
+    </div>
+    <div class="grp">
+      <select id="phraseSel" title="Type de test">
+        <option value="note">Note</option><option value="chord">Accord</option><option value="arp">Arpège</option><option value="range">Grave / médium / aigu</option><option value="vel">Doux → fort</option><option value="long">Note tenue 3 s</option>
+      </select>
+      <button id="btnPlay" class="pri" title="Barre d'espace">▶ Tester</button>
+      <label title="Rejoue automatiquement le test après chaque réglage"><input type="checkbox" id="autoPlay"> Rejouer à chaque réglage</label>
+      <button id="btnPanic" title="Coupe toutes les notes">■</button>
+    </div>
+  </div>
+  <div class="keys" id="keys"></div>
+</footer>
+</div>
+
+<div id="log"></div>
+<div id="mon">
+  <div class="mh" id="monHead">
+    <b>Moniteur SysEx</b>
+    <label title="Pause ajoutée après chaque message SysEx envoyé">Délai <input id="monDelay" type="range" min="0" max="150" step="5"> <span id="monDelayV" class="v"></span></label>
+    <label title="Afficher aussi les notes et contrôleurs"><input type="checkbox" id="monNotes"> notes</label>
+    <label><input type="checkbox" id="monHex" checked> hex</label>
+    <button id="monPause" title="Figer l'affichage">❚❚</button>
+    <button id="monClear" title="Effacer">⌫</button>
+    <button id="monCopy" title="Copier tout en texte">⧉</button>
+    <button id="monClose" title="Fermer">✕</button>
+  </div>
+  <div class="mb" id="monBody"></div>
+</div>
+<div id="toast"></div>
+<dialog id="dlg"><form method="dialog"><div id="dlgBody"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button value="no">Annuler</button><button value="yes" class="pri" id="dlgOk">Confirmer</button></div></form></dialog>
+<dialog id="helpDlg" style="max-width:620px"><form method="dialog"><div class="help" id="helpBody" data-noi18n>
+  <h3 style="margin-top:0">Mise en route</h3>
+  <ol>
+    <li>Relie le X5 à l'ordinateur (interface MIDI USB : MIDI OUT du X5 → IN de l'interface, IN du X5 ← OUT). Le port <i>TO HOST</i> fonctionne aussi avec un pilote série.</li>
+    <li>Sur le X5 : <b>GLOBAL → MIDI Filter → EX = ENA</b> (sinon aucun SysEx ne passe). Pour écrire : <b>Memory Protect Program = OFF</b>.</li>
+    <li>Ouvre cette page dans <b>Chrome</b> ou <b>Edge</b>, accepte l'accès MIDI, choisis les ports puis clique <b>Détecter</b> (le canal global est trouvé automatiquement).</li>
+    <li>Si Chrome refuse l'accès MIDI quand la page est ouverte comme fichier, lance dans le dossier de la page <code>python3 -m http.server</code> puis ouvre <code>http://localhost:8000/x5studio.html</code>.</li>
+    <li>Mets le X5 en mode PROG sur le son à retoucher et clique <b>⇩ Lire le X5</b>.</li>
+  </ol>
+  <h3>Raccourcis</h3>
+  <ul>
+    <li>Clavier de l'ordinateur = clavier musical (rangée du milieu = touches blanches, rangée du dessus = noires), <kbd>W</kbd>/<kbd>X</kbd> (AZERTY) ou <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>
+    <li><kbd>Espace</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annuler · <kbd>Ctrl/⌘+Maj+Z</kbd> = rétablir.</li>
+    <li>Double-clic sur un curseur = valeur d'origine. Molette = réglage fin.</li>
+    <li>Bouton <b>SysEx</b> : petite fenêtre (déplaçable, redimensionnable par le coin) qui montre chaque message envoyé ↑ et reçu ↓, traduit en clair. Le curseur <b>Délai</b> ajoute une pause après chaque SysEx (20 ms par défaut).</li>
+    <li>Les macros de l'onglet Rapide reviennent au centre : chaque geste <i>ajoute</i> ou <i>retire</i> par rapport au son actuel.</li>
+  </ul>
+  <h3>Limites</h3>
+  <p class="note">Cette version édite uniquement les <b>Programs</b> (sons). Les <b>Combinations</b>, les réglages Global et les paramètres internes des effets ne sont pas encore éditables.</p>
+  <p class="note">Protocole : Korg SysEx, Model ID 36h (commun X5 / X5D / X5DR / 05R/W). Paramètres en direct : fonction 41h ; son complet : fonction 40h.</p>
+  <p class="note" style="margin-top:12px">X5 Studio v1.2 — © 2026 Benjamin PATY (BenjaminPaty54) — licence MIT. Korg et X5 sont des marques de Korg Inc. ; projet indépendant non affilié.</p>
+</div><div style="text-align:right"><button class="pri">OK</button></div></form></dialog>
+
+<script>
+"use strict";
+/* ============================================================
+   0. Langues (FR, EN, IT, ES, DE)
+      Le code et l'interface sont écrits en français ; chaque texte affiché
+      est traduit à la volée via le dictionnaire I18N_DICT (clé = texte français).
+   ============================================================ */
+const LANGS = ['fr','en','it','es','de'];
+const LANG_NAMES = {fr:'Français',en:'English',it:'Italiano',es:'Español',de:'Deutsch'};
+const I18N_DICT = {" (actuellement « {0} »)": {"en": " (currently “{0}”)", "it": " (attualmente “{0}”)", "es": " (actualmente «{0}»)", "de": " (derzeit „{0}“)"}, " (toutes notes off)": {"en": " (all notes off)", "it": " (tutte le note off)", "es": " (todas las notas off)", "de": " (alle Noten aus)"}, "A/B : maintenir = origine": {"en": "A/B: hold = original", "it": "A/B: tieni premuto = originale", "es": "A/B: mantener = original", "de": "A/B: halten = Original"}, "Accentue la zone du cutoff (caractère, mordant).": {"en": "Emphasises the cutoff region (character, bite).", "it": "Accentua la zona del cutoff (carattere, mordente).", "es": "Acentúa la zona del cutoff (carácter, mordiente).", "de": "Betont den Cutoff-Bereich (Charakter, Biss)."}, "Accord": {"en": "Chord", "it": "Accordo", "es": "Acorde", "de": "Akkord"}, "Accordéons & harmonica": {"en": "Accordions & harmonica", "it": "Fisarmoniche & armonica", "es": "Acordeones & armónica", "de": "Akkordeons & Mundharmonika"}, "Accès MIDI refusé · clic ici pour réessayer": {"en": "MIDI access denied · click here to retry", "it": "Accesso MIDI negato · clicca qui per riprovare", "es": "Acceso MIDI denegado · haz clic aquí para reintentar", "de": "MIDI-Zugriff verweigert · hier klicken zum Wiederholen"}, "Afficher aussi les notes et contrôleurs": {"en": "Also show notes and controllers", "it": "Mostra anche note e controller", "es": "Mostrar también notas y controladores", "de": "Auch Noten und Controller anzeigen"}, "Aftertouch": {"en": "Aftertouch", "it": "Aftertouch", "es": "Aftertouch", "de": "Aftertouch"}, "Agit sur": {"en": "Applies to", "it": "Agisce su", "es": "Actúa sobre", "de": "Wirkt auf"}, "Aléatoire": {"en": "Random", "it": "Casuale", "es": "Aleatorio", "de": "Zufall"}, "Ampleur": {"en": "Amount", "it": "Ampiezza", "es": "Amplitud", "de": "Stärke"}, "Ampli (VDA)": {"en": "Amp (VDA)", "it": "Ampli (VDA)", "es": "Amplificador (VDA)", "de": "Verstärker (VDA)"}, "Anches & saxophones": {"en": "Reeds & saxophones", "it": "Ance & sassofoni", "es": "Lengüetas & saxofones", "de": "Rohrblätter & Saxofone"}, "Annuler": {"en": "Cancel", "it": "Annulla", "es": "Cancelar", "de": "Abbrechen"}, "Annuler (Ctrl+Z)": {"en": "Undo (Ctrl+Z)", "it": "Annulla (Ctrl+Z)", "es": "Deshacer (Ctrl+Z)", "de": "Rückgängig (Strg+Z)"}, "Appareil MIDI inconnu (id {0})": {"en": "Unknown MIDI device (id {0})", "it": "Dispositivo MIDI sconosciuto (id {0})", "es": "Dispositivo MIDI desconocido (id {0})", "de": "Unbekanntes MIDI-Gerät (ID {0})"}, "Apparition": {"en": "Fade in", "it": "Comparsa", "es": "Aparición", "de": "Einblenden"}, "Architecture": {"en": "Structure", "it": "Struttura", "es": "Estructura", "de": "Aufbau"}, "Arpège": {"en": "Arpeggio", "it": "Arpeggio", "es": "Arpegio", "de": "Arpeggio"}, "Attaque": {"en": "Attack", "it": "Attacco", "es": "Ataque", "de": "Attack"}, "Au hasard dans la même famille": {"en": "Random pick in the same family", "it": "A caso nella stessa famiglia", "es": "Al azar en la misma familia", "de": "Zufällig aus derselben Familie"}, "Aucun": {"en": "None", "it": "Nessuno", "es": "Ninguno", "de": "Keiner"}, "Aucun Program X5/05R-W dans ce fichier ({0} messages SysEx)": {"en": "No X5/05R-W Program in this file ({0} SysEx messages)", "it": "Nessun Program X5/05R-W in questo file ({0} messaggi SysEx)", "es": "Ningún Program X5/05R-W en este archivo ({0} mensajes SysEx)", "de": "Kein X5/05R-W-Program in dieser Datei ({0} SysEx-Nachrichten)"}, "Aucune banque chargée.": {"en": "No bank loaded.", "it": "Nessun banco caricato.", "es": "Ningún banco cargado.", "de": "Keine Bank geladen."}, "Aucune sortie MIDI": {"en": "No MIDI output", "it": "Nessuna uscita MIDI", "es": "Ninguna salida MIDI", "de": "Kein MIDI-Ausgang"}, "Aucune sortie MIDI choisie": {"en": "No MIDI output selected", "it": "Nessuna uscita MIDI selezionata", "es": "Ninguna salida MIDI seleccionada", "de": "Kein MIDI-Ausgang gewählt"}, "Balayage filtre (joy ↓)": {"en": "Filter sweep (joy ↓)", "it": "Sweep filtro (joy ↓)", "es": "Barrido de filtro (joy ↓)", "de": "Filter-Sweep (Joy ↓)"}, "Banque : {0}": {"en": "Bank: {0}", "it": "Banco: {0}", "es": "Banco: {0}", "de": "Bank: {0}"}, "Banque chargée ({0}) : 100 sons": {"en": "Bank loaded ({0}): 100 sounds", "it": "Banco caricato ({0}): 100 suoni", "es": "Banco cargado ({0}): 100 sonidos", "de": "Bank geladen ({0}): 100 Klänge"}, "Banque complète ({0} octets)": {"en": "Full bank ({0} bytes)", "it": "Banco completo ({0} byte)", "es": "Banco completo ({0} bytes)", "de": "Komplette Bank ({0} Bytes)"}, "Banque de 100 sons": {"en": "Bank of 100 sounds", "it": "Banco di 100 suoni", "es": "Banco de 100 sonidos", "de": "Bank mit 100 Klängen"}, "Banque envoyée": {"en": "Bank sent", "it": "Banco inviato", "es": "Banco enviado", "de": "Bank gesendet"}, "Barre d'espace": {"en": "Space bar", "it": "Barra spaziatrice", "es": "Barra espaciadora", "de": "Leertaste"}, "Bas": {"en": "Low", "it": "Basso", "es": "Bajo", "de": "Tief"}, "Basses": {"en": "Basses", "it": "Bassi", "es": "Bajos", "de": "Bässe"}, "Batterie": {"en": "Drums", "it": "Batteria", "es": "Batería", "de": "Drums"}, "Brillance": {"en": "Brightness", "it": "Brillantezza", "es": "Brillo", "de": "Helligkeit"}, "Canal": {"en": "Channel", "it": "Canale", "es": "Canal", "de": "Kanal"}, "Canal MIDI global du X5 (Global 2A)": {"en": "X5 global MIDI channel (Global 2A)", "it": "Canale MIDI globale dell'X5 (Global 2A)", "es": "Canal MIDI global del X5 (Global 2A)", "de": "Globaler MIDI-Kanal des X5 (Global 2A)"}, "Carré 1": {"en": "Square 1", "it": "Quadra 1", "es": "Cuadrada 1", "de": "Rechteck 1"}, "Carré 2": {"en": "Square 2", "it": "Quadra 2", "es": "Cuadrada 2", "de": "Rechteck 2"}, "Chaque réglage s'applique aux deux oscillateurs (affiche les valeurs de l'osc 1).": {"en": "Each change applies to both oscillators (shows osc 1 values).", "it": "Ogni modifica si applica a entrambi gli oscillatori (mostra i valori dell'osc 1).", "es": "Cada ajuste se aplica a ambos osciladores (muestra los valores del osc 1).", "de": "Jede Änderung gilt für beide Oszillatoren (zeigt die Werte von Osc 1)."}, "Chargé : ": {"en": "Loaded: ", "it": "Caricato: ", "es": "Cargado: ", "de": "Geladen: "}, "Chargé depuis la banque : ": {"en": "Loaded from bank: ", "it": "Caricato dal banco: ", "es": "Cargado desde el banco: ", "de": "Aus der Bank geladen: "}, "Cherche le X5 sur les 16 canaux (Identity Request)": {"en": "Looks for the X5 on all 16 channels (Identity Request)", "it": "Cerca l'X5 sui 16 canali (Identity Request)", "es": "Busca el X5 en los 16 canales (Identity Request)", "de": "Sucht den X5 auf allen 16 Kanälen (Identity Request)"}, "Choisis la sortie MIDI reliée au X5": {"en": "Pick the MIDI output connected to the X5", "it": "Scegli l'uscita MIDI collegata all'X5", "es": "Elige la salida MIDI conectada al X5", "de": "Wähle den MIDI-Ausgang, der mit dem X5 verbunden ist"}, "Choisis une entrée et une sortie MIDI": {"en": "Pick a MIDI input and output", "it": "Scegli un ingresso e un'uscita MIDI", "es": "Elige una entrada y una salida MIDI", "de": "Wähle einen MIDI-Eingang und -Ausgang"}, "Confirmer": {"en": "Confirm", "it": "Conferma", "es": "Confirmar", "de": "Bestätigen"}, "Contrôleurs": {"en": "Controllers", "it": "Controller", "es": "Controladores", "de": "Controller"}, "Copie impossible": {"en": "Copy failed", "it": "Copia impossibile", "es": "No se pudo copiar", "de": "Kopieren nicht möglich"}, "Copier tout en texte": {"en": "Copy everything as text", "it": "Copia tutto come testo", "es": "Copiar todo como texto", "de": "Alles als Text kopieren"}, "Cordes": {"en": "Strings", "it": "Archi", "es": "Cuerdas", "de": "Streicher"}, "Cordes pincées du monde": {"en": "World plucked strings", "it": "Corde pizzicate etniche", "es": "Cuerdas pulsadas del mundo", "de": "Gezupfte Weltinstrumente"}, "Corps": {"en": "Body", "it": "Corpo", "es": "Cuerpo", "de": "Körper"}, "Couleur": {"en": "Colour", "it": "Colore", "es": "Color", "de": "Farbe"}, "Couleur ← vélocité": {"en": "Colour ← velocity", "it": "Colore ← velocity", "es": "Color ← velocidad", "de": "Farbe ← Anschlag"}, "Coupe la sortie A/B (n'utilise que les envois C/D)": {"en": "Mutes the A/B output (uses only C/D sends)", "it": "Disattiva l'uscita A/B (usa solo le mandate C/D)", "es": "Silencia la salida A/B (solo usa los envíos C/D)", "de": "Schaltet den A/B-Ausgang stumm (nur C/D-Sends)"}, "Coupe toutes les notes": {"en": "Stops all notes", "it": "Ferma tutte le note", "es": "Corta todas las notas", "de": "Stoppt alle Noten"}, "Cuivres": {"en": "Brass", "it": "Ottoni", "es": "Metales", "de": "Blechbläser"}, "Cutoff": {"en": "Cutoff", "it": "Cutoff", "es": "Cutoff", "de": "Cutoff"}, "Cutoff ← clavier": {"en": "Cutoff ← keyboard", "it": "Cutoff ← tastiera", "es": "Cutoff ← teclado", "de": "Cutoff ← Tastatur"}, "Demande d'identité (canal {0})": {"en": "Identity request (channel {0})", "it": "Richiesta di identità (canale {0})", "es": "Solicitud de identidad (canal {0})", "de": "Identitätsanfrage (Kanal {0})"}, "Demande de la banque (100 sons)": {"en": "Bank request (100 sounds)", "it": "Richiesta del banco (100 suoni)", "es": "Solicitud del banco (100 sonidos)", "de": "Bank-Anfrage (100 Klänge)"}, "Demande du son affiché": {"en": "Request for the current sound", "it": "Richiesta del suono corrente", "es": "Solicitud del sonido actual", "de": "Anfrage des aktuellen Klangs"}, "Demande envoyée… (≈ 6 s de transfert)": {"en": "Request sent… (≈ 6 s transfer)", "it": "Richiesta inviata… (≈ 6 s di trasferimento)", "es": "Solicitud enviada… (≈ 6 s de transferencia)", "de": "Anfrage gesendet… (≈ 6 s Übertragung)"}, "Dent de scie ↗": {"en": "Saw up ↗", "it": "Dente di sega ↗", "es": "Diente de sierra ↗", "de": "Sägezahn ↗"}, "Dent de scie ↘": {"en": "Saw down ↘", "it": "Dente di sega ↘", "es": "Diente de sierra ↘", "de": "Sägezahn ↘"}, "Direct": {"en": "Live", "it": "Diretto", "es": "Directo", "de": "Direkt"}, "Direct : chaque réglage part tout de suite. Manuel : tu envoies quand tu veux.": {"en": "Live: every change is sent immediately. Manual: you send when you want.", "it": "Diretto: ogni modifica parte subito. Manuale: invii quando vuoi.", "es": "Directo: cada ajuste se envía al instante. Manual: envías cuando quieras.", "de": "Direkt: jede Änderung wird sofort gesendet. Manuell: du sendest, wann du willst."}, "Double": {"en": "Double", "it": "Doppio", "es": "Doble", "de": "Doppel"}, "Doux → fort": {"en": "Soft → loud", "it": "Piano → forte", "es": "Suave → fuerte", "de": "Leise → laut"}, "Durée de la queue après le relâchement.": {"en": "Length of the tail after key release.", "it": "Durata della coda dopo il rilascio.", "es": "Duración de la cola tras soltar la tecla.", "de": "Länge des Ausklangs nach dem Loslassen."}, "Délai": {"en": "Delay", "it": "Ritardo", "es": "Retardo", "de": "Verzögerung"}, "Désaccord": {"en": "Detune", "it": "Detune", "es": "Desafinación", "de": "Verstimmung"}, "Désaccord entre les deux oscillateurs.": {"en": "Detune between the two oscillators.", "it": "Detune tra i due oscillatori.", "es": "Desafinación entre los dos osciladores.", "de": "Verstimmung zwischen den beiden Oszillatoren."}, "Détecter": {"en": "Detect", "it": "Rileva", "es": "Detectar", "de": "Erkennen"}, "Effacer": {"en": "Clear", "it": "Cancella", "es": "Borrar", "de": "Löschen"}, "Effet 1": {"en": "Effect 1", "it": "Effetto 1", "es": "Efecto 1", "de": "Effekt 1"}, "Effet 2": {"en": "Effect 2", "it": "Effetto 2", "es": "Efecto 2", "de": "Effekt 2"}, "Effet sur le temps A : − raccourcit / + allonge (selon le sens de la sensibilité)": {"en": "Effect on A time: − shortens / + lengthens (depending on sensitivity sign)", "it": "Effetto sul tempo A: − accorcia / + allunga (secondo il segno della sensibilità)", "es": "Efecto sobre el tiempo A: − acorta / + alarga (según el signo de la sensibilidad)", "de": "Wirkung auf die A-Zeit: − verkürzt / + verlängert (je nach Vorzeichen der Empfindlichkeit)"}, "Effet sur le temps D : − raccourcit / + allonge (selon le sens de la sensibilité)": {"en": "Effect on D time: − shortens / + lengthens (depending on sensitivity sign)", "it": "Effetto sul tempo D: − accorcia / + allunga (secondo il segno della sensibilità)", "es": "Efecto sobre el tiempo D: − acorta / + alarga (según el signo de la sensibilidad)", "de": "Wirkung auf die D-Zeit: − verkürzt / + verlängert (je nach Vorzeichen der Empfindlichkeit)"}, "Effet sur le temps R : − raccourcit / + allonge (selon le sens de la sensibilité)": {"en": "Effect on R time: − shortens / + lengthens (depending on sensitivity sign)", "it": "Effetto sul tempo R: − accorcia / + allunga (secondo il segno della sensibilità)", "es": "Efecto sobre el tiempo R: − acorta / + alarga (según el signo de la sensibilidad)", "de": "Wirkung auf die R-Zeit: − verkürzt / + verlängert (je nach Vorzeichen der Empfindlichkeit)"}, "Effet sur le temps S : − raccourcit / + allonge (selon le sens de la sensibilité)": {"en": "Effect on S time: − shortens / + lengthens (depending on sensitivity sign)", "it": "Effetto sul tempo S: − accorcia / + allunga (secondo il segno della sensibilità)", "es": "Efecto sobre el tiempo S: − acorta / + alarga (según el signo de la sensibilidad)", "de": "Wirkung auf die S-Zeit: − verkürzt / + verlängert (je nach Vorzeichen der Empfindlichkeit)"}, "Effets": {"en": "Effects", "it": "Effetti", "es": "Efectos", "de": "Effekte"}, "Effets & bruits": {"en": "Effects & noises", "it": "Effetti & rumori", "es": "Efectos & ruidos", "de": "Effekte & Geräusche"}, "Effets du programme": {"en": "Program effects", "it": "Effetti del programma", "es": "Efectos del programa", "de": "Effekte des Programs"}, "Emplacement de destination sur le X5": {"en": "Target slot on the X5", "it": "Posizione di destinazione sull'X5", "es": "Posición de destino en el X5", "de": "Zielspeicherplatz auf dem X5"}, "Entrée MIDI": {"en": "MIDI input", "it": "Ingresso MIDI", "es": "Entrada MIDI", "de": "MIDI-Eingang"}, "Entrée MIDI depuis le X5": {"en": "MIDI input from the X5", "it": "Ingresso MIDI dall'X5", "es": "Entrada MIDI desde el X5", "de": "MIDI-Eingang vom X5"}, "Entrée et sortie MIDI nécessaires": {"en": "MIDI input and output required", "it": "Servono ingresso e uscita MIDI", "es": "Se necesitan entrada y salida MIDI", "de": "MIDI-Ein- und Ausgang erforderlich"}, "Enveloppe de volume": {"en": "Volume envelope", "it": "Inviluppo del volume", "es": "Envolvente de volumen", "de": "Lautstärke-Hüllkurve"}, "Enveloppe du filtre": {"en": "Filter envelope", "it": "Inviluppo del filtro", "es": "Envolvente del filtro", "de": "Filter-Hüllkurve"}, "Enveloppes": {"en": "Envelopes", "it": "Inviluppi", "es": "Envolventes", "de": "Hüllkurven"}, "Envoi bus C": {"en": "Send bus C", "it": "Mandata bus C", "es": "Envío bus C", "de": "Send Bus C"}, "Envoi bus D": {"en": "Send bus D", "it": "Mandata bus D", "es": "Envío bus D", "de": "Send Bus D"}, "Envoie le son entier dans la mémoire tampon d'édition du X5": {"en": "Sends the whole sound to the X5 edit buffer", "it": "Invia il suono intero al buffer di edit dell'X5", "es": "Envía el sonido completo al búfer de edición del X5", "de": "Sendet den ganzen Klang in den Edit-Puffer des X5"}, "Envoyer la banque entière au X5 ?<br><span class=\"note warn\">Les 100 Programs du X5 seront remplacés. Fais d'abord une sauvegarde (« Lire la banque du X5 » puis « Télécharger »).</span>": {"en": "Send the whole bank to the X5?<br><span class=\"note warn\">All 100 Programs on the X5 will be replaced. Make a backup first (“Read X5 bank”, then “Download”).</span>", "it": "Inviare l'intero banco all'X5?<br><span class=\"note warn\">I 100 Program dell'X5 saranno sostituiti. Fai prima un backup (“Leggi il banco dell'X5”, poi “Scarica”).</span>", "es": "¿Enviar el banco completo al X5?<br><span class=\"note warn\">Se reemplazarán los 100 Programs del X5. Haz antes una copia de seguridad («Leer el banco del X5» y luego «Descargar»).</span>", "de": "Ganze Bank an den X5 senden?<br><span class=\"note warn\">Alle 100 Programs des X5 werden ersetzt. Mach zuerst eine Sicherung („X5-Bank lesen“, dann „Herunterladen“).</span>"}, "Erreur envoi : {0}": {"en": "Send error: {0}", "it": "Errore di invio: {0}", "es": "Error de envío: {0}", "de": "Sendefehler: {0}"}, "Fermer": {"en": "Close", "it": "Chiudi", "es": "Cerrar", "de": "Schließen"}, "Fichier chargé : ": {"en": "File loaded: ", "it": "File caricato: ", "es": "Archivo cargado: ", "de": "Datei geladen: "}, "Fichier « All Data » : seule la partie programmes n'est pas extraite dans cette version": {"en": "“All Data” file: not extracted in this version (programs part included)", "it": "File “All Data”: non estratto in questa versione (parte programmi inclusa)", "es": "Archivo «All Data»: no se extrae en esta versión (incluida la parte de programas)", "de": "„All Data“-Datei: wird in dieser Version nicht ausgelesen (auch nicht der Program-Teil)"}, "Fichiers": {"en": "Files", "it": "File", "es": "Archivos", "de": "Dateien"}, "Figer l'affichage": {"en": "Freeze display", "it": "Blocca la visualizzazione", "es": "Congelar la vista", "de": "Anzeige einfrieren"}, "Filtre": {"en": "Filter", "it": "Filtro", "es": "Filtro", "de": "Filter"}, "Filtre (VDF)": {"en": "Filter (VDF)", "it": "Filtro (VDF)", "es": "Filtro (VDF)", "de": "Filter (VDF)"}, "Filtre — tous oscillateurs": {"en": "Filter — all oscillators", "it": "Filtro — tutti gli oscillatori", "es": "Filtro — todos los osciladores", "de": "Filter — alle Oszillatoren"}, "Flûtes": {"en": "Flutes", "it": "Flauti", "es": "Flautas", "de": "Flöten"}, "Formats lus : Program Dump (40h, 194 octets), All Programs (4Ch, 18 750 octets), et fichiers contenant plusieurs Program Dumps.": {"en": "Readable formats: Program Dump (40h, 194 bytes), All Programs (4Ch, 18,750 bytes), and files containing several Program Dumps.", "it": "Formati letti: Program Dump (40h, 194 byte), All Programs (4Ch, 18.750 byte) e file con più Program Dump.", "es": "Formatos admitidos: Program Dump (40h, 194 bytes), All Programs (4Ch, 18.750 bytes) y archivos con varios Program Dumps.", "de": "Lesbare Formate: Program Dump (40h, 194 Bytes), All Programs (4Ch, 18.750 Bytes) und Dateien mit mehreren Program Dumps."}, "Forme": {"en": "Waveform", "it": "Forma d'onda", "es": "Forma de onda", "de": "Wellenform"}, "Formes VS / DWGS": {"en": "VS / DWGS waves", "it": "Forme VS / DWGS", "es": "Formas VS / DWGS", "de": "VS-/DWGS-Wellen"}, "Formes d'onde de base": {"en": "Basic waveforms", "it": "Forme d'onda di base", "es": "Formas de onda básicas", "de": "Grundwellenformen"}, "Garder": {"en": "Keep", "it": "Salva", "es": "Guardar", "de": "Behalten"}, "Glisse les points. Les réglages fins sont dans l'onglet Ampli.": {"en": "Drag the points. Fine settings are in the Amp tab.", "it": "Trascina i punti. Le regolazioni fini sono nella scheda Ampli.", "es": "Arrastra los puntos. Los ajustes finos están en la pestaña Amplificador.", "de": "Ziehe die Punkte. Feineinstellungen findest du im Tab Verstärker."}, "Grave / médium / aigu": {"en": "Low / mid / high", "it": "Grave / medio / acuto", "es": "Grave / medio / agudo", "de": "Tief / mittel / hoch"}, "Guitares": {"en": "Guitars", "it": "Chitarre", "es": "Guitarras", "de": "Gitarren"}, "Haut": {"en": "High", "it": "Alto", "es": "Alto", "de": "Hoch"}, "Hauteur & LFO": {"en": "Pitch & LFO", "it": "Intonazione & LFO", "es": "Afinación & LFO", "de": "Tonhöhe & LFO"}, "Hold": {"en": "Hold", "it": "Hold", "es": "Hold", "de": "Hold"}, "Il faut une entrée ET une sortie MIDI": {"en": "You need a MIDI input AND output", "it": "Servono un ingresso E un'uscita MIDI", "es": "Hace falta una entrada Y una salida MIDI", "de": "Du brauchst einen MIDI-Eingang UND -Ausgang"}, "Intensité": {"en": "Depth", "it": "Intensità", "es": "Intensidad", "de": "Intensität"}, "Intensité EG": {"en": "EG depth", "it": "Intensità EG", "es": "Intensidad EG", "de": "EG-Intensität"}, "Intensité EG ← vél.": {"en": "EG depth ← vel.", "it": "Intensità EG ← vel.", "es": "Intensidad EG ← vel.", "de": "EG-Intensität ← Anschl."}, "Intensité Pitch EG": {"en": "Pitch EG depth", "it": "Intensità Pitch EG", "es": "Intensidad Pitch EG", "de": "Pitch-EG-Intensität"}, "Intervalle osc 2": {"en": "Osc 2 interval", "it": "Intervallo osc 2", "es": "Intervalo osc 2", "de": "Intervall Osc 2"}, "Journal des messages MIDI": {"en": "MIDI message log", "it": "Registro dei messaggi MIDI", "es": "Registro de mensajes MIDI", "de": "MIDI-Nachrichtenprotokoll"}, "Joystick": {"en": "Joystick", "it": "Joystick", "es": "Joystick", "de": "Joystick"}, "Kit batterie {0}": {"en": "Drum kit {0}", "it": "Kit batteria {0}", "es": "Kit de batería {0}", "de": "Drum-Kit {0}"}, "Kits DJ": {"en": "DJ kits", "it": "Kit DJ", "es": "Kits DJ", "de": "DJ-Kits"}, "L'effet sur chaque oscillateur dépend de son « Pitch EG » (onglet Oscillateurs).": {"en": "The effect on each oscillator depends on its “Pitch EG” setting (Oscillators tab).", "it": "L'effetto su ogni oscillatore dipende dal suo “Pitch EG” (scheda Oscillatori).", "es": "El efecto en cada oscilador depende de su «Pitch EG» (pestaña Osciladores).", "de": "Die Wirkung auf jeden Oszillator hängt von seinem „Pitch EG“ ab (Tab Oszillatoren)."}, "LFO de filtre (VDF MG)": {"en": "Filter LFO (VDF MG)", "it": "LFO del filtro (VDF MG)", "es": "LFO del filtro (VDF MG)", "de": "Filter-LFO (VDF MG)"}, "LFO de hauteur (vibrato)": {"en": "Pitch LFO (vibrato)", "it": "LFO di intonazione (vibrato)", "es": "LFO de afinación (vibrato)", "de": "Tonhöhen-LFO (Vibrato)"}, "LFO filtre": {"en": "Filter LFO", "it": "LFO filtro", "es": "LFO filtro", "de": "Filter-LFO"}, "LFO filtre (joy ↓)": {"en": "Filter LFO (joy ↓)", "it": "LFO filtro (joy ↓)", "es": "LFO filtro (joy ↓)", "de": "Filter-LFO (Joy ↓)"}, "LFO sur le filtre (intensité + vitesse).": {"en": "LFO on the filter (depth + speed).", "it": "LFO sul filtro (intensità + velocità).", "es": "LFO en el filtro (intensidad + velocidad).", "de": "LFO auf dem Filter (Intensität + Tempo)."}, "Les deux (liés)": {"en": "Both (linked)", "it": "Entrambi (collegati)", "es": "Ambos (vinculados)", "de": "Beide (gekoppelt)"}, "Librairie": {"en": "Library", "it": "Libreria", "es": "Biblioteca", "de": "Bibliothek"}, "Lit le son affiché sur le X5 (Program Dump Request)": {"en": "Reads the sound shown on the X5 (Program Dump Request)", "it": "Legge il suono visualizzato sull'X5 (Program Dump Request)", "es": "Lee el sonido mostrado en el X5 (Program Dump Request)", "de": "Liest den auf dem X5 angezeigten Klang (Program Dump Request)"}, "MIDI OK mais aucune interface vue : branche-la puis recharge": {"en": "MIDI OK but no interface found: plug it in, then reload", "it": "MIDI OK ma nessuna interfaccia trovata: collegala e ricarica", "es": "MIDI OK pero no se ve ninguna interfaz: conéctala y recarga", "de": "MIDI OK, aber kein Interface gefunden: anschließen und neu laden"}, "Maintiens appuyé pour entendre le son d'origine": {"en": "Hold to hear the original sound", "it": "Tieni premuto per sentire il suono originale", "es": "Mantén pulsado para oír el sonido original", "de": "Gedrückt halten, um den Originalklang zu hören"}, "Mallets & cloches": {"en": "Mallets & bells", "it": "Percussioni a lamelle & campane", "es": "Mallets & campanas", "de": "Mallets & Glocken"}, "Manuel": {"en": "Manual", "it": "Manuale", "es": "Manual", "de": "Manuell"}, "Mes sons (dans ce navigateur)": {"en": "My sounds (in this browser)", "it": "I miei suoni (in questo browser)", "es": "Mis sonidos (en este navegador)", "de": "Meine Klänge (in diesem Browser)"}, "Messages copiés": {"en": "Messages copied", "it": "Messaggi copiati", "es": "Mensajes copiados", "de": "Nachrichten kopiert"}, "Mode": {"en": "Mode", "it": "Modo", "es": "Modo", "de": "Modus"}, "Mode Simple : un seul oscillateur actif.": {"en": "Single mode: only one oscillator is active.", "it": "Modo Singolo: un solo oscillatore attivo.", "es": "Modo Simple: un solo oscilador activo.", "de": "Single-Modus: nur ein Oszillator aktiv."}, "Modulations": {"en": "Modulations", "it": "Modulazioni", "es": "Modulaciones", "de": "Modulationen"}, "Moniteur SysEx": {"en": "SysEx monitor", "it": "Monitor SysEx", "es": "Monitor SysEx", "de": "SysEx-Monitor"}, "Moniteur SysEx (messages envoyés et reçus)": {"en": "SysEx monitor (sent and received messages)", "it": "Monitor SysEx (messaggi inviati e ricevuti)", "es": "Monitor SysEx (mensajes enviados y recibidos)", "de": "SysEx-Monitor (gesendete und empfangene Nachrichten)"}, "Mono (legato)": {"en": "Mono (legato)", "it": "Mono (legato)", "es": "Mono (legato)", "de": "Mono (legato)"}, "Multisound": {"en": "Multisound", "it": "Multisound", "es": "Multisound", "de": "Multisound"}, "Niveau": {"en": "Level", "it": "Livello", "es": "Nivel", "de": "Pegel"}, "Niveau attaque": {"en": "Attack level", "it": "Livello attacco", "es": "Nivel de ataque", "de": "Attack-Pegel"}, "Niveau d'attaque": {"en": "Attack level", "it": "Livello di attacco", "es": "Nivel de ataque", "de": "Attack-Pegel"}, "Niveau de départ": {"en": "Start level", "it": "Livello iniziale", "es": "Nivel inicial", "de": "Startpegel"}, "Niveau de relâche": {"en": "Release level", "it": "Livello di rilascio", "es": "Nivel de liberación", "de": "Release-Pegel"}, "Niveau maintien": {"en": "Sustain level", "it": "Livello sustain", "es": "Nivel de sostenido", "de": "Sustain-Pegel"}, "Niveau relâche": {"en": "Release level", "it": "Livello rilascio", "es": "Nivel de liberación", "de": "Release-Pegel"}, "Niveau tenu pendant que la touche est enfoncée.": {"en": "Level held while the key is pressed.", "it": "Livello tenuto finché il tasto è premuto.", "es": "Nivel mantenido mientras la tecla está pulsada.", "de": "Pegel, der gehalten wird, solange die Taste gedrückt ist."}, "Niveaux ← vélocité": {"en": "Levels ← velocity", "it": "Livelli ← velocity", "es": "Niveles ← velocidad", "de": "Pegel ← Anschlag"}, "Nom (par défaut celui du son)": {"en": "Name (defaults to the sound's name)", "it": "Nome (predefinito: quello del suono)", "es": "Nombre (por defecto el del sonido)", "de": "Name (standardmäßig der des Klangs)"}, "Nom du son (10 caractères)": {"en": "Sound name (10 characters)", "it": "Nome del suono (10 caratteri)", "es": "Nombre del sonido (10 caracteres)", "de": "Klangname (10 Zeichen)"}, "Note On {0} vél {1} (canal {2})": {"en": "Note On {0} vel {1} (channel {2})", "it": "Note On {0} vel {1} (canale {2})", "es": "Note On {0} vel {1} (canal {2})", "de": "Note On {0} Anschl. {1} (Kanal {2})"}, "Note pivot": {"en": "Pivot key", "it": "Nota perno", "es": "Nota pivote", "de": "Bezugsnote"}, "Note tenue 3 s": {"en": "Held note 3 s", "it": "Nota tenuta 3 s", "es": "Nota sostenida 3 s", "de": "Gehaltene Note 3 s"}, "Nouveau son (Init, garde les effets)": {"en": "New sound (Init, keeps the effects)", "it": "Nuovo suono (Init, mantiene gli effetti)", "es": "Sonido nuevo (Init, conserva los efectos)", "de": "Neuer Klang (Init, Effekte bleiben)"}, "Oct +": {"en": "Oct +", "it": "Ott +", "es": "Oct +", "de": "Okt +"}, "Oct −": {"en": "Oct −", "it": "Ott −", "es": "Oct −", "de": "Okt −"}, "Octave": {"en": "Octave", "it": "Ottava", "es": "Octava", "de": "Oktave"}, "Octave + (touche X)": {"en": "Octave + (X key)", "it": "Ottava + (tasto X)", "es": "Octava + (tecla X)", "de": "Oktave + (Taste X)"}, "Octave − (touche W/Z)": {"en": "Octave − (Z/W key)", "it": "Ottava − (tasto Z/W)", "es": "Octava − (tecla Z/W)", "de": "Oktave − (Taste Y/Z)"}, "Orgues": {"en": "Organs", "it": "Organi", "es": "Órganos", "de": "Orgeln"}, "Osc 1 ↔ Osc 2": {"en": "Osc 1 ↔ Osc 2", "it": "Osc 1 ↔ Osc 2", "es": "Osc 1 ↔ Osc 2", "de": "Osc 1 ↔ Osc 2"}, "Oscillateur 1": {"en": "Oscillator 1", "it": "Oscillatore 1", "es": "Oscilador 1", "de": "Oszillator 1"}, "Oscillateur 2": {"en": "Oscillator 2", "it": "Oscillatore 2", "es": "Oscilador 2", "de": "Oszillator 2"}, "Oscillateurs": {"en": "Oscillators", "it": "Oscillatori", "es": "Osciladores", "de": "Oszillatoren"}, "Ouverture filtre": {"en": "Filter opening", "it": "Apertura filtro", "es": "Apertura de filtro", "de": "Filteröffnung"}, "Ouvre / ferme le filtre (cutoff + un peu d'EG).": {"en": "Opens / closes the filter (cutoff + a little EG).", "it": "Apre / chiude il filtro (cutoff + un po' di EG).", "es": "Abre / cierra el filtro (cutoff + un poco de EG).", "de": "Öffnet / schließt das Filter (Cutoff + etwas EG)."}, "Ouvrir un .syx…": {"en": "Open a .syx…", "it": "Apri un .syx…", "es": "Abrir un .syx…", "de": ".syx öffnen…"}, "Ouvrir un son ou une banque .syx…": {"en": "Open a sound or bank .syx…", "it": "Apri un suono o un banco .syx…", "es": "Abrir un sonido o banco .syx…", "de": "Klang oder Bank (.syx) öffnen…"}, "Pads & synthés": {"en": "Pads & synths", "it": "Pad & synth", "es": "Pads & sintes", "de": "Pads & Synths"}, "Page ouverte en file:// → ouvre-la via http://localhost (voir aide « ? »)": {"en": "Page opened as file:// → open it via http://localhost (see “?” help)", "it": "Pagina aperta come file:// → aprila tramite http://localhost (vedi aiuto “?”)", "es": "Página abierta como file:// → ábrela mediante http://localhost (ver ayuda «?»)", "de": "Seite als file:// geöffnet → über http://localhost öffnen (siehe Hilfe „?“)"}, "Vérifie les autorisations MIDI du site (icône à gauche de l'adresse)": {"en": "Check the site's MIDI permissions (icon left of the address)", "it": "Controlla i permessi MIDI del sito (icona a sinistra dell'indirizzo)", "es": "Revisa los permisos MIDI del sitio (icono a la izquierda de la dirección)", "de": "Prüfe die MIDI-Berechtigungen der Seite (Symbol links neben der Adresse)"}, "Pas d'accusé du X5 : vérifie sur l'écran que le son est bien écrit": {"en": "No acknowledgement from the X5: check its display to confirm the sound was written", "it": "Nessuna conferma dall'X5: verifica sul display che il suono sia stato scritto", "es": "Sin confirmación del X5: comprueba en su pantalla que el sonido se ha escrito", "de": "Keine Bestätigung vom X5: prüfe am Display, ob der Klang geschrieben wurde"}, "Commande envoyée (pas d'entrée MIDI pour confirmer)": {"en": "Command sent (no MIDI input to confirm)", "it": "Comando inviato (nessun ingresso MIDI per confermare)", "es": "Comando enviado (sin entrada MIDI para confirmar)", "de": "Befehl gesendet (kein MIDI-Eingang zur Bestätigung)"}, "Pan A ↔ B": {"en": "Pan A ↔ B", "it": "Pan A ↔ B", "es": "Pan A ↔ B", "de": "Pan A ↔ B"}, "Parallèle 1": {"en": "Parallel 1", "it": "Parallelo 1", "es": "Paralelo 1", "de": "Parallel 1"}, "Parallèle 2": {"en": "Parallel 2", "it": "Parallelo 2", "es": "Paralelo 2", "de": "Parallel 2"}, "Parallèle 3": {"en": "Parallel 3", "it": "Parallelo 3", "es": "Paralelo 3", "de": "Parallel 3"}, "Paramètre #{0} = {1}": {"en": "Parameter #{0} = {1}", "it": "Parametro #{0} = {1}", "es": "Parámetro #{0} = {1}", "de": "Parameter #{0} = {1}"}, "Pas de banque": {"en": "No bank", "it": "Nessun banco", "es": "No hay banco", "de": "Keine Bank"}, "Pas de banque reçue. Sur certains X5 il faut lancer GLOBAL → MIDI Data Dump → Program depuis la face avant.": {"en": "No bank received. On some X5 units you have to start GLOBAL → MIDI Data Dump → Program from the front panel.", "it": "Nessun banco ricevuto. Su alcuni X5 bisogna avviare GLOBAL → MIDI Data Dump → Program dal pannello frontale.", "es": "No se recibió ningún banco. En algunos X5 hay que lanzar GLOBAL → MIDI Data Dump → Program desde el panel frontal.", "de": "Keine Bank empfangen. Bei manchen X5 musst du GLOBAL → MIDI Data Dump → Program am Bedienfeld starten."}, "Pas de réponse : vérifie câbles, ports et GLOBAL → MIDI Filter EX = ENA": {"en": "No reply: check cables, ports and GLOBAL → MIDI Filter EX = ENA", "it": "Nessuna risposta: controlla cavi, porte e GLOBAL → MIDI Filter EX = ENA", "es": "Sin respuesta: revisa cables, puertos y GLOBAL → MIDI Filter EX = ENA", "de": "Keine Antwort: prüfe Kabel, Ports und GLOBAL → MIDI Filter EX = ENA"}, "Pas de réponse du X5 (mode PROG ? MIDI Filter EX = ENA ? bon canal ?)": {"en": "No reply from the X5 (PROG mode? MIDI Filter EX = ENA? right channel?)", "it": "Nessuna risposta dall'X5 (modo PROG? MIDI Filter EX = ENA? canale giusto?)", "es": "Sin respuesta del X5 (¿modo PROG? ¿MIDI Filter EX = ENA? ¿canal correcto?)", "de": "Keine Antwort vom X5 (PROG-Modus? MIDI Filter EX = ENA? richtiger Kanal?)"}, "Pas de sortie MIDI": {"en": "No MIDI output", "it": "Nessuna uscita MIDI", "es": "No hay salida MIDI", "de": "Kein MIDI-Ausgang"}, "Passage en mode Program Edit": {"en": "Switch to Program Edit mode", "it": "Passaggio al modo Program Edit", "es": "Cambio a modo Program Edit", "de": "Wechsel in den Program-Edit-Modus"}, "Pause ajoutée après chaque message SysEx envoyé": {"en": "Pause added after each SysEx message sent", "it": "Pausa aggiunta dopo ogni messaggio SysEx inviato", "es": "Pausa añadida tras cada mensaje SysEx enviado", "de": "Pause nach jeder gesendeten SysEx-Nachricht"}, "Percussions & batterie": {"en": "Percussion & drums", "it": "Percussioni & batteria", "es": "Percusión & batería", "de": "Percussion & Drums"}, "Petites variations aléatoires autour du son actuel. Enchaîne « Varier » puis « Annuler » jusqu'à trouver une piste.": {"en": "Small random variations around the current sound. Alternate “Vary” and “Undo” until you find something you like.", "it": "Piccole variazioni casuali attorno al suono attuale. Alterna “Varia” e “Annulla” finché trovi una pista.", "es": "Pequeñas variaciones aleatorias en torno al sonido actual. Alterna «Variar» y «Deshacer» hasta dar con una idea.", "de": "Kleine zufällige Variationen um den aktuellen Klang. Wechsle zwischen „Variieren“ und „Rückgängig“, bis du etwas findest."}, "Pianos & claviers": {"en": "Pianos & keys", "it": "Pianoforti & tastiere", "es": "Pianos & teclados", "de": "Pianos & Tasten"}, "Pitch EG": {"en": "Pitch EG", "it": "Pitch EG", "es": "Pitch EG", "de": "Pitch EG"}, "Pitch EG (commun aux deux oscillateurs)": {"en": "Pitch EG (shared by both oscillators)", "it": "Pitch EG (comune ai due oscillatori)", "es": "Pitch EG (común a ambos osciladores)", "de": "Pitch EG (für beide Oszillatoren)"}, "Pitch bend": {"en": "Pitch bend", "it": "Pitch bend", "es": "Pitch bend", "de": "Pitch Bend"}, "Pitch bend (joy ↔)": {"en": "Pitch bend (joy ↔)", "it": "Pitch bend (joy ↔)", "es": "Pitch bend (joy ↔)", "de": "Pitch Bend (Joy ↔)"}, "Placement": {"en": "Routing", "it": "Disposizione", "es": "Disposición", "de": "Anordnung"}, "Point de rupture": {"en": "Break point", "it": "Break point", "es": "Punto de ruptura", "de": "Breakpoint"}, "Ports prêts · clique Détecter": {"en": "Ports ready · click Detect", "it": "Porte pronte · clicca Rileva", "es": "Puertos listos · haz clic en Detectar", "de": "Ports bereit · klicke auf Erkennen"}, "Profondeur du LFO de hauteur, avec apparition.": {"en": "Pitch LFO depth, with fade-in.", "it": "Profondità dell'LFO di intonazione, con comparsa.", "es": "Profundidad del LFO de afinación, con aparición.", "de": "Tiefe des Tonhöhen-LFO, mit Einblendung."}, "Précédent": {"en": "Previous", "it": "Precedente", "es": "Anterior", "de": "Zurück"}, "Ranger le son courant dans l'emplacement sélectionné": {"en": "Store the current sound in the selected slot", "it": "Metti il suono corrente nella posizione selezionata", "es": "Guardar el sonido actual en la posición seleccionada", "de": "Aktuellen Klang im gewählten Platz ablegen"}, "Rapide": {"en": "Quick", "it": "Rapido", "es": "Rápido", "de": "Schnell"}, "Recherche du X5…": {"en": "Looking for the X5…", "it": "Ricerca dell'X5…", "es": "Buscando el X5…", "de": "Suche den X5…"}, "Rechercher (piano, pad, saw…)": {"en": "Search (piano, pad, saw…)", "it": "Cerca (piano, pad, saw…)", "es": "Buscar (piano, pad, saw…)", "de": "Suchen (Piano, Pad, Saw…)"}, "Redémarre à chaque note": {"en": "Restarts on each note", "it": "Riparte a ogni nota", "es": "Reinicia en cada nota", "de": "Startet bei jeder Note neu"}, "Rejoue automatiquement le test après chaque réglage": {"en": "Replays the test automatically after each change", "it": "Ripete automaticamente il test dopo ogni modifica", "es": "Repite automáticamente la prueba tras cada ajuste", "de": "Spielt den Test nach jeder Änderung automatisch ab"}, "Rejouer à chaque réglage": {"en": "Replay after each change", "it": "Ripeti a ogni modifica", "es": "Repetir en cada ajuste", "de": "Nach jeder Änderung abspielen"}, "Relâche": {"en": "Release", "it": "Rilascio", "es": "Liberación", "de": "Release"}, "Remplacer le son courant par un son « Init » neutre ?": {"en": "Replace the current sound with a neutral “Init” sound?", "it": "Sostituire il suono corrente con un suono “Init” neutro?", "es": "¿Reemplazar el sonido actual por un sonido «Init» neutro?", "de": "Aktuellen Klang durch einen neutralen „Init“-Klang ersetzen?"}, "Retard osc 2": {"en": "Osc 2 delay", "it": "Ritardo osc 2", "es": "Retardo osc 2", "de": "Verzögerung Osc 2"}, "Revenir au son tel qu'il a été chargé": {"en": "Go back to the sound as it was loaded", "it": "Torna al suono come era stato caricato", "es": "Volver al sonido tal como se cargó", "de": "Zurück zum Klang wie geladen"}, "Revenir à l'origine": {"en": "Revert to original", "it": "Torna all'originale", "es": "Volver al original", "de": "Zum Original zurück"}, "Rien encore. « Garder » mémorise le son courant dans ce navigateur.": {"en": "Nothing yet. “Keep” stores the current sound in this browser.", "it": "Ancora niente. “Salva” memorizza il suono corrente in questo browser.", "es": "Nada todavía. «Guardar» memoriza el sonido actual en este navegador.", "de": "Noch nichts. „Behalten“ speichert den aktuellen Klang in diesem Browser."}, "Rythmes & boucles": {"en": "Rhythms & loops", "it": "Ritmi & loop", "es": "Ritmos & bucles", "de": "Rhythmen & Loops"}, "Réaction du volume et du filtre à la vélocité.": {"en": "How volume and filter respond to velocity.", "it": "Reazione di volume e filtro alla velocity.", "es": "Respuesta del volumen y del filtro a la velocidad.", "de": "Reaktion von Lautstärke und Filter auf den Anschlag."}, "Réponse d'identité · {0}": {"en": "Identity reply · {0}", "it": "Risposta di identità · {0}", "es": "Respuesta de identidad · {0}", "de": "Identitätsantwort · {0}"}, "Rétablir (Ctrl+Maj+Z)": {"en": "Redo (Ctrl+Shift+Z)", "it": "Ripristina (Ctrl+Maiusc+Z)", "es": "Rehacer (Ctrl+Mayús+Z)", "de": "Wiederholen (Strg+Umschalt+Z)"}, "Simple": {"en": "Single", "it": "Singolo", "es": "Simple", "de": "Single"}, "Simple = 1 oscillateur (polyphonie 32). Double = 2 oscillateurs (16 voix). Batterie = un kit de percussions.": {"en": "Single = 1 oscillator (32 voices). Double = 2 oscillators (16 voices). Drums = a percussion kit.", "it": "Singolo = 1 oscillatore (32 voci). Doppio = 2 oscillatori (16 voci). Batteria = un kit di percussioni.", "es": "Simple = 1 oscilador (32 voces). Doble = 2 osciladores (16 voces). Batería = un kit de percusión.", "de": "Single = 1 Oszillator (32 Stimmen). Doppel = 2 Oszillatoren (16 Stimmen). Drums = ein Percussion-Kit."}, "Son complet « {0} » ({1} octets)": {"en": "Full sound “{0}” ({1} bytes)", "it": "Suono completo “{0}” ({1} byte)", "es": "Sonido completo «{0}» ({1} bytes)", "de": "Kompletter Klang „{0}“ ({1} Bytes)"}, "Son envoyé dans la mémoire d'édition du X5": {"en": "Sound sent to the X5 edit buffer", "it": "Suono inviato al buffer di edit dell'X5", "es": "Sonido enviado al búfer de edición del X5", "de": "Klang in den Edit-Puffer des X5 gesendet"}, "Son rangé en {0} de la banque (pas encore sur le X5)": {"en": "Sound stored in {0} of the bank (not yet on the X5)", "it": "Suono messo in {0} del banco (non ancora sull'X5)", "es": "Sonido guardado en {0} del banco (aún no en el X5)", "de": "Klang in {0} der Bank abgelegt (noch nicht auf dem X5)"}, "Son reçu du X5 : ": {"en": "Sound received from the X5: ", "it": "Suono ricevuto dall'X5: ", "es": "Sonido recibido del X5: ", "de": "Klang vom X5 empfangen: "}, "Sons de base": {"en": "Source sounds", "it": "Suoni di base", "es": "Sonidos base", "de": "Grundklänge"}, "Sortie A/B coupée": {"en": "A/B output off", "it": "Uscita A/B spenta", "es": "Salida A/B apagada", "de": "A/B-Ausgang aus"}, "Sortie MIDI": {"en": "MIDI output", "it": "Uscita MIDI", "es": "Salida MIDI", "de": "MIDI-Ausgang"}, "Sortie MIDI vers le X5": {"en": "MIDI output to the X5", "it": "Uscita MIDI verso l'X5", "es": "Salida MIDI hacia el X5", "de": "MIDI-Ausgang zum X5"}, "Sortie OK · sans entrée, la lecture du X5 est impossible": {"en": "Output OK · without an input, reading from the X5 is impossible", "it": "Uscita OK · senza ingresso non si può leggere l'X5", "es": "Salida OK · sin entrada no se puede leer el X5", "de": "Ausgang OK · ohne Eingang kann der X5 nicht gelesen werden"}, "Stockage local indisponible": {"en": "Local storage unavailable", "it": "Archiviazione locale non disponibile", "es": "Almacenamiento local no disponible", "de": "Lokaler Speicher nicht verfügbar"}, "Suivant": {"en": "Next", "it": "Successivo", "es": "Siguiente", "de": "Weiter"}, "Suivi clavier": {"en": "Key tracking", "it": "Key tracking", "es": "Seguimiento de teclado", "de": "Keytracking"}, "Suivi de clavier": {"en": "Keyboard tracking", "it": "Inseguimento tastiera", "es": "Seguimiento de teclado", "de": "Tastaturverfolgung"}, "SysEx Korg fonction {0}h": {"en": "Korg SysEx function {0}h", "it": "SysEx Korg funzione {0}h", "es": "SysEx Korg función {0}h", "de": "Korg-SysEx Funktion {0}h"}, "SysEx universel": {"en": "Universal SysEx", "it": "SysEx universale", "es": "SysEx universal", "de": "Universal-SysEx"}, "Série 1 → 2": {"en": "Serial 1 → 2", "it": "Serie 1 → 2", "es": "Serie 1 → 2", "de": "Seriell 1 → 2"}, "Temps & niveaux": {"en": "Times & levels", "it": "Tempi & livelli", "es": "Tiempos & niveles", "de": "Zeiten & Pegel"}, "Temps & niveaux de l'EG": {"en": "EG times & levels", "it": "Tempi & livelli dell'EG", "es": "Tiempos & niveles del EG", "de": "EG-Zeiten & -Pegel"}, "Temps EG ← clavier": {"en": "EG time ← keyboard", "it": "Tempo EG ← tastiera", "es": "Tiempo EG ← teclado", "de": "EG-Zeit ← Tastatur"}, "Temps EG ← vél.": {"en": "EG time ← vel.", "it": "Tempo EG ← vel.", "es": "Tiempo EG ← vel.", "de": "EG-Zeit ← Anschl."}, "Temps affectés :": {"en": "Affected times:", "it": "Tempi interessati:", "es": "Tiempos afectados:", "de": "Betroffene Zeiten:"}, "Temps attaque": {"en": "Attack time", "it": "Tempo attacco", "es": "Tiempo de ataque", "de": "Attack-Zeit"}, "Temps d'attaque": {"en": "Attack time", "it": "Tempo di attacco", "es": "Tiempo de ataque", "de": "Attack-Zeit"}, "Temps d'attaque du volume et du filtre.": {"en": "Attack time of volume and filter.", "it": "Tempo di attacco di volume e filtro.", "es": "Tiempo de ataque del volumen y del filtro.", "de": "Attack-Zeit von Lautstärke und Filter."}, "Temps de déclin": {"en": "Decay time", "it": "Tempo di decadimento", "es": "Tiempo de caída", "de": "Decay-Zeit"}, "Temps de relâche": {"en": "Release time", "it": "Tempo di rilascio", "es": "Tiempo de liberación", "de": "Release-Zeit"}, "Temps déclin": {"en": "Decay time", "it": "Tempo decadimento", "es": "Tiempo de caída", "de": "Decay-Zeit"}, "Temps pente": {"en": "Slope time", "it": "Tempo pendenza", "es": "Tiempo de pendiente", "de": "Slope-Zeit"}, "Temps relâche": {"en": "Release time", "it": "Tempo rilascio", "es": "Tiempo de liberación", "de": "Release-Zeit"}, "Temps ← vélocité": {"en": "Times ← velocity", "it": "Tempi ← velocity", "es": "Tiempos ← velocidad", "de": "Zeiten ← Anschlag"}, "Timbre": {"en": "Tone", "it": "Timbro", "es": "Timbre", "de": "Klangfarbe"}, "Toucher": {"en": "Touch", "it": "Tocco", "es": "Pulsación", "de": "Anschlag"}, "Tout": {"en": "All", "it": "Tutto", "es": "Todo", "de": "Alle"}, "Triangle": {"en": "Triangle", "it": "Triangolo", "es": "Triángulo", "de": "Dreieck"}, "Type de test": {"en": "Test type", "it": "Tipo di test", "es": "Tipo de prueba", "de": "Testart"}, "Télécharger la banque .syx": {"en": "Download bank .syx", "it": "Scarica il banco .syx", "es": "Descargar el banco .syx", "de": "Bank als .syx herunterladen"}, "Télécharger le son courant (.syx, 194 octets)": {"en": "Download current sound (.syx, 194 bytes)", "it": "Scarica il suono corrente (.syx, 194 byte)", "es": "Descargar el sonido actual (.syx, 194 bytes)", "de": "Aktuellen Klang herunterladen (.syx, 194 Bytes)"}, "Varier le son": {"en": "Vary the sound", "it": "Varia il suono", "es": "Variar el sonido", "de": "Klang variieren"}, "Version 1 : choix des effets et du placement seulement. Les réglages internes de chaque effet (temps de réverbération, retard, vitesse…) sont conservés tels quels et repartent intacts avec le son. Ils seront éditables dès que j'aurai la table SysEx officielle des effets du X5.": {"en": "This version: effect types and routing only. Each effect's internal settings (reverb time, delay, speed…) are kept as they are and travel unchanged with the sound. They will become editable once the official X5 effects SysEx table is available.", "it": "Questa versione: solo tipo di effetto e disposizione. Le impostazioni interne di ogni effetto (tempo di riverbero, ritardo, velocità…) restano invariate e viaggiano con il suono. Saranno modificabili quando sarà disponibile la tabella SysEx ufficiale degli effetti dell'X5.", "es": "Esta versión: solo tipo de efecto y disposición. Los ajustes internos de cada efecto (tiempo de reverberación, retardo, velocidad…) se conservan tal cual y viajan intactos con el sonido. Serán editables cuando se disponga de la tabla SysEx oficial de efectos del X5.", "de": "Diese Version: nur Effekttyp und Anordnung. Die internen Einstellungen jedes Effekts (Hallzeit, Delay, Tempo…) bleiben unverändert und wandern mit dem Klang. Sie werden editierbar, sobald die offizielle SysEx-Effekttabelle des X5 vorliegt."}, "Vibrato": {"en": "Vibrato", "it": "Vibrato", "es": "Vibrato", "de": "Vibrato"}, "Vibrato par contrôleurs": {"en": "Vibrato from controllers", "it": "Vibrato dai controller", "es": "Vibrato por controladores", "de": "Vibrato über Controller"}, "Vibrato ← aftertouch": {"en": "Vibrato ← aftertouch", "it": "Vibrato ← aftertouch", "es": "Vibrato ← aftertouch", "de": "Vibrato ← Aftertouch"}, "Vibrato ← joy ↑": {"en": "Vibrato ← joy ↑", "it": "Vibrato ← joy ↑", "es": "Vibrato ← joy ↑", "de": "Vibrato ← Joy ↑"}, "Vitesse": {"en": "Speed", "it": "Velocità", "es": "Velocidad", "de": "Tempo"}, "Vitesse ← AT + joy": {"en": "Speed ← AT + joy", "it": "Velocità ← AT + joy", "es": "Velocidad ← AT + joy", "de": "Tempo ← AT + Joy"}, "Vitesse ← clavier": {"en": "Speed ← keyboard", "it": "Velocità ← tastiera", "es": "Velocidad ← teclado", "de": "Tempo ← Tastatur"}, "Voix": {"en": "Voices", "it": "Voci", "es": "Voces", "de": "Stimmen"}, "Volume": {"en": "Volume", "it": "Volume", "es": "Volumen", "de": "Lautstärke"}, "Volume (VDA) — tous oscillateurs": {"en": "Volume (VDA) — all oscillators", "it": "Volume (VDA) — tutti gli oscillatori", "es": "Volumen (VDA) — todos los osciladores", "de": "Lautstärke (VDA) — alle Oszillatoren"}, "Volume osc 1 ↔ osc 2.": {"en": "Osc 1 ↔ osc 2 volume.", "it": "Volume osc 1 ↔ osc 2.", "es": "Volumen osc 1 ↔ osc 2.", "de": "Lautstärke Osc 1 ↔ Osc 2."}, "Volume ← clavier": {"en": "Volume ← keyboard", "it": "Volume ← tastiera", "es": "Volumen ← teclado", "de": "Lautstärke ← Tastatur"}, "Volume ← vélocité": {"en": "Volume ← velocity", "it": "Volume ← velocity", "es": "Volumen ← velocidad", "de": "Lautstärke ← Anschlag"}, "Vél": {"en": "Vel", "it": "Vel", "es": "Vel", "de": "Anschl."}, "Vélocité": {"en": "Velocity", "it": "Velocity", "es": "Velocidad", "de": "Anschlag"}, "Vélocité des notes de test": {"en": "Velocity of test notes", "it": "Velocity delle note di test", "es": "Velocidad de las notas de prueba", "de": "Anschlagstärke der Testnoten"}, "Wah / mouvement": {"en": "Wah / movement", "it": "Wah / movimento", "es": "Wah / movimiento", "de": "Wah / Bewegung"}, "Web MIDI autorisé · {0} entrée(s), {1} sortie(s) : {2}": {"en": "Web MIDI allowed · {0} input(s), {1} output(s): {2}", "it": "Web MIDI autorizzato · {0} ingresso/i, {1} uscita/e: {2}", "es": "Web MIDI autorizado · {0} entrada(s), {1} salida(s): {2}", "de": "Web MIDI erlaubt · {0} Eingang/Eingänge, {1} Ausgang/Ausgänge: {2}"}, "Web MIDI indisponible : ouvre la page dans Chrome ou Edge": {"en": "Web MIDI unavailable: open the page in Chrome or Edge", "it": "Web MIDI non disponibile: apri la pagina in Chrome o Edge", "es": "Web MIDI no disponible: abre la página en Chrome o Edge", "de": "Web MIDI nicht verfügbar: öffne die Seite in Chrome oder Edge"}, "Web MIDI refusé : {0}": {"en": "Web MIDI denied: {0}", "it": "Web MIDI negato: {0}", "es": "Web MIDI denegado: {0}", "de": "Web MIDI verweigert: {0}"}, "X5 : données refusées (NAK) — vérifie Memory Protect / mode": {"en": "X5: data rejected (NAK) — check Memory Protect / mode", "it": "X5: dati rifiutati (NAK) — controlla Memory Protect / modo", "es": "X5: datos rechazados (NAK) — revisa Memory Protect / modo", "de": "X5: Daten abgelehnt (NAK) — prüfe Memory Protect / Modus"}, "X5 : données reçues (ACK)": {"en": "X5: data received (ACK)", "it": "X5: dati ricevuti (ACK)", "es": "X5: datos recibidos (ACK)", "de": "X5: Daten empfangen (ACK)"}, "X5 : erreur d'écriture (Memory Protect activé ?)": {"en": "X5: write error (Memory Protect on?)", "it": "X5: errore di scrittura (Memory Protect attivo?)", "es": "X5: error de escritura (¿Memory Protect activado?)", "de": "X5: Schreibfehler (Memory Protect an?)"}, "X5 : format refusé": {"en": "X5: format rejected", "it": "X5: formato rifiutato", "es": "X5: formato rechazado", "de": "X5: Format abgelehnt"}, "X5 : écriture terminée ✔": {"en": "X5: write complete ✔", "it": "X5: scrittura completata ✔", "es": "X5: escritura completada ✔", "de": "X5: Schreiben abgeschlossen ✔"}, "X5 : écriture terminée": {"en": "X5: write complete", "it": "X5: scrittura completata", "es": "X5: escritura completada", "de": "X5: Schreiben abgeschlossen"}, "X5 : erreur d'écriture": {"en": "X5: write error", "it": "X5: errore di scrittura", "es": "X5: error de escritura", "de": "X5: Schreibfehler"}, "X5 : reçu (ACK)": {"en": "X5: received (ACK)", "it": "X5: ricevuto (ACK)", "es": "X5: recibido (ACK)", "de": "X5: empfangen (ACK)"}, "X5 : refusé (NAK)": {"en": "X5: rejected (NAK)", "it": "X5: rifiutato (NAK)", "es": "X5: rechazado (NAK)", "de": "X5: abgelehnt (NAK)"}, "X5 détecté · canal {0}": {"en": "X5 detected · channel {0}", "it": "X5 rilevato · canale {0}", "es": "X5 detectado · canal {0}", "de": "X5 erkannt · Kanal {0}"}, "adr {0}, val {1}": {"en": "addr {0}, val {1}", "it": "ind {0}, val {1}", "es": "dir {0}, val {1}", "de": "Adr {0}, Wert {1}"}, "animé": {"en": "lively", "it": "animato", "es": "animado", "de": "bewegt"}, "aucun": {"en": "none", "it": "nessuno", "es": "ninguno", "de": "keins"}, "brillant": {"en": "bright", "it": "brillante", "es": "brillante", "de": "hell"}, "coloré": {"en": "coloured", "it": "colorato", "es": "coloreado", "de": "farbig"}, "court": {"en": "short", "it": "corto", "es": "corto", "de": "kurz"}, "expressif": {"en": "expressive", "it": "espressivo", "es": "expresivo", "de": "ausdrucksvoll"}, "large": {"en": "wide", "it": "ampio", "es": "amplio", "de": "breit"}, "lent": {"en": "slow", "it": "lento", "es": "lento", "de": "langsam"}, "long": {"en": "long", "it": "lungo", "es": "largo", "de": "lang"}, "net": {"en": "clean", "it": "netto", "es": "limpio", "de": "klar"}, "neutre": {"en": "neutral", "it": "neutro", "es": "neutro", "de": "neutral"}, "notes": {"en": "notes", "it": "note", "es": "notas", "de": "Noten"}, "nouvelle banque": {"en": "new bank", "it": "nuovo banco", "es": "banco nuevo", "de": "neue Bank"}, "percussif": {"en": "percussive", "it": "percussivo", "es": "percusivo", "de": "perkussiv"}, "sec": {"en": "dry", "it": "secco", "es": "seco", "de": "trocken"}, "sombre": {"en": "dark", "it": "scuro", "es": "oscuro", "de": "dunkel"}, "statique": {"en": "static", "it": "statico", "es": "estático", "de": "statisch"}, "tenu": {"en": "sustained", "it": "tenuto", "es": "sostenido", "de": "gehalten"}, "égal": {"en": "even", "it": "uniforme", "es": "uniforme", "de": "gleichmäßig"}, "{0} ({1} sons isolés)": {"en": "{0} ({1} single sounds)", "it": "{0} ({1} suoni singoli)", "es": "{0} ({1} sonidos sueltos)", "de": "{0} ({1} Einzelklänge)"}, "Écrire": {"en": "Write", "it": "Scrivi", "es": "Escribir", "de": "Schreiben"}, "Écrire « <b>{0}</b> » dans l'emplacement <b>{1}</b> du X5{2} ?<br><span class=\"note warn\">Le son qui s'y trouve sera remplacé.</span>": {"en": "Write “<b>{0}</b>” to slot <b>{1}</b> on the X5{2}?<br><span class=\"note warn\">The sound currently there will be replaced.</span>", "it": "Scrivere “<b>{0}</b>” nella posizione <b>{1}</b> dell'X5{2}?<br><span class=\"note warn\">Il suono presente sarà sostituito.</span>", "es": "¿Escribir «<b>{0}</b>» en la posición <b>{1}</b> del X5{2}?<br><span class=\"note warn\">El sonido que hay ahí será reemplazado.</span>", "de": "„<b>{0}</b>“ in Speicherplatz <b>{1}</b> des X5 schreiben{2}?<br><span class=\"note warn\">Der dort gespeicherte Klang wird ersetzt.</span>"}, "Écrit le son dans la mémoire du X5": {"en": "Writes the sound to the X5 memory", "it": "Scrive il suono nella memoria dell'X5", "es": "Escribe el sonido en la memoria del X5", "de": "Schreibt den Klang in den Speicher des X5"}, "Écriture dans {0}": {"en": "Write to {0}", "it": "Scrittura in {0}", "es": "Escritura en {0}", "de": "Schreiben in {0}"}, "Éditer :": {"en": "Edit:", "it": "Modifica:", "es": "Editar:", "de": "Bearbeiten:"}, "Épaisseur": {"en": "Width", "it": "Spessore", "es": "Grosor", "de": "Breite"}, "Équilibre osc": {"en": "Osc balance", "it": "Bilanciamento osc", "es": "Equilibrio osc", "de": "Osc-Balance"}, "→ Identity Request sur les 16 canaux": {"en": "→ Identity Request on all 16 channels", "it": "→ Identity Request sui 16 canali", "es": "→ Identity Request en los 16 canales", "de": "→ Identity Request auf allen 16 Kanälen"}, "↶ Annuler la variation": {"en": "↶ Undo the variation", "it": "↶ Annulla la variazione", "es": "↶ Deshacer la variación", "de": "↶ Variation rückgängig"}, "⇧ Envoyer": {"en": "⇧ Send", "it": "⇧ Invia", "es": "⇧ Enviar", "de": "⇧ Senden"}, "⇧ Envoyer la banque au X5": {"en": "⇧ Send bank to X5", "it": "⇧ Invia il banco all'X5", "es": "⇧ Enviar el banco al X5", "de": "⇧ Bank an X5 senden"}, "⇩ Lire la banque du X5": {"en": "⇩ Read X5 bank", "it": "⇩ Leggi il banco dell'X5", "es": "⇩ Leer el banco del X5", "de": "⇩ X5-Bank lesen"}, "⇩ Lire le X5": {"en": "⇩ Read X5", "it": "⇩ Leggi X5", "es": "⇩ Leer X5", "de": "⇩ X5 lesen"}, "▶ Tester": {"en": "▶ Test", "it": "▶ Prova", "es": "▶ Probar", "de": "▶ Testen"}, "● modifié": {"en": "● modified", "it": "● modificato", "es": "● modificado", "de": "● geändert"}, "🎲 Varier": {"en": "🎲 Vary", "it": "🎲 Varia", "es": "🎲 Variar", "de": "🎲 Variieren"}, "Osc 1 + 2": {"en": "Osc 1 + 2", "it": "Osc 1 + 2", "es": "Osc 1 + 2", "de": "Osc 1 + 2"}};
+const HELP = {"fr": "\n  <h3 style=\"margin-top:0\">Mise en route</h3>\n  <ol>\n    <li>Relie le X5 à l'ordinateur (interface MIDI USB : MIDI OUT du X5 → IN de l'interface, IN du X5 ← OUT). Le port <i>TO HOST</i> fonctionne aussi avec un pilote série.</li>\n    <li>Sur le X5 : <b>GLOBAL → MIDI Filter → EX = ENA</b> (sinon aucun SysEx ne passe). Pour écrire : <b>Memory Protect Program = OFF</b>.</li>\n    <li>Ouvre cette page dans <b>Chrome</b> ou <b>Edge</b>, accepte l'accès MIDI, choisis les ports puis clique <b>Détecter</b> (le canal global est trouvé automatiquement).</li>\n    <li>Si Chrome refuse l'accès MIDI quand la page est ouverte comme fichier, lance dans le dossier de la page <code>python3 -m http.server</code> puis ouvre <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Mets le X5 en mode PROG sur le son à retoucher et clique <b>⇩ Lire le X5</b>.</li>\n  </ol>\n  <h3>Raccourcis</h3>\n  <ul>\n    <li>Clavier de l'ordinateur = clavier musical (rangée du milieu = touches blanches, rangée du dessus = noires), <kbd>W</kbd>/<kbd>X</kbd> (AZERTY) ou <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>\n    <li><kbd>Espace</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annuler · <kbd>Ctrl/⌘+Maj+Z</kbd> = rétablir.</li>\n    <li>Double-clic sur un curseur = valeur d'origine. Molette = réglage fin.</li>\n    <li>Bouton <b>SysEx</b> : petite fenêtre (déplaçable, redimensionnable par le coin) qui montre chaque message envoyé ↑ et reçu ↓, traduit en clair. Le curseur <b>Délai</b> ajoute une pause après chaque SysEx (20 ms par défaut).</li>\n    <li>Les macros de l'onglet Rapide reviennent au centre : chaque geste <i>ajoute</i> ou <i>retire</i> par rapport au son actuel.</li>\n    <li>Les drapeaux en haut à droite changent la langue de l'interface.</li>\n  </ul>\n  <h3>Limites</h3>\n  <p class=\"note\">Cette version édite uniquement les <b>Programs</b> (sons). Les <b>Combinations</b>, les réglages Global et les paramètres internes des effets ne sont pas encore éditables.</p>\n  <p class=\"note\">Protocole : Korg SysEx, Model ID 36h (commun X5 / X5D / X5DR / 05R/W). Paramètres en direct : fonction 41h ; son complet : fonction 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.2 — © 2026 Benjamin PATY (BenjaminPaty54) — licence MIT. Korg et X5 sont des marques de Korg Inc. ; projet indépendant non affilié.</p>\n", "en": "\n  <h3 style=\"margin-top:0\">Getting started</h3>\n  <ol>\n    <li>Connect the X5 to the computer (USB MIDI interface: X5 MIDI OUT → interface IN, X5 IN ← interface OUT). The <i>TO HOST</i> port also works with a serial driver.</li>\n    <li>On the X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (otherwise no SysEx gets through). To write: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Open this page in <b>Chrome</b> or <b>Edge</b>, allow MIDI access, pick the ports, then click <b>Detect</b> (the global channel is found automatically).</li>\n    <li>If Chrome refuses MIDI access when the page is opened as a file, run <code>python3 -m http.server</code> in the page's folder, then open <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Put the X5 in PROG mode on the sound you want to edit and click <b>⇩ Read X5</b>.</li>\n  </ol>\n  <h3>Shortcuts</h3>\n  <ul>\n    <li>Computer keyboard = music keyboard (middle row = white keys, row above = black keys), <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>\n    <li><kbd>Space</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = undo · <kbd>Ctrl/⌘+Shift+Z</kbd> = redo.</li>\n    <li>Double-click a slider = original value. Mouse wheel = fine adjustment.</li>\n    <li><b>SysEx</b> button: a small window (movable, resizable from its corner) showing every message sent ↑ and received ↓, decoded in plain words. The <b>Delay</b> slider adds a pause after each SysEx message (20 ms by default).</li>\n    <li>The macros on the Quick tab spring back to the centre: each gesture <i>adds to</i> or <i>takes away from</i> the current sound.</li>\n    <li>The flags at the top right change the interface language.</li>\n  </ul>\n  <h3>Limitations</h3>\n  <p class=\"note\">This version edits <b>Programs</b> (sounds) only. <b>Combinations</b>, Global settings and the internal effect parameters cannot be edited yet.</p>\n  <p class=\"note\">Protocol: Korg SysEx, Model ID 36h (shared by X5 / X5D / X5DR / 05R/W). Live parameters: function 41h; full sound: function 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.2 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>\n", "it": "\n  <h3 style=\"margin-top:0\">Per iniziare</h3>\n  <ol>\n    <li>Collega l'X5 al computer (interfaccia MIDI USB: MIDI OUT dell'X5 → IN dell'interfaccia, IN dell'X5 ← OUT). Anche la porta <i>TO HOST</i> funziona con un driver seriale.</li>\n    <li>Sull'X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (altrimenti nessun SysEx passa). Per scrivere: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Apri questa pagina in <b>Chrome</b> o <b>Edge</b>, consenti l'accesso MIDI, scegli le porte e clicca <b>Rileva</b> (il canale globale viene trovato automaticamente).</li>\n    <li>Se Chrome rifiuta l'accesso MIDI quando la pagina è aperta come file, esegui <code>python3 -m http.server</code> nella cartella della pagina, poi apri <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Metti l'X5 in modo PROG sul suono da modificare e clicca <b>⇩ Leggi X5</b>.</li>\n  </ol>\n  <h3>Scorciatoie</h3>\n  <ul>\n    <li>Tastiera del computer = tastiera musicale (fila centrale = tasti bianchi, fila superiore = neri), <kbd>Z</kbd>/<kbd>X</kbd> = ottava.</li>\n    <li><kbd>Spazio</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annulla · <kbd>Ctrl/⌘+Maiusc+Z</kbd> = ripristina.</li>\n    <li>Doppio clic su un cursore = valore originale. Rotella = regolazione fine.</li>\n    <li>Pulsante <b>SysEx</b>: piccola finestra (spostabile, ridimensionabile dall'angolo) che mostra ogni messaggio inviato ↑ e ricevuto ↓, tradotto in chiaro. Il cursore <b>Ritardo</b> aggiunge una pausa dopo ogni SysEx (20 ms predefiniti).</li>\n    <li>Le macro della scheda Rapido tornano al centro: ogni gesto <i>aggiunge</i> o <i>toglie</i> rispetto al suono attuale.</li>\n    <li>Le bandiere in alto a destra cambiano la lingua dell'interfaccia.</li>\n  </ul>\n  <h3>Limiti</h3>\n  <p class=\"note\">Questa versione modifica solo i <b>Program</b> (suoni). Le <b>Combination</b>, le impostazioni Global e i parametri interni degli effetti non sono ancora modificabili.</p>\n  <p class=\"note\">Protocollo: Korg SysEx, Model ID 36h (comune a X5 / X5D / X5DR / 05R/W). Parametri in diretta: funzione 41h; suono completo: funzione 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.2 — © 2026 Benjamin PATY (BenjaminPaty54) — licenza MIT. Korg e X5 sono marchi di Korg Inc.; progetto indipendente e non affiliato.</p>\n", "es": "\n  <h3 style=\"margin-top:0\">Primeros pasos</h3>\n  <ol>\n    <li>Conecta el X5 al ordenador (interfaz MIDI USB: MIDI OUT del X5 → IN de la interfaz, IN del X5 ← OUT). El puerto <i>TO HOST</i> también funciona con un controlador serie.</li>\n    <li>En el X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (si no, no pasa ningún SysEx). Para escribir: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Abre esta página en <b>Chrome</b> o <b>Edge</b>, acepta el acceso MIDI, elige los puertos y haz clic en <b>Detectar</b> (el canal global se encuentra automáticamente).</li>\n    <li>Si Chrome rechaza el acceso MIDI cuando la página se abre como archivo, ejecuta <code>python3 -m http.server</code> en la carpeta de la página y abre <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Pon el X5 en modo PROG en el sonido que quieres editar y haz clic en <b>⇩ Leer X5</b>.</li>\n  </ol>\n  <h3>Atajos</h3>\n  <ul>\n    <li>Teclado del ordenador = teclado musical (fila central = teclas blancas, fila superior = negras), <kbd>Z</kbd>/<kbd>X</kbd> = octava.</li>\n    <li><kbd>Espacio</kbd> = prueba · <kbd>Ctrl/⌘+Z</kbd> = deshacer · <kbd>Ctrl/⌘+Mayús+Z</kbd> = rehacer.</li>\n    <li>Doble clic en un deslizador = valor original. Rueda del ratón = ajuste fino.</li>\n    <li>Botón <b>SysEx</b>: ventana pequeña (movible y redimensionable desde la esquina) que muestra cada mensaje enviado ↑ y recibido ↓, descifrado. El deslizador <b>Retardo</b> añade una pausa tras cada SysEx (20 ms por defecto).</li>\n    <li>Las macros de la pestaña Rápido vuelven al centro: cada gesto <i>añade</i> o <i>quita</i> respecto al sonido actual.</li>\n    <li>Las banderas de arriba a la derecha cambian el idioma de la interfaz.</li>\n  </ul>\n  <h3>Limitaciones</h3>\n  <p class=\"note\">Esta versión edita solo los <b>Programs</b> (sonidos). Las <b>Combinations</b>, los ajustes Global y los parámetros internos de los efectos aún no se pueden editar.</p>\n  <p class=\"note\">Protocolo: Korg SysEx, Model ID 36h (común a X5 / X5D / X5DR / 05R/W). Parámetros en directo: función 41h; sonido completo: función 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.2 — © 2026 Benjamin PATY (BenjaminPaty54) — licencia MIT. Korg y X5 son marcas de Korg Inc.; proyecto independiente y no afiliado.</p>\n", "de": "\n  <h3 style=\"margin-top:0\">Erste Schritte</h3>\n  <ol>\n    <li>Verbinde den X5 mit dem Computer (USB-MIDI-Interface: MIDI OUT des X5 → IN des Interfaces, IN des X5 ← OUT). Der <i>TO HOST</i>-Port funktioniert auch mit einem seriellen Treiber.</li>\n    <li>Am X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (sonst kommt kein SysEx durch). Zum Schreiben: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Öffne diese Seite in <b>Chrome</b> oder <b>Edge</b>, erlaube den MIDI-Zugriff, wähle die Ports und klicke auf <b>Erkennen</b> (der globale Kanal wird automatisch gefunden).</li>\n    <li>Verweigert Chrome den MIDI-Zugriff, wenn die Seite als Datei geöffnet ist, starte im Ordner der Seite <code>python3 -m http.server</code> und öffne <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Schalte den X5 in den PROG-Modus auf den Klang, den du bearbeiten willst, und klicke auf <b>⇩ X5 lesen</b>.</li>\n  </ol>\n  <h3>Tastenkürzel</h3>\n  <ul>\n    <li>Computertastatur = Musiktastatur (mittlere Reihe = weiße Tasten, obere Reihe = schwarze), <kbd>Y</kbd>/<kbd>X</kbd> (QWERTZ) = Oktave.</li>\n    <li><kbd>Leertaste</kbd> = Test · <kbd>Strg/⌘+Z</kbd> = rückgängig · <kbd>Strg/⌘+Umschalt+Z</kbd> = wiederholen.</li>\n    <li>Doppelklick auf einen Regler = Originalwert. Mausrad = Feineinstellung.</li>\n    <li>Schaltfläche <b>SysEx</b>: kleines Fenster (verschiebbar, an der Ecke in der Größe änderbar), das jede gesendete ↑ und empfangene ↓ Nachricht im Klartext zeigt. Der Regler <b>Verzögerung</b> fügt nach jeder SysEx-Nachricht eine Pause ein (standardmäßig 20 ms).</li>\n    <li>Die Makros im Tab Schnell springen in die Mitte zurück: Jede Geste <i>fügt</i> dem aktuellen Klang etwas <i>hinzu</i> oder <i>nimmt</i> etwas weg.</li>\n    <li>Die Flaggen oben rechts ändern die Sprache der Oberfläche.</li>\n  </ul>\n  <h3>Einschränkungen</h3>\n  <p class=\"note\">Diese Version bearbeitet nur <b>Programs</b> (Klänge). <b>Combinations</b>, Global-Einstellungen und die internen Effektparameter sind noch nicht editierbar.</p>\n  <p class=\"note\">Protokoll: Korg SysEx, Model ID 36h (gemeinsam für X5 / X5D / X5DR / 05R/W). Live-Parameter: Funktion 41h; kompletter Klang: Funktion 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.2 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT-Lizenz. Korg und X5 sind Marken der Korg Inc.; unabhängiges, nicht verbundenes Projekt.</p>\n"};
+const I18N = {lang:'fr', map:new Map()};
+for (const [fr,tr] of Object.entries(I18N_DICT)) I18N.map.set(fr,tr);
+function T(s, ...a){
+  if (s==null) return s;
+  let r = s;
+  if (I18N.lang!=='fr'){ const e=I18N.map.get(s); if (e && e[I18N.lang]) r=e[I18N.lang]; }
+  return a.length ? r.replace(/\{(\d)\}/g,(m,i)=>a[+i]) : r;
+}
+function trText(n){
+  const v=n.nodeValue; if (!v || !v.trim()) return;
+  const src = (n.__tr!==undefined && v===n.__tr) ? n.__fr : v;
+  n.__fr = src;
+  const k = src.trim(); const t = T(k);
+  const out = t===k ? src : src.replace(k, t);
+  n.__tr = out;
+  if (out!==v) n.nodeValue = out;
+}
+function trAttr(el, a){
+  const v=el.getAttribute(a); if (!v) return;
+  el.__frA = el.__frA || {}; el.__trA = el.__trA || {};
+  const src = (el.__trA[a]!==undefined && v===el.__trA[a]) ? el.__frA[a] : v;
+  el.__frA[a]=src; const out=T(src); el.__trA[a]=out;
+  if (out!==v) el.setAttribute(a,out);
+}
+const skip = n => { const e = n.nodeType===1 ? n : n.parentElement; return !e || !!e.closest('[data-noi18n],script,style'); };
+function trTree(root){
+  if (skip(root)) return;
+  if (root.nodeType===3){ trText(root); return; }
+  const w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT);
+  for (let n=w.currentNode; n; n=w.nextNode()){
+    if (n.nodeType===1){ if (n.hasAttribute('data-noi18n')) continue; for (const a of ['title','placeholder']) if (n.hasAttribute(a)) trAttr(n,a); }
+    else if (!skip(n)) trText(n);
+  }
+}
+const i18nObs = new MutationObserver(ms=>{
+  for (const m of ms){
+    if (m.type==='childList') m.addedNodes.forEach(trTree);
+    else if (m.type==='characterData'){ if (!skip(m.target)) trText(m.target); }
+    else if (m.type==='attributes' && !skip(m.target)) trAttr(m.target, m.attributeName);
+  }
+});
+const FLAGS = {
+  fr:'<svg viewBox="0 0 3 2"><rect width="1" height="2" fill="#0055A4"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#EF4135"/></svg>',
+  en:'<svg viewBox="0 0 60 30"><rect width="60" height="30" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" stroke="#C8102E" stroke-width="2"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></svg>',
+  it:'<svg viewBox="0 0 3 2"><rect width="1" height="2" fill="#009246"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#CE2B37"/></svg>',
+  es:'<svg viewBox="0 0 4 3"><rect width="4" height="3" fill="#AA151B"/><rect y=".75" width="4" height="1.5" fill="#F1BF00"/></svg>',
+  de:'<svg viewBox="0 0 5 3"><rect width="5" height="1" fill="#000"/><rect y="1" width="5" height="1" fill="#DD0000"/><rect y="2" width="5" height="1" fill="#FFCE00"/></svg>',
+};
+function setLang(l, initial){
+  if (!LANGS.includes(l)) l='en';
+  I18N.lang=l; document.documentElement.lang=l;
+  try{ localStorage.setItem('x5s.lang',l); }catch(e){}
+  document.querySelectorAll('#flags button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+  const hb=document.getElementById('helpBody'); if (hb && HELP[l]) hb.innerHTML=HELP[l];
+  if (!initial){ trTree(document.body); refreshAll(); renderBank(); renderMine(); }
+}
+function initLang(){
+  const f=document.getElementById('flags');
+  for (const l of LANGS){ const b=document.createElement('button'); b.type='button'; b.dataset.l=l; b.title=LANG_NAMES[l]; b.setAttribute('data-noi18n',''); b.innerHTML=FLAGS[l]; b.onclick=()=>setLang(l); f.append(b); }
+  let l=null; try{ l=localStorage.getItem('x5s.lang'); }catch(e){}
+  if (!l){ const nav=(navigator.language||'en').slice(0,2).toLowerCase(); l = LANGS.includes(nav) ? nav : 'en'; }
+  setLang(l, true);
+  i18nObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['title','placeholder']});
+}
+/* X5 Studio v1.2 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
+/* ============================================================
+   1. Données de référence
+   ============================================================ */
+const WAVES = ["A.Piano 1", "A.Piano1 LP", "A.Piano 2", "E.Piano 1", "E.Piano1 LP", "E.Piano 2", "E.Piano2LP", "Soft EP", "Soft EP LP", "Hard EP", "Hard EP LP", "PianoPad 1", "PianoPad 2", "Clay", "Clay LP", "Harpsicord", "HarpsicdLP", "PercOrgan1", "PercOrg1 LP", "PercOrgan2", "PercOrg2LP", "Organ 1", "Organ 1 LP", "Organ 2", "Organ 2 LP", "Organ 3", "Organ 4", "Organ 5", "RotaryOrg1", "RotaryOrg2", "PipeOrgan1", "PipeOrg1LP", "PipeOrgan2", "PipeOrg2LP", "PipeOrgan3", "PipeOrg3LP", "Musette", "Musette V", "Bandneon", "BandneonLP", "Accordion", "AcordionLP", "Harmonica", "G.Guitar", "G.GuitarLP", "F.Guitar", "F.GuitarLP", "F.Guitar V", "A.Gtr Harm", "E.Guitar 1", "E.Guitar1 V", "E.Guitar 2", "E.Guitar 3", "MuteGuitar", "Funky Gtr", "FunkyGtr V", "E.Gtr Harm", "DistGuitar", "Dist GtrLP", "DistGuitrV", "Over Drive", "OverDry LP", "OverDry F4", "MuteDstGtr", "MtDstGtr V", "PowerChord", "PowerChd V", "OverDvChrd", "Gtr Slide", "GtrSlide V", "Sitar 1", "Sitar 2", "Sitar 2 LP", "Santur", "Bouzouki", "Bouzouki LP", "Banjo", "Shamisen", "Koto", "Uood", "Harp", "MandlinTrm", "A.Bass 1", "A.Bass1 LP", "A.Bass 2", "A.Bass2 LP", "E.Bass 1", "E.Bass1 LP", "E.Bass 2", "E. Bass2 LP", "Pick Bass1", "PicBass1 LP", "Pick Bass2", "Fretless", "FretlessLP", "Slap Bass1", "Slap Bass2", "SlpBass2LP", "Slap Bass3", "SynthBass1", "SynBass1 LP", "SynthBass2", "SynBass2LP", "House Bass", "FM Bass", "FM Bass LP", "Kalimba", "Music Box", "MusicBoxLP", "Log Drum", "Marimba", "Xylophone", "Vibe", "Celesta", "Glocken", "BrightBell", "B.Bell LP", "Metal Bell", "M. Bell LP", "Gamelan", "Pole", "Pole LP", "Tubular", "Split Drum", "Split Bell", "Flute", "Pan Flute", "PanFluteLP", "Shakuhachi", "ShakhachLP", "Bottle", "Recorder", "Ocarina", "Oboe", "EnglishHrn", "Eng.HornLP", "BasoonOboe", "BsonOboeLP", "Clarinet", "ClarinetLP", "Bari Sax", "Bari.SaxLP", "Tenor Sax", "T.Sax LP", "Alto Sax", "A.Sax LP", "SopranoSax", "S.Sax LP", "Tuba", "Tuba LP", "Horn", "FlugelHorn", "Trombone 1", "Trombone 2", "Trumpet", "Trumpet LP", "Mute TP", "Mute TP LP", "Brass 1", "Brass 1 LP", "Brass 2", "Brass 2 LP", "StringEns.", "StrEns. V1", "StrEns. V2", "StrEns. V3", "AnaStrings", "PWM", "Violin", "Cello", "Cello LP", "Pizzicato", "Voice", "Choir", "Soft Choir", "Air Vox", "Doo Voice", "DooVoiceLP", "Syn Vox", "Syn Vox LP", "White Pad", "Ether Bell", "E.Bell LP", "Mega Pad", "Spectrum 1", "Spectrum 2", "Stadium", "Stadium NT", "BrushNoise", "BruNoiseNT", "Steel Drum", "SteelDrmLP", "BrushSwirl", "Belltree", "BelltreeNT", "BeltreV NT", "Tri Roll", "TriRoll NT", "Telephon", "TelephonNT", "Clicker", "Clicker NT", "Crickets 1", "Crickts1NT", "Crickets 2", "Crickts2NT", "Magic Bell", "Sporing", "Rattle", "Kava 1", "Kava 2", "Fever 1", "Fever 2", "Zappers 1", "Zappers 2", "Bugs", "Surfy", "SleighBell", "Elec Beat", "Idling", "EthnicBeat", "Taps", "Tap 1", "Tap 2", "Tap 3", "Tap 4", "Tap 5", "Orch Hit", "SnareRl/Ht", "Syn Snare", "Rev Snare", "PowerSnare", "Orch Perc", "Crash Cym", "CrashCymLP", "CrashLP NT", "China Cym", "Splash Cym", "Orch Crash", "Tite HH", "Tite HH NT", "Bell Ride", "Ping Ride", "Timpani", "Timpani LP", "Cabasa", "Cabasa NT", "Agogo", "Cow Bell", "Low Bongo", "Claves", "Timbale", "WoodBlock1", "WoodBlock2", "WoodBlock3", "Taiko Hit", "Syn Claves", "Melo Tom", "ProccesTom", "Syn Tom 1", "Syn Tom 2", "VocalSnare", "Zap 1", "Zap 2", "Fret Zap 1", "Fret Zap 2", "Vibla Slap", "Indust", "Thing", "Thing NT", "FingerSnap", "FingSnapNT", "Tambourine", "Hand Clap", "HandClapNT", "Gun Shot", "Castanet", "CastanetNT", "Snap", "Snap NT", "Gt Scratch", "Side Stick", "SideStikNT", "TimbleSide", "TimblSidNT", "Syn Rim", "Syn Rim NT", "Open HH", "OpenSyn HH", "CloseSynHH", "Sagat", "Sagat NT", "Sagatty", "Sagatty NT", "JingleBell", "Taiko", "Slap Bongo", "Open Conga", "Slap Conga", "Palm Conga", "Mute Conga", "Tabla 1", "Tabla 2", "Maracas", "SynMaracas", "SynMarcsNT", "MuteTriang", "OpenTriang", "Guiro", "Guiro LP", "Scratch Hi", "ScratcHiNT", "Scratch Lo", "Scratc LoNT", "ScratchDbl", "ScratDblNT", "Mini 1a", "Digital 1", "VS 102", "VS 48", "VS 52", "VS 58", "VS 71", "VS 72", "VS 88", "VS 89", "13 - 35", "DWGSOrgan1", "DWGSOrgan2", "DWGS E.P.", "Saw", "Square", "Ramp", "Pulse 25%", "Pulse 8%", "Pulse 4%", "Syn Sine", "Sine", "DJ Kit 1", "DJ Kit 2"];
+const WAVE_CATS = [[0,'Pianos & claviers'],[17,'Orgues'],[36,'Accordéons & harmonica'],[43,'Guitares'],[70,'Cordes pincées du monde'],[82,'Basses'],[106,'Mallets & cloches'],[125,'Flûtes'],[133,'Anches & saxophones'],[148,'Cuivres'],[162,'Cordes'],[172,'Voix'],[180,'Pads & synthés'],[186,'Effets & bruits'],[218,'Rythmes & boucles'],[227,'Percussions & batterie'],[316,'Formes VS / DWGS'],[330,'Formes d\'onde de base'],[338,'Kits DJ']];
+const MGW = ['Triangle','Dent de scie ↗','Dent de scie ↘','Carré 1','Aléatoire','Carré 2'];
+const KMODE = ['Off','Bas','Haut','Tout'];
+const FX = ['— Off —','Reverb: Hall','Reverb: Ensemble Hall','Reverb: Concert Hall','Reverb: Room','Reverb: Large Room','Reverb: Live Stage','Reverb: Wet Plate','Reverb: Dry Plate','Reverb: Spring Reverb','Early Reflection I','Early Reflection II','Early Reflection III','Stereo Delay','Cross Delay','Dual Mono Delay','Multi Tap Delay I','Multi Tap Delay II','Multi Tap Delay III','Stereo Chorus I','Stereo Chorus II','Quadrature Chorus','Crossover Chorus','Harmonic Chorus','Symphonic Ensemble','Flanger I','Flanger II','Crossover Flanger','Exciter','Enhancer','Distortion','Over Drive','Stereo Phaser I','Stereo Phaser II','Rotary Speaker','Auto Pan','Tremolo','Parametric EQ','Chorus-Delay','Flanger-Delay','Delay/Hall','Delay/Room','Delay/Chorus','Delay/Flanger','Delay/Distortion','Delay/Overdrive','Delay/Phaser','Delay/Rotary'];
+const NOTE_N = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const noteName = n => NOTE_N[n%12] + (Math.floor(n/12)-1);
+
+/* ============================================================
+   2. Carte des paramètres d'un Program (164 octets)
+      [clé, libellé, adresse Parameter Change (41h), encodage dans le dump, min, max, options]
+      Encodages : u8/s8 = octet (signé : complément à 2) · u16 = 2 octets LSB/MSB
+                  bits = champ de bits (s = décalage, m = masque) · bit = 1 bit
+                  tri = interrupteur −/0/+ (bit b = actif, bit b+4 = négatif)
+      Source : panel Ctrlr 05R/W 0.99 (M. De Carolis), plages vérifiées sur la notice X2/X3.
+   ============================================================ */
+const COMMON = [
+  ['mode','Mode',0,{t:'u8',o:10},0,2,{opts:['Simple','Double','Batterie']}],
+  ['mono','Mono',1,{t:'bit',o:11,b:0},0,1],
+  ['hold','Hold',2,{t:'bit',o:11,b:1},0,1],
+  ['peg.sl','Niveau de départ',3,{t:'s8',o:21},-99,99],
+  ['peg.at','Temps d\'attaque',4,{t:'u8',o:22},0,99],
+  ['peg.al','Niveau d\'attaque',5,{t:'s8',o:23},-99,99],
+  ['peg.dt','Temps de déclin',6,{t:'u8',o:24},0,99],
+  ['peg.rt','Temps de relâche',7,{t:'u8',o:25},0,99],
+  ['peg.rl','Niveau de relâche',8,{t:'s8',o:26},-99,99],
+  ['peg.vlev','Niveaux ← vélocité',9,{t:'s8',o:27},-99,99],
+  ['peg.vtim','Temps ← vélocité',10,{t:'s8',o:28},-99,99],
+  ['fmg.wave','Forme',11,{t:'bits',o:29,s:0,m:7},0,5,{opts:MGW}],
+  ['fmg.freq','Vitesse',12,{t:'u8',o:30},0,99],
+  ['fmg.int','Intensité',13,{t:'u8',o:32},0,99],
+  ['fmg.del','Délai',14,{t:'u8',o:31},0,99],
+  ['fmg.osc','Agit sur',15,{t:'bits',o:29,s:5,m:3},0,3,{opts:['Aucun','Osc 1','Osc 2','Osc 1 + 2']}],
+  ['fmg.sync','Redémarre à chaque note',16,{t:'bit',o:29,b:7},0,1],
+  ['at.bend','Pitch bend',17,{t:'s8',o:33},-12,12],
+  ['at.fc','Ouverture filtre',18,{t:'s8',o:34},-99,99],
+  ['at.mg','LFO filtre',19,{t:'u8',o:35},0,99],
+  ['at.amp','Volume',20,{t:'s8',o:36},-99,99],
+  ['joy.mg','LFO filtre (joy ↓)',21,{t:'u8',o:39},0,99],
+  ['joy.bend','Pitch bend (joy ↔)',22,{t:'s8',o:37},-12,12],
+  ['joy.vdf','Balayage filtre (joy ↓)',23,{t:'s8',o:38},-99,99],
+  ['interval','Intervalle osc 2',88,{t:'s8',o:18},-12,12],
+  ['detune','Désaccord',89,{t:'s8',o:19},-50,50],
+  ['delay','Retard osc 2',90,{t:'u8',o:20},0,99],
+];
+const OSC = [
+  ['wave','Multisound',24,{t:'u16',o:[12,15]},0,339],
+  ['lvl','Niveau',25,{t:'u8',o:65},0,99],
+  ['oct','Octave',26,{t:'s8',o:[14,17]},-2,1,{opts:{'-2':"32'",'-1':"16'",'0':"8'",'1':"4'"}}],
+  ['pitch','Intensité Pitch EG',27,{t:'s8',o:40},-99,99],
+  ['pan','Pan A ↔ B',28,{t:'s8',o:86},-1,30],
+  ['sendC','Envoi bus C',29,{t:'bits',o:82,s:0,m:15},0,9],
+  ['sendD','Envoi bus D',30,{t:'bits',o:82,s:4,m:15},0,9],
+  ['vdf.cut','Cutoff',31,{t:'u8',o:50},0,99],
+  ['vdf.eint','Intensité EG',32,{t:'u8',o:53},0,99],
+  ['vdf.col','Couleur',33,{t:'u8',o:83},0,99],
+  ['vdf.colv','Couleur ← vélocité',34,{t:'s8',o:84},-99,99],
+  ['vdf.at','Temps attaque',35,{t:'u8',o:57},0,99],
+  ['vdf.al','Niveau attaque',36,{t:'s8',o:58},-99,99],
+  ['vdf.dt','Temps déclin',37,{t:'u8',o:59},0,99],
+  ['vdf.bp','Point de rupture',38,{t:'s8',o:60},-99,99],
+  ['vdf.st','Temps pente',39,{t:'u8',o:61},0,99],
+  ['vdf.sl','Niveau maintien',40,{t:'s8',o:62},-99,99],
+  ['vdf.rt','Temps relâche',41,{t:'u8',o:63},0,99],
+  ['vdf.rl','Niveau relâche',42,{t:'s8',o:64},-99,99],
+  ['vdf.vint','Intensité EG ← vél.',43,{t:'s8',o:56},-99,99],
+  ['vdf.vtim','Temps EG ← vél.',44,{t:'u8',o:55},0,99],
+  ['vdf.va','A',45,{t:'tri',o:79,b:0},-1,1],
+  ['vdf.vd','D',46,{t:'tri',o:79,b:1},-1,1],
+  ['vdf.vs','S',47,{t:'tri',o:79,b:2},-1,1],
+  ['vdf.vr','R',48,{t:'tri',o:79,b:3},-1,1],
+  ['vdf.kkey','Note pivot',49,{t:'u8',o:51},0,127],
+  ['vdf.kmode','Suivi clavier',50,{t:'bits',o:85,s:0,m:3},0,3,{opts:KMODE}],
+  ['vdf.kint','Cutoff ← clavier',51,{t:'s8',o:52},-99,99],
+  ['vdf.ktim','Temps EG ← clavier',52,{t:'u8',o:54},0,99],
+  ['vdf.ka','A',53,{t:'tri',o:78,b:0},-1,1],
+  ['vdf.kd','D',54,{t:'tri',o:78,b:1},-1,1],
+  ['vdf.ks','S',55,{t:'tri',o:78,b:2},-1,1],
+  ['vdf.kr','R',56,{t:'tri',o:78,b:3},-1,1],
+  ['vda.at','Temps attaque',57,{t:'u8',o:71},0,99],
+  ['vda.al','Niveau attaque',58,{t:'u8',o:72},0,99],
+  ['vda.dt','Temps déclin',59,{t:'u8',o:73},0,99],
+  ['vda.bp','Point de rupture',60,{t:'u8',o:74},0,99],
+  ['vda.st','Temps pente',61,{t:'u8',o:75},0,99],
+  ['vda.sl','Niveau maintien',62,{t:'u8',o:76},0,99],
+  ['vda.rt','Temps relâche',63,{t:'u8',o:77},0,99],
+  ['vda.vamp','Volume ← vélocité',64,{t:'s8',o:68},-99,99],
+  ['vda.vtim','Temps EG ← vél.',65,{t:'u8',o:70},0,99],
+  ['vda.va','A',66,{t:'tri',o:81,b:0},-1,1],
+  ['vda.vd','D',67,{t:'tri',o:81,b:1},-1,1],
+  ['vda.vs','S',68,{t:'tri',o:81,b:2},-1,1],
+  ['vda.vr','R',69,{t:'tri',o:81,b:3},-1,1],
+  ['vda.kkey','Note pivot',70,{t:'u8',o:66},0,127],
+  ['vda.kmode','Suivi clavier',71,{t:'bits',o:85,s:4,m:3},0,3,{opts:KMODE}],
+  ['vda.kamp','Volume ← clavier',72,{t:'s8',o:67},-99,99],
+  ['vda.ktim','Temps EG ← clavier',73,{t:'u8',o:69},0,99],
+  ['vda.ka','A',74,{t:'tri',o:80,b:0},-1,1],
+  ['vda.kd','D',75,{t:'tri',o:80,b:1},-1,1],
+  ['vda.ks','S',76,{t:'tri',o:80,b:2},-1,1],
+  ['vda.kr','R',77,{t:'tri',o:80,b:3},-1,1],
+  ['pm.wave','Forme',78,{t:'bits',o:41,s:0,m:7},0,5,{opts:MGW}],
+  ['pm.freq','Vitesse',79,{t:'u8',o:42},0,99],
+  ['pm.int','Intensité',80,{t:'u8',o:45},0,99],
+  ['pm.del','Délai',81,{t:'u8',o:43},0,99],
+  ['pm.fade','Apparition',82,{t:'u8',o:44},0,99],
+  ['pm.sync','Redémarre à chaque note',83,{t:'bit',o:41,b:7},0,1],
+  ['pm.ktrk','Vitesse ← clavier',84,{t:'s8',o:46},-99,99],
+  ['pm.atjoy','Vitesse ← AT + joy',85,{t:'u8',o:49},0,9],
+  ['pm.aft','Vibrato ← aftertouch',86,{t:'u8',o:47},0,99],
+  ['pm.joy','Vibrato ← joy ↑',87,{t:'u8',o:48},0,99],
+];
+const FXP = [
+  ['fx1.type','Effet 1',155,{t:'u8',o:135},0,47,{opts:FX}],
+  ['fx2.type','Effet 2',156,{t:'u8',o:136},0,47,{opts:FX}],
+  ['fx.place','Placement',165,{t:'bits',o:143,s:4,m:3},0,3,{opts:['Série 1 → 2','Parallèle 1','Parallèle 2','Parallèle 3']}],
+];
+const OSC2_ADDR = 67, OSC2_DUMP = 47;
+const PDEF = {};           // clé complète → définition
+const ADDR = new Map();    // adresse → clé complète
+function reg(list, osc){
+  for (const [k,label,addr,enc,min,max,x] of list){
+    const key = osc ? k+'@'+osc : k;
+    let e = {...enc};
+    if (osc){
+      if (Array.isArray(e.o)) e.o = e.o[osc-1];
+      else if (osc===2) e.o += OSC2_DUMP;
+    }
+    const a = osc===2 ? addr+OSC2_ADDR : addr;
+    PDEF[key] = {key, base:k, label, addr:a, enc:e, min, max, opts:x&&x.opts, osc:osc||0};
+    ADDR.set(a, key);
+  }
+}
+reg(COMMON,0); reg(OSC,1); reg(OSC,2); reg(FXP,0);
+
+/* ============================================================
+   3. Codec : buffer ↔ valeurs, Korg 7→8 bits, messages SysEx
+   ============================================================ */
+const PROG_LEN = 164;
+function getF(buf, d){
+  const e=d.enc, b=buf[e.o];
+  switch(e.t){
+    case 'u8': return b;
+    case 's8': return b>127 ? b-256 : b;
+    case 'u16': return buf[e.o] | (buf[e.o+1]<<8);
+    case 'bits': return (b>>e.s) & e.m;
+    case 'bit': return (b>>e.b) & 1;
+    case 'tri': return ((b>>e.b)&1) ? (((b>>(e.b+4))&1) ? -1 : 1) : 0;
+  }
+}
+function setF(buf, d, v){
+  const e=d.enc;
+  switch(e.t){
+    case 'u8': buf[e.o]=v&255; break;
+    case 's8': buf[e.o]=(v+256)&255; break;
+    case 'u16': buf[e.o]=v&255; buf[e.o+1]=(v>>8)&255; break;
+    case 'bits': buf[e.o]=(buf[e.o] & ~(e.m<<e.s)) | ((v&e.m)<<e.s); break;
+    case 'bit': buf[e.o]=(buf[e.o] & ~(1<<e.b)) | ((v&1)<<e.b); break;
+    case 'tri': {
+      let b = buf[e.o] & ~((1<<e.b)|(1<<(e.b+4)));
+      if (v===1) b |= (1<<e.b); else if (v===-1) b |= (1<<e.b)|(1<<(e.b+4));
+      buf[e.o]=b; break;
+    }
+  }
+}
+// Korg : chaque groupe de 7 octets est précédé d'un octet contenant leurs bits de poids fort (bit i = octet i)
+function enc78(data){
+  const out=[];
+  for (let i=0;i<data.length;i+=7){
+    let msb=0; const grp=[];
+    for (let j=0;j<7 && i+j<data.length;j++){ const v=data[i+j]; if (v&128) msb|=1<<j; grp.push(v&127); }
+    out.push(msb,...grp);
+  }
+  return out;
+}
+function dec87(midi){
+  const out=[];
+  for (let i=0;i<midi.length;i+=8){
+    const msb=midi[i];
+    for (let j=1;j<8 && i+j<midi.length;j++) out.push(midi[i+j] | (((msb>>(j-1))&1)<<7));
+  }
+  return out;
+}
+const S = {ch:0};
+const hdr = f => [0xF0,0x42,0x30|S.ch,0x36,f];
+const v14 = v => { if (v<0) v+=16384; return [v&127,(v>>7)&127]; };
+const MSG = {
+  modeProg: () => [...hdr(0x4E),0x03,0x00,0xF7],
+  param: (a,v) => [...hdr(0x41), a&127, (a>>7)&127, ...v14(v), 0xF7],
+  reqProg: () => [...hdr(0x10),0xF7],
+  reqBank: () => [...hdr(0x1C),0x00,0xF7],
+  dumpProg: buf => [...hdr(0x40), ...enc78(Array.from(buf)), 0xF7],
+  dumpBank: bank => [...hdr(0x4C), 0x00, ...enc78(Array.from(bank)), 0xF7],
+  write: slot => [...hdr(0x11),0x00,slot&127,0xF7],
+  ident: ch => [0xF0,0x7E,ch&15,0x06,0x01,0xF7],
+};
+const hex = a => Array.from(a, b=>b.toString(16).padStart(2,'0').toUpperCase()).join(' ');
+const progName = (buf,off=0) => String.fromCharCode(...buf.slice(off,off+10)).replace(/[^\x20-\x7e]/g,' ');
+
+/* ============================================================
+   4. État, historique
+   ============================================================ */
+function initBuffer(){
+  const b = new Uint8Array(PROG_LEN);
+  const set=(k,v)=>setF(b,PDEF[k],v);
+  'Init Prog '.split('').forEach((c,i)=>b[i]=c.charCodeAt(0));
+  set('fmg.freq',30); set('joy.bend',2); set('joy.mg',20);
+  for (const o of [1,2]){
+    set('wave@'+o,330); set('lvl@'+o,99); set('pan@'+o,15);
+    set('vdf.cut@'+o,70); set('vdf.kkey@'+o,60); set('vda.kkey@'+o,60);
+    set('vda.al@'+o,99); set('vda.bp@'+o,99); set('vda.sl@'+o,99); set('vda.rt@'+o,25); set('vda.vamp@'+o,30);
+    set('pm.freq@'+o,60); set('pm.joy@'+o,30);
+  }
+  return b;
+}
+let cur = initBuffer();        // son en cours d'édition
+let origin = cur.slice();      // son tel que chargé (A/B, double-clic)
+let hist = [cur.slice()], hIdx = 0;
+let scope = 'both';            // Osc édité dans les pages VDF / VDA / LFO : 1, 2 ou 'both'
+let live = true;
+const val = k => getF(cur, PDEF[k]);
+const isDouble = () => val('mode')===1;
+function commit(){
+  const last = hist[hIdx];
+  if (last && last.every((v,i)=>v===cur[i])) return;
+  hist = hist.slice(0,hIdx+1); hist.push(cur.slice()); if (hist.length>200) hist.shift(); hIdx = hist.length-1;
+  saveWork(); updDirty();
+}
+function updDirty(){
+  const d = !origin.every((v,i)=>v===cur[i]);
+  $('#dirty').textContent = d ? '● modifié' : '';
+  $('#btnUndo').disabled = hIdx<=0; $('#btnRedo').disabled = hIdx>=hist.length-1;
+}
+function saveWork(){ try{ localStorage.setItem('x5s.cur', hex(cur)); localStorage.setItem('x5s.org', hex(origin)); }catch(e){} }
+function loadWork(){
+  try{
+    const a=localStorage.getItem('x5s.cur'), o=localStorage.getItem('x5s.org');
+    if (a){ const p=a.split(' ').map(h=>parseInt(h,16)); if (p.length===PROG_LEN){ cur=Uint8Array.from(p); } }
+    if (o){ const p=o.split(' ').map(h=>parseInt(h,16)); if (p.length===PROG_LEN){ origin=Uint8Array.from(p); } }
+    hist=[cur.slice()]; hIdx=0;
+  }catch(e){}
+}
+
+/* Écriture d'un paramètre (par l'utilisateur) : met à jour le buffer et l'envoie au X5 */
+function setParam(key, v, opt={}){
+  const d = PDEF[key]; v = Math.max(d.min, Math.min(d.max, Math.round(v)));
+  if (getF(cur,d)===v) return;
+  setF(cur,d,v);
+  if (!opt.noSend) queueParam(d.addr, v);
+  if (!opt.noRefresh) refresh(key);
+  if (!opt.noAudition) audition();
+}
+/* clé "de page" (ex. 'vdf.cut') → une ou deux clés réelles selon l'oscillateur choisi */
+function scopedKeys(base){
+  if (!PDEF[base+'@1']) return [base];
+  if (scope==='both') return isDouble() ? [base+'@1', base+'@2'] : [base+'@1'];
+  return [base+'@'+scope];
+}
+function readKey(base){ return PDEF[base+'@1'] ? base+'@'+(scope==='both'?1:scope) : base; }
+
+/* Applique un buffer complet (annuler, A/B, chargement) en n'envoyant que ce qui change */
+function applyBuffer(nb, {send=true}={}){
+  const changed=[]; let other=false;
+  const covered=new Set();
+  for (const d of Object.values(PDEF)){
+    const e=d.enc; covered.add(e.o); if (e.t==='u16') covered.add(e.o+1);
+    if (getF(cur,d)!==getF(nb,d)) changed.push(d);
+  }
+  for (let i=0;i<PROG_LEN;i++) if (!covered.has(i) && i!==134 && cur[i]!==nb[i]) other=true;
+  cur = nb.slice();
+  if (send && live && midi.out){
+    if (other || changed.length>24) sendDump(true);
+    else for (const d of changed) queueParam(d.addr, getF(cur,d));
+  }
+  refreshAll();
+}
+
+/* ============================================================
+   5. MIDI
+   ============================================================ */
+const midi = {acc:null, out:null, inp:null};
+const pending = new Map(); let flushT=null;
+/* File d'envoi : les messages partent dans l'ordre, espacés de TX.delay ms après chaque SysEx.
+   On tient compte de la durée réelle de transmission MIDI (31 250 bauds ≈ 0,32 ms par octet). */
+const TX = {delay:20, next:0};
+try{ const d=localStorage.getItem('x5s.delay'); if (d!==null) TX.delay=+d; }catch(e){}
+function rawSend(bytes, quiet){
+  if (!midi.out) return false;
+  const now = performance.now();
+  const t = Math.max(now, TX.next);
+  TX.next = t + bytes.length*0.32 + (bytes[0]===0xF0 ? TX.delay : 0);
+  try { if (t > now+1) midi.out.send(bytes, t); else midi.out.send(bytes); }
+  catch(e){ log(T('Erreur envoi : {0}',e.message),'e'); return false; }
+  const fire=()=>{
+    blink('#ledOut'); mon('o', bytes);
+    if (!quiet) log('→ '+(bytes.length>24 ? hex(bytes.slice(0,12))+' … ('+bytes.length+' octets)' : hex(bytes)),'o');
+  };
+  if (t > now+1) setTimeout(fire, t-now); else fire();
+  return true;
+}
+function queueParam(addr, v){
+  if (!live || !midi.out) return;
+  pending.set(addr, v);
+  if (!flushT) flushT = setTimeout(flush, 15);
+}
+function flush(){
+  flushT=null; if (!pending.size) return;
+  rawSend(MSG.modeProg(), true);  // le X5 abandonne l'édition MIDI si on touche sa face avant : on renvoie toujours le mode
+  for (const [a,v] of pending) rawSend(MSG.param(a,v));
+  pending.clear();
+}
+function sendDump(quiet){
+  if (!midi.out){ toast('Aucune sortie MIDI choisie','bad'); return; }
+  rawSend(MSG.modeProg(), true); rawSend(MSG.dumpProg(cur));
+  if (!quiet) toast('Son envoyé dans la mémoire d\'édition du X5','ok');
+}
+let ledT={};
+function blink(sel){ const el=$(sel); el.classList.add('on'); clearTimeout(ledT[sel]); ledT[sel]=setTimeout(()=>el.classList.remove('on'),70); }
+
+let waiters=[];   // attentes de réponse {test, resolve, timer}
+function expect(test, ms){
+  return new Promise(res=>{
+    const w={test,res}; w.t=setTimeout(()=>{ waiters=waiters.filter(x=>x!==w); res(null); }, ms);
+    waiters.push(w);
+  });
+}
+function onMidi(ev){
+  const d = ev.data; if (!d || !d.length) return;
+  blink('#ledIn'); mon('i', d);
+  if (d[0]!==0xF0) return;   // seuls les SysEx nous intéressent (les notes jouées sur le X5 passent)
+  log('← '+(d.length>24 ? hex(d.slice(0,12))+' … ('+d.length+' octets)' : hex(d)),'i');
+  for (const w of [...waiters]) if (w.test(d)){ clearTimeout(w.t); waiters=waiters.filter(x=>x!==w); w.res(d); }
+  // Identity Reply : F0 7E 0n 06 02 42 36 …
+  if (d[1]===0x7E && d[3]===0x06 && d[4]===0x02){
+    if (d[5]===0x42 && d[6]===0x36){ setChannel(d[2]&15); status(T('X5 détecté · canal {0}',(d[2]&15)+1),'ok'); }
+    else status(T('Appareil MIDI inconnu (id {0})',hex(d.slice(5,7))),'bad');
+    return;
+  }
+  if (d[1]!==0x42 || (d[2]&0xF0)!==0x30 || d[3]!==0x36) return;
+  const f=d[4];
+  if (f===0x40 && d.length===194){
+    const data = dec87(Array.from(d.slice(5,193)));
+    loadProgram(Uint8Array.from(data.slice(0,PROG_LEN)), 'Son reçu du X5 : ');
+  } else if (f===0x4C && d.length===18750){
+    const data = dec87(Array.from(d.slice(6,18749)));
+    setBank(Uint8Array.from(data.slice(0,16400)), 'X5');
+  } else if (f===0x41 && d.length===10){
+    // le X5 envoie ses propres modifications de face avant → on suit
+    const a = d[5] | (d[6]<<7); let v = d[7] | (d[8]<<7); if (v>8191) v-=16384;
+    const k = ADDR.get(a);
+    if (k){ setF(cur, PDEF[k], v); refresh(k); }
+  } else if (f===0x21) toast('X5 : écriture terminée ✔','ok');
+  else if (f===0x22) toast('X5 : erreur d\'écriture (Memory Protect activé ?)','bad');
+  else if (f===0x23) log('X5 : données reçues (ACK)','m');
+  else if (f===0x24) toast('X5 : données refusées (NAK) — vérifie Memory Protect / mode','bad');
+  else if (f===0x26) toast('X5 : format refusé','bad');
+}
+async function initMidi(){
+  if (!navigator.requestMIDIAccess){ status('Web MIDI indisponible : ouvre la page dans Chrome ou Edge','bad'); return; }
+  try { midi.acc = await navigator.requestMIDIAccess({sysex:true}); }
+  catch(e){
+    const fileUrl = location.protocol==='file:';
+    status('Accès MIDI refusé · clic ici pour réessayer','bad');
+    log(T('Web MIDI refusé : {0}',e.name+' — '+e.message),'e');
+    log(fileUrl ? 'Page ouverte en file:// → ouvre-la via http://localhost (voir aide « ? »)' : 'Vérifie les autorisations MIDI du site (icône à gauche de l\'adresse)','e');
+    $('#log').classList.add('on');
+    $('#midiState').style.cursor='pointer'; $('#midiState').onclick=()=>{ $('#midiState').onclick=null; initMidi(); };
+    return;
+  }
+  log(T('Web MIDI autorisé · {0} entrée(s), {1} sortie(s) : {2}',midi.acc.inputs.size,midi.acc.outputs.size,[...midi.acc.outputs.values()].map(p=>p.name).join(', ')),'m');
+  if (!midi.acc.outputs.size) status('MIDI OK mais aucune interface vue : branche-la puis recharge','bad');
+  midi.acc.onstatechange = fillPorts; fillPorts();
+}
+function fillPorts(){
+  const pref = (k)=>{ try{return localStorage.getItem(k)}catch(e){return null} };
+  const outs=[...midi.acc.outputs.values()], ins=[...midi.acc.inputs.values()];
+  const fill=(sel,list,key)=>{
+    const keep = sel.value || pref(key);
+    sel.innerHTML = '<option value="">— aucun —</option>' + list.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+    const m = list.find(p=>p.id===keep || p.name===keep) || list.find(p=>/x5|05r|korg/i.test(p.name)) || (list.length===1?list[0]:null);
+    sel.value = m ? m.id : '';
+  };
+  fill($('#outSel'),outs,'x5s.out'); fill($('#inSel'),ins,'x5s.in'); pickPorts();
+}
+function pickPorts(){
+  if (!midi.acc) return;
+  if (midi.inp) midi.inp.onmidimessage=null;
+  midi.out = midi.acc.outputs.get($('#outSel').value) || null;
+  midi.inp = midi.acc.inputs.get($('#inSel').value) || null;
+  if (midi.inp) midi.inp.onmidimessage = onMidi;
+  try{ if (midi.out) localStorage.setItem('x5s.out', midi.out.name); if (midi.inp) localStorage.setItem('x5s.in', midi.inp.name);}catch(e){}
+  if (midi.out && midi.inp) status('Ports prêts · clique Détecter','ok');
+  else if (midi.out) status('Sortie OK · sans entrée, la lecture du X5 est impossible','');
+  else status('Choisis la sortie MIDI reliée au X5','bad');
+}
+function setChannel(c){ S.ch=c; $('#chSel').value=c; try{localStorage.setItem('x5s.ch',c)}catch(e){} }
+async function detect(){
+  if (!midi.out || !midi.inp){ toast('Choisis une entrée et une sortie MIDI','bad'); return; }
+  status('Recherche du X5…','');
+  const p = expect(d=>d[1]===0x7E && d[4]===0x02, 2500);
+  for (let c=0;c<16;c++) rawSend(MSG.ident(c), true);
+  log('→ Identity Request sur les 16 canaux','o');
+  const r = await p;
+  if (!r) status('Pas de réponse : vérifie câbles, ports et GLOBAL → MIDI Filter EX = ENA','bad');
+}
+async function readX5(){
+  if (!midi.out || !midi.inp){ toast('Il faut une entrée ET une sortie MIDI','bad'); return; }
+  rawSend(MSG.modeProg()); rawSend(MSG.reqProg());
+  const r = await expect(d=>d[1]===0x42 && d[4]===0x40, 3000);
+  if (!r) toast('Pas de réponse du X5 (mode PROG ? MIDI Filter EX = ENA ? bon canal ?)','bad');
+}
+async function writeX5(){
+  if (!midi.out){ toast('Aucune sortie MIDI','bad'); return; }
+  const slot = +$('#slotSel').value;
+  const tgt = bank ? T(' (actuellement « {0} »)', progName(bank, slot*PROG_LEN).trim()) : '';
+  if (!await ask(T('Écrire « <b>{0}</b> » dans l\'emplacement <b>{1}</b> du X5{2} ?<br><span class="note warn">Le son qui s\'y trouve sera remplacé.</span>', progName(cur).trim(), 'A'+String(slot).padStart(2,'0'), tgt))) return;
+  sendDump(true);
+  await new Promise(r=>setTimeout(r,150));
+  rawSend(MSG.write(slot));
+  const r = await expect(d=>d[1]===0x42 && [0x21,0x22,0x24,0x26].includes(d[4]), 3000);
+  if (!r) toast(midi.inp ? 'Pas d\'accusé du X5 : vérifie sur l\'écran que le son est bien écrit' : 'Commande envoyée (pas d\'entrée MIDI pour confirmer)', '');
+  else if (r[4]===0x21){ origin = cur.slice(); if (bank){ bank.set(cur, slot*PROG_LEN); renderBank(); } updDirty(); saveWork(); }
+}
+
+/* ---------- notes de test ---------- */
+const held = new Set();
+function noteOn(n,v){ if(!midi.out) return; rawSend([0x90|S.ch,n,v??+$('#vel').value],true); held.add(n); keyVis(n,true); }
+function noteOff(n){ if(!midi.out) return; rawSend([0x80|S.ch,n,0],true); held.delete(n); keyVis(n,false); }
+let phraseT=[];
+function stopPhrase(){ phraseT.forEach(clearTimeout); phraseT=[]; for (const n of [...held]) if (!physHeld.has(n)) noteOff(n); }
+function play(kind){
+  stopPhrase();
+  const base = 48 + octShift*12 + 12, v=+$('#vel').value;
+  const at=(ms,f)=>phraseT.push(setTimeout(f,ms));
+  const nt=(t,n,dur,vel)=>{ at(t,()=>noteOn(n,vel??v)); at(t+dur,()=>noteOff(n)); };
+  switch(kind||$('#phraseSel').value){
+    case 'note': nt(0,base,900); break;
+    case 'chord': [0,4,7,11].forEach(i=>nt(0,base+i,1400)); break;
+    case 'arp': [0,4,7,12,16,12,7,4].forEach((i,j)=>nt(j*150,base+i,140)); break;
+    case 'range': [base-24,base,base+24].forEach((n,j)=>nt(j*700,n,600)); break;
+    case 'vel': [20,50,80,110,127].forEach((vv,j)=>nt(j*450,base,380,vv)); break;
+    case 'long': nt(0,base,3000); break;
+  }
+}
+let audT=null;
+function audition(){ if (!$('#autoPlay').checked) return; clearTimeout(audT); audT=setTimeout(()=>play(),350); }
+function panic(){ stopPhrase(); if(!midi.out) return; try{ midi.out.clear && midi.out.clear(); }catch(e){} TX.next=0; for (let n=0;n<128;n++) if (held.has(n)) noteOff(n); rawSend([0xB0|S.ch,123,0]); rawSend([0xB0|S.ch,120,0],true); held.clear(); document.querySelectorAll('.key.down').forEach(k=>k.classList.remove('down')); }
+
+/* ---------- moniteur SysEx ---------- */
+const MON = {t0:performance.now(), paused:false, rows:[]};
+function describe(d){
+  if (d[0]===0xF0 && d[1]===0x7E) return d[4]===0x01 ? T('Demande d\'identité (canal {0})',(d[2]&15)+1) : d[4]===0x02 ? T('Réponse d\'identité · {0}',(d[5]===0x42&&d[6]===0x36?'Korg X5 / 05R/W':'id '+hex(d.slice(5,7)))) : T('SysEx universel');
+  if (d[0]===0xF0 && d[1]===0x42 && d[3]===0x36){
+    const f=d[4];
+    if (f===0x4E) return T('Passage en mode Program Edit');
+    if (f===0x41){ const a=d[5]|(d[6]<<7); let v=d[7]|(d[8]<<7); if(v>8191) v-=16384; const k=ADDR.get(a);
+      if (!k) return T('Paramètre #{0} = {1}',a,v);
+      const pd=PDEF[k]; return (pd.osc?'Osc '+pd.osc+' · ':'')+T(pd.label)+' = '+fmt(pd,v)+'  ('+T('adr {0}, val {1}',a,v)+')'; }
+    if (f===0x40) return T('Son complet « {0} » ({1} octets)',progName(Uint8Array.from(dec87(Array.from(d.slice(5,193))).slice(0,10))).trim(),d.length);
+    if (f===0x10) return T('Demande du son affiché');
+    if (f===0x1C) return T('Demande de la banque (100 sons)');
+    if (f===0x4C) return T('Banque complète ({0} octets)',d.length);
+    if (f===0x11) return T('Écriture dans {0}','A'+String(d[6]).padStart(2,'0'));
+    return T(({0x21:'X5 : écriture terminée',0x22:'X5 : erreur d\'écriture',0x23:'X5 : reçu (ACK)',0x24:'X5 : refusé (NAK)',0x26:'X5 : format refusé'})[f] || '') || T('SysEx Korg fonction {0}h',f.toString(16).toUpperCase());
+  }
+  const st=d[0]&0xF0, ch=(d[0]&15)+1;
+  if (st===0x90 && d[2]>0) return T('Note On {0} vél {1} (canal {2})',noteName(d[1]),d[2],ch);
+  if (st===0x80 || st===0x90) return 'Note Off '+noteName(d[1]);
+  if (st===0xB0) return 'CC '+d[1]+' = '+d[2]+(d[1]===123?T(' (toutes notes off)'):'');
+  if (st===0xE0) return 'Pitch bend';
+  if (st===0xD0) return 'Aftertouch '+d[1];
+  if (st===0xC0) return 'Program Change '+d[1];
+  return 'MIDI '+hex(d.slice(0,3));
+}
+function mon(dir, bytes){
+  const el=$('#mon'); if (!el || !el.classList.contains('on') || MON.paused) return;
+  const d=Array.from(bytes); if (d[0]===0xF8 || d[0]===0xFE) return;   // horloge / active sensing
+  if (d[0]!==0xF0 && !$('#monNotes').checked) return;
+  const t=((performance.now()-MON.t0)/1000).toFixed(3);
+  const hx = d.length>48 ? hex(d.slice(0,24))+' … '+hex(d.slice(-4))+' ('+d.length+' o)' : hex(d);
+  const r=h('div',{class:'r '+dir},h('span',{class:'t'},t),h('span',{class:'a'},dir==='o'?'↑':'↓'),h('span',{class:'d'},describe(d)),h('span'),h('span'),h('span',{class:'x'},hx));
+  MON.rows.push(t+' '+(dir==='o'?'OUT':'IN ')+' '+describe(d)+' | '+hx);
+  if (MON.rows.length>500) MON.rows.shift();
+  const b=$('#monBody'); const stick = b.scrollTop+b.clientHeight >= b.scrollHeight-20;
+  b.append(r); while (b.childNodes.length>300) b.firstChild.remove();
+  if (stick) b.scrollTop=b.scrollHeight;
+}
+function initMon(){
+  const el=$('#mon'), dl=$('#monDelay');
+  const showDelay=()=>{ $('#monDelayV').textContent=TX.delay+' ms'; };
+  dl.value=TX.delay; showDelay();
+  dl.oninput=()=>{ TX.delay=+dl.value; showDelay(); try{localStorage.setItem('x5s.delay',TX.delay)}catch(e){} };
+  const setOpen=o=>{ el.classList.toggle('on',o); $('#btnMon').classList.toggle('on',o); try{localStorage.setItem('x5s.mon',o?'1':'0')}catch(e){} };
+  let open=true; try{ open = localStorage.getItem('x5s.mon')!=='0'; }catch(e){}
+  setOpen(open);
+  $('#btnMon').onclick=()=>setOpen(!el.classList.contains('on'));
+  $('#monClose').onclick=()=>setOpen(false);
+  $('#monClear').onclick=()=>{ $('#monBody').innerHTML=''; MON.rows=[]; MON.t0=performance.now(); };
+  $('#monPause').onclick=()=>{ MON.paused=!MON.paused; $('#monPause').textContent=MON.paused?'▶':'❚❚'; $('#monPause').classList.toggle('pri',MON.paused); };
+  $('#monHex').onchange=()=>el.classList.toggle('hidehex',!$('#monHex').checked);
+  $('#monCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(MON.rows.join('\n')); toast('Messages copiés','ok'); }catch(e){ toast('Copie impossible','bad'); } };
+  // déplacer la fenêtre par sa barre de titre
+  const hd=$('#monHead'); let dx=0,dy=0,drag=false;
+  hd.addEventListener('pointerdown',e=>{ if (e.target.closest('button,input,label')) return; drag=true; const r=el.getBoundingClientRect(); dx=e.clientX-r.left; dy=e.clientY-r.top; hd.setPointerCapture(e.pointerId); });
+  hd.addEventListener('pointermove',e=>{ if(!drag) return; el.style.left=Math.max(0,Math.min(innerWidth-80,e.clientX-dx))+'px'; el.style.top=Math.max(0,Math.min(innerHeight-40,e.clientY-dy))+'px'; el.style.bottom='auto'; });
+  hd.addEventListener('pointerup',()=>drag=false);
+}
+
+/* ============================================================
+   6. Interface : utilitaires
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const h = (tag, attrs={}, ...kids) => {
+  const el = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs||{})){
+    if (k==='class') el.className=v; else if (k==='html') el.innerHTML=v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k,v);
+  }
+  for (const c of kids.flat()) if (c!=null) el.append(c.nodeType ? c : document.createTextNode(c));
+  return el;
+};
+function log(t,c){ const l=$('#log'); const d=h('div',{class:c||''},t); l.append(d); while(l.childNodes.length>300) l.firstChild.remove(); l.scrollTop=l.scrollHeight; }
+let toastT; function toast(t,c){ const el=$('#toast'); el.textContent=t; el.className='on '+(c||''); clearTimeout(toastT); toastT=setTimeout(()=>el.className='',3800); }
+function status(t,c){ const el=$('#midiState'); el.textContent=t; el.className='pill '+(c||''); }
+function ask(html){ return new Promise(res=>{ const d=$('#dlg'); $('#dlgBody').innerHTML=T(html); d.returnValue=''; d.showModal(); d.onclose=()=>res(d.returnValue==='yes'); }); }
+function fmt(d, v){
+  const b=d.base;
+  if (d.opts) return T(Array.isArray(d.opts) ? d.opts[v] : d.opts[v]);
+  if (b==='pan') return v<0 ? 'OFF' : v===15 ? 'CNT' : v<15 ? 'A'+(15-v) : 'B'+(v-15);
+  if (b.endsWith('kkey')) return noteName(v);
+  if (d.min<0 && v>0) return '+'+v;
+  return String(v);
+}
+
+/* registre des contrôles à rafraîchir */
+const binds = [];
+function refresh(key){ if (key==='mode'){ refreshAll(); return; } const base=key.split('@')[0]; for (const b of binds) if (b.keys.includes(key)||b.keys.includes(base)) b.upd(); drawEGs(); updDirty(); }
+function refreshAll(){
+  if (!isDouble() && scope===2) scope='both';
+  if (document.activeElement!==$('#pname')) $('#pname').value = progName(cur);
+  for (const b of binds) b.upd();
+  document.querySelectorAll('[data-need-double]').forEach(el=>el.classList.toggle('dis', !isDouble()));
+  updDirty(); drawEGs();
+}
+
+/* curseur générique. base = clé de page (sans @) ou clé complète ; osc = 0 (selon portée), 1 ou 2 */
+function slider(base, osc, opt={}){
+  const keyOf = () => osc ? base+'@'+osc : readKey(base);
+  const keysW = () => osc ? [base+'@'+osc] : scopedKeys(base);
+  const d0 = PDEF[keyOf()];
+  const inp = h('input',{type:'range',min:d0.min,max:d0.max,step:1});
+  const out = h('span',{class:'val'});
+  const lab = h('label',{title:d0.label},opt.label||d0.label);
+  const row = h('div',{class:'row'},lab,inp,out);
+  let startBuf=null;
+  inp.addEventListener('pointerdown',()=>{startBuf=true});
+  inp.addEventListener('input',()=>{ const v=+inp.value; for (const k of keysW()) setParam(k,v,{noRefresh:true}); out.textContent=fmt(PDEF[keyOf()],v); drawEGs(); syncSame(keyOf()); });
+  inp.addEventListener('change',()=>{ commit(); });
+  inp.addEventListener('dblclick',()=>{ for (const k of keysW()) setParam(k,getF(origin,PDEF[k])); commit(); });
+  inp.addEventListener('wheel',e=>{ e.preventDefault(); const v=+inp.value+(e.deltaY<0?1:-1); for (const k of keysW()) setParam(k,v); clearTimeout(inp._w); inp._w=setTimeout(commit,400); },{passive:false});
+  const b={keys:[base, base+'@1', base+'@2'], el:inp, upd:()=>{ const d=PDEF[keyOf()]; const v=getF(cur,d); inp.value=v; out.textContent=fmt(d,v);
+      const o = osc || (scope==='both'?1:scope); row.classList.toggle('dis', o===2 && !isDouble() && !!PDEF[base+'@2']); }};
+  binds.push(b); b.upd();
+  return row;
+}
+function syncSame(key){ const base=key.split('@')[0]; for (const b of binds) if (b.keys.includes(base)) b.upd(); }
+function choice(base, osc, opt={}){
+  const keyOf = () => osc ? base+'@'+osc : readKey(base);
+  const keysW = () => osc ? [base+'@'+osc] : scopedKeys(base);
+  const d0 = PDEF[keyOf()];
+  const sel = h('select',{style:'width:100%'});
+  const entries = Array.isArray(d0.opts) ? d0.opts.map((t,i)=>[i,t]) : Object.entries(d0.opts).map(([v,t])=>[+v,t]).sort((a,b)=>a[0]-b[0]);
+  for (const [v,t] of entries) sel.append(h('option',{value:v},t));
+  sel.addEventListener('change',()=>{ for (const k of keysW()) setParam(k,+sel.value); commit(); });
+  const row = h('div',{class:'row'},h('label',{},opt.label||d0.label),sel,h('span'));
+  binds.push({keys:[base,base+'@1',base+'@2'],upd:()=>{ sel.value=getF(cur,PDEF[keyOf()]); const o=osc||(scope==='both'?1:scope); row.classList.toggle('dis', o===2 && !isDouble() && !!PDEF[base+'@2']); }});
+  binds.at(-1).upd(); return row;
+}
+function toggle(base, osc, label){
+  const keyOf = () => osc ? base+'@'+osc : readKey(base);
+  const keysW = () => osc ? [base+'@'+osc] : scopedKeys(base);
+  const cb = h('input',{type:'checkbox'});
+  cb.addEventListener('change',()=>{ for (const k of keysW()) setParam(k,cb.checked?1:0); commit(); });
+  binds.push({keys:[base,base+'@1',base+'@2'],upd:()=>{ cb.checked=!!getF(cur,PDEF[keyOf()]); }}); binds.at(-1).upd();
+  return h('div',{class:'row'},h('label',{},label||PDEF[keyOf()].label),h('div',{},cb),h('span'));
+}
+function triGroup(prefix, title){   // ex. prefix 'vdf.v' → A D S R
+  const wrap=h('div',{class:'tris'},h('span',{},title));
+  for (const s of ['a','d','s','r']){
+    const base=prefix+s, t=h('div',{class:'tri',title:'Effet sur le temps '+s.toUpperCase()+' : − raccourcit / + allonge (selon le sens de la sensibilité)'});
+    const bs=[-1,0,1].map(v=>{ const b=h('button',{type:'button'},v<0?'−':v>0?'+':'0'); b.onclick=()=>{ for (const k of scopedKeys(base)) setParam(k,v); commit(); }; return b; });
+    t.append(...bs);
+    wrap.append(h('span',{class:'trik'},h('b',{},s.toUpperCase()), t));
+    binds.push({keys:[base,base+'@1',base+'@2'],upd:()=>{ const v=getF(cur,PDEF[readKey(base)]); bs.forEach((b,i)=>{ b.classList.toggle('on',[-1,0,1][i]===v); b.classList.toggle('n',v===-1 && i===0); b.classList.toggle('z',v===0 && i===1); }); }});
+    binds.at(-1).upd();
+  }
+  return wrap;
+}
+function card(title, ...kids){ return h('div',{class:'card'},h('h3',{},title),...kids); }
+
+/* ============================================================
+   7. Éditeur d'enveloppes (glisser les points)
+   ============================================================ */
+const EGs=[];
+function egEditor(kind){
+  // points : t = clé de temps, l = clé de niveau (ou valeur fixe)
+  const spec = {
+    vdf:{start:0, pts:[['vdf.at','vdf.al'],['vdf.dt','vdf.bp'],['vdf.st','vdf.sl'],'SUS',['vdf.rt','vdf.rl']], lmin:-99,lmax:99},
+    vda:{start:0, pts:[['vda.at','vda.al'],['vda.dt','vda.bp'],['vda.st','vda.sl'],'SUS',['vda.rt',0]], lmin:0,lmax:99},
+    peg:{start:'peg.sl', pts:[['peg.at','peg.al'],['peg.dt',0],'SUS',['peg.rt','peg.rl']], lmin:-99,lmax:99},
+  }[kind];
+  let W=640; const H=190,P=14,SUS=70; let frozen=0;
+  const nT = spec.pts.filter(p=>p!=='SUS').length;
+  const tkeys = spec.pts.filter(p=>p!=='SUS').map(p=>p[0]);
+  let SEG=(W-2*P-SUS)/nT;
+  const rescale=()=>{ if (frozen) return; const tot=tkeys.reduce((a,k)=>a+Math.min(99,val(readKey(k))),0); SEG=(W-2*P-SUS)/Math.max(nT*22, tot)*99; };
+  const NS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(NS,'svg'); svg.setAttribute('viewBox',`0 0 ${W} ${H}`); svg.classList.add('eg');
+  const g=(t,a)=>{const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); return e;};
+  const y=l=>{ l=Math.max(spec.lmin,Math.min(spec.lmax,l)); const r=(l-spec.lmin)/(spec.lmax-spec.lmin); return H-P-r*(H-2*P); };
+  const ly=Y=>Math.round(spec.lmin + (H-P-Y)/(H-2*P)*(spec.lmax-spec.lmin));
+  const zero=g('line',{x1:P,x2:W-P,stroke:'#3a3f46','stroke-dasharray':'3 4'});
+  const area=g('path',{fill:'url(#gr'+kind+')',stroke:'none'});
+  const path=g('path',{fill:'none',stroke:'var(--acc)','stroke-width':2.2,'stroke-linejoin':'round'});
+  const defs=g('defs',{}); const lg=g('linearGradient',{id:'gr'+kind,x1:0,x2:0,y1:0,y2:1});
+  lg.append(g('stop',{offset:0,'stop-color':'#e9a23b','stop-opacity':.28}),g('stop',{offset:1,'stop-color':'#e9a23b','stop-opacity':.02})); defs.append(lg);
+  const onL=g('text',{y:H-3}); onL.textContent='note on'; const offL=g('text',{y:H-3}); offL.textContent='note off';
+  const offLine=g('line',{stroke:'#4a5058','stroke-dasharray':'2 3',y1:P,y2:H-P});
+  const tip=g('text',{fill:'var(--acc2)'}); tip.style.fill='var(--acc2)';
+  svg.append(defs,zero,area,path,offLine,onL,offL,tip);
+  const handles=[];
+  const pts=()=>{  // calcule les coordonnées
+    const k=b=>readKey(b); const out=[];
+    let x=P, lv = typeof spec.start==='string' ? val(k(spec.start)) : spec.start;
+    out.push({x,y:y(lv),lk:typeof spec.start==='string'?spec.start:null,tk:null});
+    let sus=0;
+    for (const p of spec.pts){
+      if (p==='SUS'){ x+=SUS; sus=x; out.push({x,y:out.at(-1).y,sus:true}); continue; }
+      const [tk,lk]=p; x+= Math.min(99,val(k(tk)))/99*SEG;
+      const l = typeof lk==='string' ? val(k(lk)) : lk;
+      out.push({x,y:y(l),tk,lk:typeof lk==='string'?lk:null});
+    }
+    return {out,sus};
+  };
+  const draw=()=>{
+    const cw=svg.clientWidth; if (cw>0 && Math.abs(cw-W)>1){ W=cw; svg.setAttribute('viewBox',`0 0 ${W} ${H}`); zero.setAttribute('x2',W-P); }
+    rescale();
+    const {out,sus}=pts();
+    zero.setAttribute('y1',y(0)); zero.setAttribute('y2',y(0));
+    const d='M'+out.map(p=>p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' L');
+    path.setAttribute('d',d); area.setAttribute('d',d+` L${out.at(-1).x} ${y(Math.max(0,spec.lmin))} L${P} ${y(Math.max(0,spec.lmin))} Z`);
+    offLine.setAttribute('x1',sus); offLine.setAttribute('x2',sus); onL.setAttribute('x',P); offL.setAttribute('x',sus+3);
+    let hi=0;
+    out.forEach((p,i)=>{
+      if (p.sus || (!p.tk && !p.lk)) return;
+      let c=handles[hi]; if(!c){ c=g('circle',{r:7,fill:'#1d2024',stroke:'var(--acc)','stroke-width':2,class:'h'}); svg.append(c); handles.push(c); bindDrag(c); }
+      c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c._i=i; c._p=p; hi++;
+    });
+  };
+  const bindDrag=c=>{
+    c.addEventListener('pointerdown',e=>{
+      c.setPointerCapture(e.pointerId); frozen=1; const {out}=pts(); const prevX = c._i>0 ? out[c._i-1].x : P; c._prev=prevX;
+      const mv=ev=>{
+        const r=svg.getBoundingClientRect(); const sx=W/r.width, sy=H/r.height;
+        const X=(ev.clientX-r.left)*sx, Y=(ev.clientY-r.top)*sy; const p=c._p;
+        if (p.tk) for (const k of scopedKeys(p.tk)) setParam(k, (X-c._prev)/SEG*99, {noRefresh:true});
+        if (p.lk) for (const k of scopedKeys(p.lk)) setParam(k, ly(Y), {noRefresh:true});
+        const parts=[]; if(p.tk) parts.push(T(PDEF[readKey(p.tk)].label)+' '+val(readKey(p.tk))); if(p.lk) parts.push(T(PDEF[readKey(p.lk)].label)+' '+fmt(PDEF[readKey(p.lk)],val(readKey(p.lk))));
+        tip.textContent=parts.join(' · '); tip.setAttribute('x',Math.min(W-260,Math.max(P,X+10))); tip.setAttribute('y',14);
+        for (const b of binds) b.upd(); drawEGs();
+      };
+      const up=()=>{ c.removeEventListener('pointermove',mv); c.removeEventListener('pointerup',up); tip.textContent=''; frozen=0; draw(); commit(); };
+      c.addEventListener('pointermove',mv); c.addEventListener('pointerup',up);
+    });
+  };
+  EGs.push(draw); draw();
+  if (window.ResizeObserver) new ResizeObserver(()=>draw()).observe(svg);
+  return svg;
+}
+function drawEGs(){ EGs.forEach(f=>f()); }
+
+/* ============================================================
+   8. Pages
+   ============================================================ */
+function scopeBar(){
+  const seg=h('div',{class:'seg'});
+  const bs=[['1','Osc 1'],['2','Osc 2'],['both','Les deux (liés)']].map(([v,t])=>{
+    const b=h('button',{type:'button'},t); b.onclick=()=>{ scope = v==='both'?'both':+v; refreshAll(); document.querySelectorAll('.scopeseg').forEach(s=>s._upd()); }; return [v,b]; });
+  bs.forEach(([,b])=>seg.append(b)); seg.classList.add('scopeseg');
+  seg._upd=()=>{ bs.forEach(([v,b])=>{ b.classList.toggle('on', String(scope)===v); b.disabled = v==='2' && !isDouble(); }); };
+  seg._upd(); binds.push({keys:['mode'],upd:seg._upd});
+  const n=h('span',{class:'note'}); binds.push({keys:['mode'],upd:()=>{ n.textContent = isDouble() ? (scope==='both'?'Chaque réglage s\'applique aux deux oscillateurs (affiche les valeurs de l\'osc 1).':'') : 'Mode Simple : un seul oscillateur actif.'; }}); binds.at(-1).upd();
+  return h('div',{class:'scope'},h('b',{},'Éditer :'),seg,n);
+}
+
+/* --- Rapide : macros --- */
+const MACROS = [
+  {n:'Brillance', d:'Ouvre / ferme le filtre (cutoff + un peu d\'EG).', lo:'sombre', hi:'brillant', t:[['vdf.cut',1],['vdf.eint',.4]]},
+  {n:'Couleur', d:'Accentue la zone du cutoff (caractère, mordant).', lo:'neutre', hi:'coloré', t:[['vdf.col',1]]},
+  {n:'Attaque', d:'Temps d\'attaque du volume et du filtre.', lo:'percussif', hi:'lent', t:[['vda.at',1],['vdf.at',.7]]},
+  {n:'Corps', d:'Niveau tenu pendant que la touche est enfoncée.', lo:'court', hi:'tenu', t:[['vda.sl',1],['vda.bp',.6],['vdf.sl',.5]]},
+  {n:'Relâche', d:'Durée de la queue après le relâchement.', lo:'sec', hi:'long', t:[['vda.rt',1],['vdf.rt',.8]]},
+  {n:'Toucher', d:'Réaction du volume et du filtre à la vélocité.', lo:'égal', hi:'expressif', t:[['vda.vamp',1],['vdf.vint',.8],['vdf.colv',.4]]},
+  {n:'Vibrato', d:'Profondeur du LFO de hauteur, avec apparition.', lo:'aucun', hi:'large', t:[['pm.int',.8],['pm.fade',.5]]},
+  {n:'Wah / mouvement', d:'LFO sur le filtre (intensité + vitesse).', lo:'statique', hi:'animé', t:[['fmg.int',1],['fmg.freq',.4]]},
+  {n:'Épaisseur', d:'Désaccord entre les deux oscillateurs.', lo:'net', hi:'large', t:[['detune',.5]], dbl:true},
+  {n:'Équilibre osc', d:'Volume osc 1 ↔ osc 2.', lo:'osc 1', hi:'osc 2', t:[['lvl@1',-1],['lvl@2',1]], dbl:true, abs:true},
+];
+function macroEl(m){
+  const thumb=h('div',{class:'thumb'}), tr=h('div',{class:'track'},h('div',{class:'mid'}),h('span',{class:'lo'},'← ',h('span',{},m.lo)),h('span',{class:'hi'},h('span',{},m.hi),' →'),thumb);
+  const rd=h('div',{class:'r'});
+  const el=h('div',{class:'macro'},h('div',{class:'t'},m.n),h('div',{class:'d'},m.d),tr,rd);
+  if (m.dbl){ el.dataset.needDouble=1; }
+  let base=null,x0=0;
+  tr.addEventListener('pointerdown',e=>{ tr.setPointerCapture(e.pointerId); base=cur.slice(); x0=e.clientX; tr.classList.add('drag'); });
+  tr.addEventListener('pointermove',e=>{
+    if (!base) return;
+    const r=tr.getBoundingClientRect(); const delta=Math.max(-1,Math.min(1,(e.clientX-x0)/(r.width/2)));
+    thumb.style.left=(50+delta*50)+'%';
+    const amt=delta*60; const parts=[];
+    for (const [tk,sc] of m.t){
+      const keys = tk.includes('@') ? [tk] : (PDEF[tk+'@1'] ? (isDouble()?[tk+'@1',tk+'@2']:[tk+'@1']) : [tk]);
+      for (const k of keys){ const d=PDEF[k]; const nv=getF(base,d)+amt*sc; setParam(k,nv,{noRefresh:true}); }
+      const k0=keys[0]; parts.push(T(PDEF[k0].label)+' '+fmt(PDEF[k0],getF(base,PDEF[k0]))+'→'+fmt(PDEF[k0],val(k0)));
+    }
+    rd.textContent=parts.slice(0,2).join(' · ');
+    for (const b of binds) b.upd(); drawEGs();
+  });
+  const end=()=>{ if(!base) return; base=null; tr.classList.remove('drag'); thumb.style.left='50%'; commit(); setTimeout(()=>rd.textContent='',2500); };
+  tr.addEventListener('pointerup',end); tr.addEventListener('pointercancel',end);
+  return el;
+}
+function buildQuick(){
+  const p=$('#p-quick');
+  p.append(h('div',{class:'macros'},MACROS.map(macroEl)));
+  const sel=h('div',{class:'cols2',style:'margin-top:12px'});
+  const amt=h('input',{type:'range',min:1,max:40,value:12});
+  const fam={timbre:h('input',{type:'checkbox',checked:''}),env:h('input',{type:'checkbox',checked:''}),mod:h('input',{type:'checkbox'}),wave:h('input',{type:'checkbox'})};
+  const famDef={timbre:/^vdf\.(cut|eint|col)|^lvl/, env:/^(vdf|vda)\.(at|al|dt|bp|st|sl|rt|rl)$|^peg\./, mod:/^(pm|fmg)\.(freq|int|del|fade)|^(at|joy)\./, wave:/^wave$/};
+  const mutate=()=>{
+    const a=+amt.value;
+    for (const d of Object.values(PDEF)){
+      if (d.enc.t==='tri'||d.enc.t==='bit'||d.opts) continue;
+      if (d.osc===2 && !isDouble()) continue;
+      const fk=Object.keys(fam).find(f=>fam[f].checked && famDef[f].test(d.base)); if (!fk) continue;
+      if (fk==='wave'){ if (Math.random()<.5){ const w=val(d.key); const c=WAVE_CATS.filter(x=>x[0]<=w).at(-1)[0]; const nx=WAVE_CATS.find(x=>x[0]>c); const hi=(nx?nx[0]:340)-1; setParam(d.key, c+Math.floor(Math.random()*(hi-c+1)),{noRefresh:true,noAudition:true}); } continue; }
+      const span=(d.max-d.min); const nv=val(d.key)+(Math.random()*2-1)*span*a/200;
+      setParam(d.key,nv,{noRefresh:true,noAudition:true});
+    }
+    commit(); refreshAll(); audition();
+  };
+  sel.append(
+    card('Varier le son',
+      h('div',{class:'row'},h('label',{},'Ampleur'),amt,h('span')),
+      h('div',{class:'tris'},...Object.entries({timbre:'Timbre',env:'Enveloppes',mod:'Modulations',wave:'Multisound'}).map(([k,t])=>h('label',{},fam[k],' '+t))),
+      h('div',{style:'display:flex;gap:8px;margin-top:8px'},h('button',{class:'pri',onclick:mutate},'🎲 Varier'),h('button',{onclick:undo},'↶ Annuler la variation')),
+      h('p',{class:'note'},'Petites variations aléatoires autour du son actuel. Enchaîne « Varier » puis « Annuler » jusqu\'à trouver une piste.')),
+    card('Volume (VDA) — tous oscillateurs', egEditor('vda'), h('p',{class:'note'},'Glisse les points. Les réglages fins sont dans l\'onglet Ampli.'))
+  );
+  p.append(sel);
+  const ow=h('div',{class:'cards',style:'margin-top:12px'});
+  ow.append(card('Sons de base', waveMini(1), waveMini(2)), card('Filtre — tous oscillateurs', egEditor('vdf')));
+  p.append(ow);
+}
+function waveMini(o){
+  const n=h('div',{class:'wname'}); const r=h('div',{class:'row'},h('label',{},'Osc '+o),n,h('span'));
+  if (o===2) r.dataset.needDouble=1;
+  binds.push({keys:['wave@'+o,'mode'],upd:()=>{ n.textContent = val('mode')===2 ? T('Kit batterie {0}',val('wave@'+o)+1) : (WAVES[val('wave@'+o)]||'?'); }}); binds.at(-1).upd();
+  return r;
+}
+
+/* --- Oscillateurs --- */
+function wavePicker(o){
+  const key='wave@'+o;
+  const q=h('input',{type:'text',placeholder:'Rechercher (piano, pad, saw…)',style:'width:100%'});
+  const list=h('div',{class:'wlist'});
+  const name=h('div',{class:'wname'});
+  let items=[];
+  const fill=()=>{
+    const f=q.value.trim().toLowerCase(); list.innerHTML=''; items=[];
+    const add=(i,t)=>{ const el=h('div',{class:'w'},t); el.onclick=()=>{ setParam(key,i); commit(); }; el._i=i; items.push(el); list.append(el); };
+    if (val('mode')===2){ for (let i=0;i<16;i++) add(i,'Kit '+(i+1)); }
+    else WAVE_CATS.forEach(([s0,t],ci)=>{
+      const e=(WAVE_CATS[ci+1]||[340])[0]; const hits=[];
+      for (let i=s0;i<e;i++) if (!f || WAVES[i].toLowerCase().includes(f) || t.toLowerCase().includes(f)) hits.push(i);
+      if (hits.length){ list.append(h('div',{class:'c'},t)); hits.forEach(i=>add(i,String(i).padStart(3,'0')+'  '+WAVES[i])); }
+    });
+    mark(true);
+  };
+  const mark=(scroll)=>{ const w=val(key); for (const el of items){ const on=el._i===w; el.classList.toggle('sel',on); if (on && scroll) list.scrollTop=el.offsetTop-list.clientHeight/2; } };
+  q.addEventListener('input',fill);
+  const step=dlt=>{ setParam(key,val(key)+dlt); commit(); mark(true); };
+  const rnd=()=>{ const w=val(key); const c=WAVE_CATS.filter(x=>x[0]<=w).at(-1)[0]; const nx=WAVE_CATS.find(x=>x[0]>c); const hi=(nx?nx[0]:340)-1; setParam(key,c+Math.floor(Math.random()*(hi-c+1))); commit(); mark(true); };
+  let lastMode=-1;
+  binds.push({keys:[key,'mode'],upd:()=>{ const w=val(key); name.textContent = val('mode')===2 ? 'Kit '+(w+1) : String(w).padStart(3,'0')+' · '+(WAVES[w]||'?') + ' — ' + T((WAVE_CATS.filter(x=>x[0]<=w).at(-1)||[0,''])[1]); name.title=name.textContent; if (lastMode!==val('mode')){ lastMode=val('mode'); fill(); } else mark(false); }});
+  binds.at(-1).upd();
+  new IntersectionObserver(es=>{ if (es[0].isIntersecting) mark(true); }).observe(list);
+  return h('div',{class:'wave'},h('div',{class:'top'},h('button',{onclick:()=>step(-1),title:'Précédent'},'◀'),name,h('button',{onclick:()=>step(1),title:'Suivant'},'▶'),h('button',{onclick:rnd,title:'Au hasard dans la même famille'},'🎲')),q,list);
+}
+function panRow(o){
+  const key='pan@'+o; const d=PDEF[key];
+  const inp=h('input',{type:'range',min:0,max:30}), out=h('span',{class:'val'}), off=h('input',{type:'checkbox',title:'Coupe la sortie A/B (n\'utilise que les envois C/D)'});
+  inp.addEventListener('input',()=>{ setParam(key,+inp.value,{noRefresh:true}); out.textContent=fmt(d,+inp.value); off.checked=false; });
+  inp.addEventListener('change',commit);
+  inp.addEventListener('dblclick',()=>{ setParam(key,15); commit(); });
+  off.addEventListener('change',()=>{ setParam(key, off.checked?-1:15); commit(); });
+  binds.push({keys:[key],upd:()=>{ const v=val(key); off.checked=v<0; inp.disabled=v<0; inp.value=v<0?15:v; out.textContent=fmt(d,v); }}); binds.at(-1).upd();
+  return h('div',{},h('div',{class:'row'},h('label',{},'Pan A ↔ B'),inp,out),h('div',{class:'row'},h('label',{},'Sortie A/B coupée'),h('div',{},off),h('span')));
+}
+function buildOsc(){
+  const p=$('#p-osc');
+  const g=h('div',{class:'cards'});
+  g.append(card('Architecture', choice('mode',0), toggle('mono',0,'Mono (legato)'), toggle('hold',0,'Hold'),
+    h('p',{class:'note'},'Simple = 1 oscillateur (polyphonie 32). Double = 2 oscillateurs (16 voix). Batterie = un kit de percussions.')));
+  const o2=card('Osc 1 ↔ Osc 2', slider('interval',0), slider('detune',0), slider('delay',0)); o2.dataset.needDouble=1; g.append(o2);
+  for (const o of [1,2]){
+    const c=card('Oscillateur '+o, wavePicker(o), choice('oct',o), slider('lvl',o), slider('pitch',o,{label:'Pitch EG'}), panRow(o), slider('sendC',o), slider('sendD',o));
+    if (o===2) c.dataset.needDouble=1;
+    g.append(c);
+  }
+  p.append(g);
+}
+/* --- VDF --- */
+function buildVDF(){
+  const p=$('#p-vdf'); p.append(scopeBar());
+  const g=h('div',{class:'cards'});
+  g.append(h('div',{class:'card wide'},h('h3',{},'Enveloppe du filtre'),egEditor('vdf')));
+  g.append(card('Filtre', slider('vdf.cut',0), slider('vdf.eint',0), slider('vdf.col',0), slider('vdf.colv',0)));
+  g.append(card('Temps & niveaux de l\'EG', ...['at','al','dt','bp','st','sl','rt','rl'].map(s=>slider('vdf.'+s,0))));
+  g.append(card('Vélocité', slider('vdf.vint',0), slider('vdf.vtim',0), triGroup('vdf.v','Temps affectés :')));
+  g.append(card('Suivi de clavier', choice('vdf.kmode',0), slider('vdf.kkey',0), slider('vdf.kint',0), slider('vdf.ktim',0), triGroup('vdf.k','Temps affectés :')));
+  p.append(g);
+}
+/* --- VDA --- */
+function buildVDA(){
+  const p=$('#p-vda'); p.append(scopeBar());
+  const g=h('div',{class:'cards'});
+  g.append(h('div',{class:'card wide'},h('h3',{},'Enveloppe de volume'),egEditor('vda')));
+  g.append(card('Temps & niveaux', ...['at','al','dt','bp','st','sl','rt'].map(s=>slider('vda.'+s,0))));
+  g.append(card('Vélocité', slider('vda.vamp',0), slider('vda.vtim',0), triGroup('vda.v','Temps affectés :')));
+  g.append(card('Suivi de clavier', choice('vda.kmode',0), slider('vda.kkey',0), slider('vda.kamp',0), slider('vda.ktim',0), triGroup('vda.k','Temps affectés :')));
+  p.append(g);
+}
+/* --- Hauteur & LFO --- */
+function buildMod(){
+  const p=$('#p-mod');
+  const g=h('div',{class:'cards'});
+  g.append(h('div',{class:'card wide'},h('h3',{},'Pitch EG (commun aux deux oscillateurs)'),egEditor('peg'),
+    h('div',{class:'cols2'},h('div',{},...['peg.sl','peg.at','peg.al','peg.dt'].map(k=>slider(k,0))),h('div',{},...['peg.rt','peg.rl','peg.vlev','peg.vtim'].map(k=>slider(k,0)))),
+    h('p',{class:'note'},'L\'effet sur chaque oscillateur dépend de son « Pitch EG » (onglet Oscillateurs).')));
+  g.append(card('LFO de filtre (VDF MG)', choice('fmg.wave',0), slider('fmg.freq',0), slider('fmg.int',0), slider('fmg.del',0), choice('fmg.osc',0), toggle('fmg.sync',0)));
+  p.append(g);
+  p.append(h('div',{style:'margin-top:12px'},scopeBar()));
+  const g2=h('div',{class:'cards'});
+  g2.append(card('LFO de hauteur (vibrato)', choice('pm.wave',0), slider('pm.freq',0), slider('pm.int',0), slider('pm.del',0), slider('pm.fade',0), toggle('pm.sync',0), slider('pm.ktrk',0)));
+  g2.append(card('Vibrato par contrôleurs', slider('pm.aft',0), slider('pm.joy',0), slider('pm.atjoy',0)));
+  p.append(g2);
+}
+/* --- Contrôleurs --- */
+function buildCtl(){
+  const p=$('#p-ctl'); const g=h('div',{class:'cards'});
+  g.append(card('Aftertouch', slider('at.bend',0), slider('at.fc',0), slider('at.mg',0), slider('at.amp',0)));
+  g.append(card('Joystick', slider('joy.bend',0), slider('joy.vdf',0), slider('joy.mg',0)));
+  p.append(g);
+}
+/* --- Effets --- */
+function buildFX(){
+  const p=$('#p-fx'); const g=h('div',{class:'cards'});
+  const warn=h('p',{class:'note warn'});
+  binds.push({keys:['fx1.type','fx2.type'],upd:()=>{ const a=val('fx1.type'),b=val('fx2.type'); const bad=new Set([19,20,21,22,23,24,32,33,34,35,36,38,39,42,43,46,47]);
+    warn.textContent = ((a===24 && bad.has(b)) || (b===24 && bad.has(a))) ? 'Symphonic Ensemble ne peut pas être combiné avec l\'autre effet choisi : le X5 le refusera.' : ''; }}); binds.at(-1).upd();
+  g.append(card('Effets du programme', choice('fx1.type',0), choice('fx2.type',0), choice('fx.place',0), warn,
+    h('p',{class:'note'},'Version 1 : choix des effets et du placement seulement. Les réglages internes de chaque effet (temps de réverbération, retard, vitesse…) sont conservés tels quels et repartent intacts avec le son. Ils seront éditables dès que j\'aurai la table SysEx officielle des effets du X5.')));
+  p.append(g);
+}
+/* --- Librairie --- */
+let bank=null, bankSel=0, bankFrom='';
+function setBank(b, from){ bank=b; bankFrom=from; renderBank(); toast(T('Banque chargée ({0}) : 100 sons',from),'ok'); showPage('lib'); }
+function renderBank(){
+  const el=$('#bankGrid'); if (!el) return; el.innerHTML='';
+  $('#bankInfo').textContent = bank ? T('Banque : {0}',bankFrom) : T('Aucune banque chargée.');
+  if (!bank) return;
+  for (let i=0;i<100;i++){
+    const s=h('div',{class:'slot'+(i===bankSel?' sel':''),title:'Clic : charger dans l\'éditeur'},h('b',{},'A'+String(i).padStart(2,'0')),progName(bank,i*PROG_LEN));
+    s.onclick=()=>{ bankSel=i; $('#slotSel').value=i; loadProgram(bank.slice(i*PROG_LEN,(i+1)*PROG_LEN),'Chargé depuis la banque : ',true); renderBank(); };
+    el.append(s);
+  }
+}
+function loadProgram(buf, msg, send){
+  cur=buf.slice(); origin=buf.slice(); hist=[cur.slice()]; hIdx=0;
+  if (send && live && midi.out) sendDump(true);
+  refreshAll(); saveWork();
+  if (msg) toast(T(msg)+progName(buf).trim(),'ok');
+}
+function download(name, bytes){
+  const a=h('a',{href:URL.createObjectURL(new Blob([Uint8Array.from(bytes)],{type:'application/octet-stream'})),download:name});
+  document.body.append(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function parseSyx(u8){
+  const msgs=[]; let s=-1;
+  for (let i=0;i<u8.length;i++){ if (u8[i]===0xF0) s=i; else if (u8[i]===0xF7 && s>=0){ msgs.push(u8.slice(s,i+1)); s=-1; } }
+  const singles=[]; let b=null;
+  for (const m of msgs){
+    if (m[1]!==0x42 || m[3]!==0x36) continue;
+    if (m[4]===0x40 && m.length===194) singles.push(Uint8Array.from(dec87(Array.from(m.slice(5,193))).slice(0,PROG_LEN)));
+    if (m[4]===0x4C && m.length===18750) b=Uint8Array.from(dec87(Array.from(m.slice(6,18749))).slice(0,16400));
+    if (m[4]===0x50) log('Fichier « All Data » : seule la partie programmes n\'est pas extraite dans cette version','m');
+  }
+  return {msgs:msgs.length,singles,bank:b};
+}
+let mine=[];
+function loadMine(){ try{ mine=JSON.parse(localStorage.getItem('x5s.mine')||'[]'); }catch(e){ mine=[]; } }
+function saveMine(){ try{ localStorage.setItem('x5s.mine',JSON.stringify(mine)); }catch(e){ toast('Stockage local indisponible','bad'); } }
+function renderMine(){
+  const el=$('#mineList'); el.innerHTML='';
+  if (!mine.length) el.append(h('p',{class:'note'},'Rien encore. « Garder » mémorise le son courant dans ce navigateur.'));
+  mine.forEach((m,i)=>el.append(h('div',{class:'item'},h('span',{},m.name),h('small',{class:'note'},m.date),
+    h('button',{onclick:()=>loadProgram(Uint8Array.from(m.data),'Chargé : ',true)},'Charger'),
+    h('button',{onclick:()=>download(m.name.trim().replace(/[^\w\-]+/g,'_')+'.syx',MSG.dumpProg(Uint8Array.from(m.data)))},'.syx'),
+    h('button',{class:'warn',onclick:()=>{ mine.splice(i,1); saveMine(); renderMine(); }},'✕'))));
+}
+function buildLib(){
+  const p=$('#p-lib'); const g=h('div',{class:'cards'});
+  const file=h('input',{type:'file',accept:'.syx,.mid,application/octet-stream',style:'display:none'});
+  file.addEventListener('change',async()=>{
+    const f=file.files[0]; if(!f) return; const u=new Uint8Array(await f.arrayBuffer()); const r=parseSyx(u);
+    if (r.bank) setBank(r.bank, f.name);
+    if (r.singles.length===1) loadProgram(r.singles[0],'Fichier chargé : ',true);
+    else if (r.singles.length>1){ const b=new Uint8Array(16400); r.singles.slice(0,100).forEach((s,i)=>b.set(s,i*PROG_LEN)); setBank(b, T('{0} ({1} sons isolés)',f.name,r.singles.length)); }
+    if (!r.bank && !r.singles.length) toast(T('Aucun Program X5/05R-W dans ce fichier ({0} messages SysEx)',r.msgs),'bad');
+    file.value='';
+  });
+  const bankCard=h('div',{class:'card wide'},h('h3',{},'Banque de 100 sons',h('span',{class:'note',id:'bankInfo'})),
+    h('div',{style:'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px'},
+      h('button',{onclick:async()=>{ if(!midi.out||!midi.inp){toast('Entrée et sortie MIDI nécessaires','bad');return;} rawSend(MSG.modeProg(),true); rawSend(MSG.reqBank()); toast('Demande envoyée… (≈ 6 s de transfert)'); const r=await expect(d=>d[1]===0x42&&d[4]===0x4C,15000); if(!r) toast('Pas de banque reçue. Sur certains X5 il faut lancer GLOBAL → MIDI Data Dump → Program depuis la face avant.','bad'); }},'⇩ Lire la banque du X5'),
+      h('button',{onclick:()=>file.click()},'Ouvrir un .syx…'),
+      h('button',{onclick:()=>{ if(!bank){ bank=new Uint8Array(16400); for(let i=0;i<100;i++) bank.set(initBuffer(),i*PROG_LEN); bankFrom=T('nouvelle banque'); } bank.set(cur,bankSel*PROG_LEN); renderBank(); toast(T('Son rangé en {0} de la banque (pas encore sur le X5)','A'+String(bankSel).padStart(2,'0'))); }},'Ranger le son courant dans l\'emplacement sélectionné'),
+      h('button',{onclick:()=>{ if(!bank) return toast('Pas de banque','bad'); download('X5_banque.syx',MSG.dumpBank(bank)); }},'Télécharger la banque .syx'),
+      h('button',{class:'warn',onclick:async()=>{ if(!bank) return toast('Pas de banque','bad'); if(!midi.out) return toast('Pas de sortie MIDI','bad'); if(await ask('Envoyer la banque entière au X5 ?<br><span class="note warn">Les 100 Programs du X5 seront remplacés. Fais d\'abord une sauvegarde (« Lire la banque du X5 » puis « Télécharger »).</span>')){ rawSend(MSG.dumpBank(bank)); toast('Banque envoyée'); } }},'⇧ Envoyer la banque au X5')),
+    h('div',{class:'bank',id:'bankGrid'}), file);
+  g.append(bankCard);
+  const nm=h('input',{type:'text',placeholder:'Nom (par défaut celui du son)'});
+  g.append(card('Mes sons (dans ce navigateur)',
+    h('div',{style:'display:flex;gap:6px;margin-bottom:8px'},nm,h('button',{class:'pri',onclick:()=>{ mine.unshift({name:(nm.value||progName(cur)).slice(0,24),date:new Date().toLocaleString(I18N.lang),data:Array.from(cur)}); nm.value=''; saveMine(); renderMine(); }},'Garder')),
+    h('div',{class:'list',id:'mineList'})));
+  g.append(card('Fichiers',
+    h('div',{style:'display:grid;gap:8px'},
+      h('button',{onclick:()=>download(progName(cur).trim().replace(/[^\w\-]+/g,'_')+'.syx',MSG.dumpProg(cur))},'Télécharger le son courant (.syx, 194 octets)'),
+      h('button',{onclick:()=>file.click()},'Ouvrir un son ou une banque .syx…'),
+      h('button',{onclick:async()=>{ if(await ask('Remplacer le son courant par un son « Init » neutre ?')){ const b=initBuffer(); b.set(cur.slice(135,164),135); cur=b; commit(); if(live&&midi.out) sendDump(true); refreshAll(); } }},'Nouveau son (Init, garde les effets)')),
+    h('p',{class:'note'},'Formats lus : Program Dump (40h, 194 octets), All Programs (4Ch, 18 750 octets), et fichiers contenant plusieurs Program Dumps.')));
+  p.append(g); renderBank(); loadMine(); renderMine();
+}
+
+/* ---------- clavier ---------- */
+let octShift=0; const physHeld=new Set();
+const KEYMAP={KeyA:0,KeyW:1,KeyS:2,KeyE:3,KeyD:4,KeyF:5,KeyT:6,KeyG:7,KeyY:8,KeyH:9,KeyU:10,KeyJ:11,KeyK:12,KeyO:13,KeyL:14,KeyP:15,Semicolon:16,Quote:17};
+function buildKeys(){
+  const el=$('#keys'); el.innerHTML=''; const lo=48+octShift*12, n=25;
+  const whites=[]; for (let i=0;i<n;i++) if (![1,3,6,8,10].includes((lo+i)%12)) whites.push(lo+i);
+  const ww=100/whites.length;
+  whites.forEach((m,i)=>el.append(keyEl(m,'w',i*ww,ww)));
+  for (let i=0;i<n;i++){ const m=lo+i; if ([1,3,6,8,10].includes(m%12)){ const wi=whites.indexOf(m-1); el.append(keyEl(m,'b',(wi+1)*ww-ww*0.3,ww*0.6)); } }
+  $('#octLbl').textContent=noteName(lo)+'–'+noteName(lo+24);
+}
+function keyEl(m,c,l,w){
+  const k=h('div',{class:'key '+c,style:`left:${l}%;width:${w}%`,'data-n':m},m%12===0?noteName(m):'');
+  k.addEventListener('pointerdown',e=>{ k.setPointerCapture(e.pointerId); const y=e.offsetY/k.offsetHeight; noteOn(m, Math.max(20,Math.min(127,Math.round(40+y*87)))); });
+  k.addEventListener('pointerup',()=>noteOff(m)); k.addEventListener('pointercancel',()=>noteOff(m));
+  return k;
+}
+function keyVis(n,on){ const k=document.querySelector(`.key[data-n="${n}"]`); if(k) k.classList.toggle('down',on); }
+
+/* ============================================================
+   9. Démarrage
+   ============================================================ */
+function showPage(id){ document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===id)); document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+id)); drawEGs(); }
+function undo(){ if (hIdx>0){ hIdx--; applyBuffer(hist[hIdx]); saveWork(); } }
+function redo(){ if (hIdx<hist.length-1){ hIdx++; applyBuffer(hist[hIdx]); saveWork(); } }
+function boot(){
+  initLang();
+  loadWork();
+  for (let c=0;c<16;c++) $('#chSel').append(h('option',{value:c},String(c+1)));
+  for (let i=0;i<100;i++) $('#slotSel').append(h('option',{value:i},'A'+String(i).padStart(2,'0')));
+  try{ const c=localStorage.getItem('x5s.ch'); if (c!==null) S.ch=+c; }catch(e){}
+  $('#chSel').value=S.ch;
+  buildQuick(); buildOsc(); buildVDF(); buildVDA(); buildMod(); buildCtl(); buildFX(); buildLib(); buildKeys();
+  refreshAll();
+  $('#tabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) showPage(b.dataset.p); });
+  $('#outSel').onchange=pickPorts; $('#inSel').onchange=pickPorts;
+  $('#chSel').onchange=()=>setChannel(+$('#chSel').value);
+  $('#btnDetect').onclick=detect; $('#btnRead').onclick=readX5; $('#btnSend').onclick=()=>sendDump(); $('#btnWrite').onclick=writeX5;
+  $('#modeLive').onclick=()=>{ live=true; $('#modeLive').classList.add('on'); $('#modeMan').classList.remove('on'); sendDump(); };
+  $('#modeMan').onclick=()=>{ live=false; $('#modeMan').classList.add('on'); $('#modeLive').classList.remove('on'); };
+  $('#btnLog').onclick=()=>$('#log').classList.toggle('on');
+  initMon();
+  $('#btnHelp').onclick=()=>$('#helpDlg').showModal();
+  $('#btnUndo').onclick=undo; $('#btnRedo').onclick=redo;
+  $('#btnRevert').onclick=()=>{ applyBuffer(origin); commit(); };
+  const ab=$('#btnAB'); let abBuf=null;
+  ab.addEventListener('pointerdown',()=>{ abBuf=cur.slice(); applyBuffer(origin); ab.classList.add('pri'); if($('#autoPlay').checked) play(); });
+  const abUp=()=>{ if(!abBuf) return; applyBuffer(abBuf); abBuf=null; ab.classList.remove('pri'); };
+  ab.addEventListener('pointerup',abUp); ab.addEventListener('pointerleave',abUp);
+  $('#pname').addEventListener('input',()=>{ const s=$('#pname').value.padEnd(10,' ').slice(0,10); for (let i=0;i<10;i++){ const c=s.charCodeAt(i); cur[i]=c>=32&&c<127?c:32; } clearTimeout($('#pname')._t); $('#pname')._t=setTimeout(()=>{ commit(); if(live&&midi.out) sendDump(true); },700); });
+  $('#btnPlay').onclick=()=>play(); $('#btnPanic').onclick=panic;
+  $('#octDn').onclick=()=>{ octShift=Math.max(-3,octShift-1); buildKeys(); }; $('#octUp').onclick=()=>{ octShift=Math.min(3,octShift+1); buildKeys(); };
+  window.addEventListener('keydown',e=>{
+    const t=e.target; if (t.matches('input[type=text],input:not([type]),select,textarea')) return;
+    if ((e.ctrlKey||e.metaKey) && e.code==='KeyZ'){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
+    if (e.ctrlKey||e.metaKey||e.altKey) return;
+    if (e.code==='Space'){ e.preventDefault(); play(); return; }
+    if (e.code==='KeyZ'){ $('#octDn').click(); return; } if (e.code==='KeyX'){ $('#octUp').click(); return; }
+    if (e.code in KEYMAP && !e.repeat){ const n=48+octShift*12+KEYMAP[e.code]; physHeld.add(n); noteOn(n); e.preventDefault(); }
+  });
+  window.addEventListener('keyup',e=>{ if (e.code in KEYMAP){ const n=48+octShift*12+KEYMAP[e.code]; physHeld.delete(n); noteOff(n); } });
+  window.addEventListener('blur',()=>{ for (const n of physHeld) noteOff(n); physHeld.clear(); });
+  initMidi();
+  updDirty();
+  trTree(document.body);
+}
+boot();
+</script>
+</body>
+</html>
