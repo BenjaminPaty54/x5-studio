@@ -58,8 +58,7 @@ Ouvre ensuite **http://localhost:8000/x5studio.html** dans Chrome et accepte l'a
 | **Rapide** | Dix macros (Brillance, Attaque, Relâche, Vibrato, Épaisseur…) qui agissent sur plusieurs paramètres à la fois. Chaque geste ajoute ou retire par rapport au son actuel, puis la macro revient au centre. Le bouton **Varier** propose de petites variations aléatoires. |
 | **Oscillateurs** | Mode Simple / Double / Batterie, choix parmi les 340 multisounds (recherche, familles, tirage au hasard), octave, niveau, panoramique, envois. |
 | **Filtre (VDF)** et **Ampli (VDA)** | Enveloppes modifiables à la souris, sensibilité à la vélocité et au clavier. Tu peux éditer l'oscillateur 1, l'oscillateur 2, ou les deux à la fois (« liés »). |
-| **Hauteur & LFO** | Pitch EG, LFO de filtre, vibrato. |
-| **Contrôleurs** | Aftertouch et joystick. |
+| **Modulation** | Pitch EG, LFO de filtre, vibrato ; en vue Complet, aussi l'aftertouch et le joystick. |
 | **Effets** | Choix des deux effets et de leur placement. |
 | **Librairie** | Lire ou envoyer une banque de 100 sons, ouvrir et enregistrer des fichiers `.syx`, garder ses sons favoris dans le navigateur. |
 

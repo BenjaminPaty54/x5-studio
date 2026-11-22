@@ -58,8 +58,7 @@ Then open **http://localhost:8000/x5studio.html** in Chrome and allow access to 
 | **Quick** | Ten macros (Brightness, Attack, Release, Vibrato, Width…) that each move several parameters at once. Each gesture adds to or subtracts from the current sound, then the macro springs back to the centre. **Vary** suggests small random variations. |
 | **Oscillators** | Single / Double / Drums mode, a choice of 340 multisounds (search, families, random pick), octave, level, pan, sends. |
 | **Filter (VDF)** and **Amp (VDA)** | Envelopes you edit with the mouse, velocity and keyboard sensitivity. You can edit oscillator 1, oscillator 2, or both at once ("linked"). |
-| **Pitch & LFO** | Pitch EG, filter LFO, vibrato. |
-| **Controllers** | Aftertouch and joystick. |
+| **Modulation** | Pitch EG, filter LFO, vibrato; in Full view, also aftertouch and joystick. |
 | **Effects** | Choice of the two effects and how they're routed. |
 | **Library** | Read or send a bank of 100 sounds, open and save `.syx` files, keep favourite sounds in the browser. |
 

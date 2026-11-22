@@ -4,6 +4,11 @@
 
 Toutes les modifications notables de X5 Studio sont listées ici. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et la numérotation suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.5.2] — 2026-11-22
+
+### Modifié
+- **Mêmes onglets dans les deux vues.** L'onglet Contrôleurs disparaît : ses réglages Aftertouch et Joystick se trouvent maintenant en bas de l'onglet **Modulation** (ex-« Hauteur & LFO »), en vue Complet seulement.
+
 ## [1.5.1] — 2026-11-22
 
 ### Modifié
@@ -78,6 +83,7 @@ Ces corrections viennent des tables MIDI officielles du X5DR transcrites dans le
 - Les sensibilités à la vélocité et au clavier ont leurs trois états (−/0/+).
 - Le suivi de clavier a ses quatre modes (Off/Bas/Haut/Tout).
 
+[1.5.2]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.2
 [1.5.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.1
 [1.5]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5
 [1.4]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.4

@@ -90,13 +90,13 @@ nav.tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
 nav.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 12px;color:var(--mute);box-shadow:none;text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:600}
 nav.tabs button.on{color:var(--txt);border-bottom-color:var(--tabc,var(--acc))}
 nav.tabs button[data-p=quick]{--tabc:var(--c-quick)} nav.tabs button[data-p=osc]{--tabc:var(--c-osc)} nav.tabs button[data-p=vdf]{--tabc:var(--c-vdf)}
-nav.tabs button[data-p=vda]{--tabc:var(--c-vda)} nav.tabs button[data-p=mod]{--tabc:var(--c-mod)} nav.tabs button[data-p=ctl]{--tabc:var(--c-ctl)}
+nav.tabs button[data-p=vda]{--tabc:var(--c-vda)} nav.tabs button[data-p=mod]{--tabc:var(--c-mod)}
 nav.tabs button[data-p=fx]{--tabc:var(--c-fx)} nav.tabs button[data-p=lib]{--tabc:var(--c-lib)}
 main{overflow:auto;padding:16px}
 .page{display:none;--sec:var(--acc)}
 .page.on{display:block}
 #p-quick{--sec:var(--c-quick)} #p-osc{--sec:var(--c-osc)} #p-vdf{--sec:var(--c-vdf)} #p-vda{--sec:var(--c-vda)}
-#p-mod{--sec:var(--c-mod)} #p-ctl{--sec:var(--c-ctl)} #p-fx{--sec:var(--c-fx)} #p-lib{--sec:var(--c-lib)}
+#p-mod{--sec:var(--c-mod)} #p-fx{--sec:var(--c-fx)} #p-lib{--sec:var(--c-lib)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 /* chaque carte = un module : façade alu, deux vis, sérigraphie fine */
 .card,.macro{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 16px 12px;box-shadow:var(--shadow);min-width:0;overflow:hidden}
@@ -220,7 +220,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
 <body>
 <div class="app">
 <header>
-  <div class="brand" title="X5 Studio v1.5.1 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
+  <div class="brand" title="X5 Studio v1.5.2 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
   <span id="midiState" class="pill">MIDI : en attente</span>
   <div class="grp">
     <span class="led" id="ledOut" title="MIDI output"></span><select id="outSel" title="MIDI output to the X5"></select>
@@ -266,8 +266,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
     <button data-p="osc">Oscillators</button>
     <button data-p="vdf">Filter (VDF)</button>
     <button data-p="vda">Amp (VDA)</button>
-    <button data-p="mod">Pitch & LFO</button>
-    <button data-p="ctl" class="adv">Controllers</button>
+    <button data-p="mod">Modulation</button>
     <button data-p="fx">Effects</button>
     <button data-p="lib">Library</button>
   </nav>
@@ -279,7 +278,6 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
   <section class="page" id="p-vdf"></section>
   <section class="page" id="p-vda"></section>
   <section class="page" id="p-mod"></section>
-  <section class="page" id="p-ctl"></section>
   <section class="page" id="p-fx"></section>
   <section class="page" id="p-lib"></section>
 </main>
@@ -342,7 +340,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
   <h3>Limitations</h3>
   <p class="note">This version edits <b>Programs</b> (sounds) only. <b>Combinations</b>, Global settings and the internal effect parameters cannot be edited yet.</p>
   <p class="note">Protocol: Korg SysEx, Model ID 36h (shared by X5 / X5D / X5DR / 05R/W). Live parameters: function 41h; full sound: function 40h.</p>
-  <p class="note" style="margin-top:12px">X5 Studio v1.5.1 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
+  <p class="note" style="margin-top:12px">X5 Studio v1.5.2 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
 </div><div style="text-align:right"><button class="pri">OK</button></div></form></dialog>
 
 <script>
@@ -447,7 +445,7 @@ function initLang(){
   setLang(l, true);
   i18nObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['title','placeholder']});
 }
-/* X5 Studio v1.5.1 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
+/* X5 Studio v1.5.2 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
 /* ============================================================
    1. Données de référence
    ============================================================ */
@@ -1353,8 +1351,9 @@ function buildMod(){
   p.append(g2);
 }
 /* --- Contrôleurs --- */
+/* Contrôleurs (aftertouch, joystick) : en bas de l'onglet Modulation, vue Complet uniquement */
 function buildCtl(){
-  const p=$('#p-ctl'); const g=h('div',{class:'cards'});
+  const p=$('#p-mod'); const g=h('div',{class:'cards adv',style:'margin-top:14px'});
   g.append(card('Aftertouch', slider('at.bend',0), slider('at.fc',0), slider('at.mg',0), slider('at.amp',0)));
   g.append(card('Joystick', slider('joy.bend',0), slider('joy.vdf',0), slider('joy.mg',0)));
   p.append(g);

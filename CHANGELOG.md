@@ -4,6 +4,11 @@
 
 All notable changes to X5 Studio are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.5.2] — 2026-11-22
+
+### Changed
+- **Same tabs in both views.** The Controllers tab is gone: its Aftertouch and Joystick settings now sit at the bottom of the **Modulation** tab (formerly "Pitch & LFO"), in Full view only.
+
 ## [1.5.1] — 2026-11-22
 
 ### Changed
@@ -78,6 +83,7 @@ These fixes come from the official X5DR MIDI implementation tables transcribed i
 - Velocity and keyboard sensitivity switches now have their three states (−/0/+).
 - Keyboard tracking has its four modes (Off/Low/High/All).
 
+[1.5.2]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.2
 [1.5.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.1
 [1.5]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5
 [1.4]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.4
