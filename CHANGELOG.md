@@ -4,6 +4,20 @@
 
 All notable changes to X5 Studio are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.6] — 2026-11-22
+
+### Added
+- **Detailed effect editor** (Effects tab, Full view): every setting of each of the 47 effect types, following the "Effect Parameter" tables of the Korg manual. Reverb time is shown in seconds, LFO speeds in Hz, delays in ms and EQ in dB.
+- For each effect: **On/Off** switch, **wet/dry balance** L and R (linked by default), and **dynamic modulation** (source: joystick, aftertouch, pedals, VDA EG; amount −15…+15).
+- Choosing an effect type now loads starting values for that type and switches the effect on.
+
+### Changed
+- Effect settings, including type changes, are sent to the X5 as a whole sound (Program Dump), at most every 150 ms while a control moves. The order of the X5's effect Parameter Change messages does not follow the manual, so the dump route is the reliable one.
+- Effects tab layout: routing on top, the two effects side by side.
+
+### Fixed
+- Undo/redo of an effect On/Off change was not sent to the X5.
+
 ## [1.5.2] — 2026-11-22
 
 ### Changed
@@ -83,6 +97,7 @@ These fixes come from the official X5DR MIDI implementation tables transcribed i
 - Velocity and keyboard sensitivity switches now have their three states (−/0/+).
 - Keyboard tracking has its four modes (Off/Low/High/All).
 
+[1.6]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.6
 [1.5.2]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.2
 [1.5.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.1
 [1.5]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5

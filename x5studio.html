@@ -201,6 +201,11 @@ footer{background:var(--hdr);border-top:1px solid var(--hdrline);padding:8px 14p
 .flags svg{width:24px;height:16px;display:block;border-radius:2px}
 #btnTheme{min-width:34px}
 html[data-view="simple"] .adv{display:none!important}
+html[data-view="full"] .simple-only{display:none!important}
+.fxsep{border-top:1px dashed var(--line);margin:10px 0 6px}
+.fxoff .fxon{display:none}
+.cards.fxcards{grid-template-columns:repeat(auto-fill,minmax(420px,1fr))}
+.cards.fxcards .card.wide .row{max-width:520px}
 #btnEdit{font-weight:600;min-width:92px}
 #btnEdit.on{color:var(--neg);border-color:var(--neg)}
 #log{position:fixed;right:12px;bottom:118px;width:min(560px,92vw);max-height:40vh;overflow:auto;background:var(--term);color:var(--termtxt);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;font:11px/1.45 var(--mono);display:none;z-index:50;box-shadow:var(--pop)}
@@ -220,7 +225,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
 <body>
 <div class="app">
 <header>
-  <div class="brand" title="X5 Studio v1.5.2 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
+  <div class="brand" title="X5 Studio v1.6 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
   <span id="midiState" class="pill">MIDI : en attente</span>
   <div class="grp">
     <span class="led" id="ledOut" title="MIDI output"></span><select id="outSel" title="MIDI output to the X5"></select>
@@ -338,9 +343,9 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
     <li><b>● Editing / ○ Play</b> button: shows whether the X5 is in edit mode. One click hands control back to it (Program mode); it is also put back in play mode when you close the page. If the X5 rejects a change (for example after using its front panel), the app puts it back in edit mode and resends the sound.</li>
   </ul>
   <h3>Limitations</h3>
-  <p class="note">This version edits <b>Programs</b> (sounds) only. <b>Combinations</b>, Global settings and the internal effect parameters cannot be edited yet.</p>
+  <p class="note">This version edits <b>Programs</b> (sounds) only, effects included (Full view). <b>Combinations</b> and Global settings cannot be edited.</p>
   <p class="note">Protocol: Korg SysEx, Model ID 36h (shared by X5 / X5D / X5DR / 05R/W). Live parameters: function 41h; full sound: function 40h.</p>
-  <p class="note" style="margin-top:12px">X5 Studio v1.5.2 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
+  <p class="note" style="margin-top:12px">X5 Studio v1.6 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
 </div><div style="text-align:right"><button class="pri">OK</button></div></form></dialog>
 
 <script>
@@ -445,7 +450,7 @@ function initLang(){
   setLang(l, true);
   i18nObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['title','placeholder']});
 }
-/* X5 Studio v1.5.2 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
+/* X5 Studio v1.6 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
 /* ============================================================
    1. Données de référence
    ============================================================ */
@@ -700,6 +705,7 @@ function setParam(key, v, opt={}){
   const d = PDEF[key]; v = Math.max(d.min, Math.min(d.max, Math.round(v)));
   if (getF(cur,d)===v) return;
   setF(cur,d,v);
+  if (key==='fx1.type' || key==='fx2.type'){ const sl=key==='fx1.type'?1:2, bits=sl===1?3:12; fxDefaults(sl, v); cur[FXO.io] = v ? (cur[FXO.io]|bits) : (cur[FXO.io]&~bits); if (!opt.noSend) fxChanged(); if (!opt.noRefresh) refresh(key); return; }
   if (!opt.noSend) queueParam(d.addr, v);
   if (!opt.noRefresh) refresh(key);
   if (!opt.noAudition) audition();
@@ -720,6 +726,7 @@ function applyBuffer(nb, {send=true}={}){
     const e=d.enc; covered.add(e.o); if (e.t==='u16') covered.add(e.o+1);
     if (getF(cur,d)!==getF(nb,d)) changed.push(d);
   }
+  for (let i=135;i<=163;i++) covered.delete(i);   // bloc effets : toujours renvoyé en son complet
   for (let i=0;i<PROG_LEN;i++) if (!covered.has(i) && i!==134 && cur[i]!==nb[i]) other=true;
   cur = nb.slice();
   if (send && live && midi.out){
@@ -1358,14 +1365,157 @@ function buildCtl(){
   g.append(card('Joystick', slider('joy.bend',0), slider('joy.vdf',0), slider('joy.mg',0)));
   p.append(g);
 }
-/* --- Effets --- */
+/* --- Effets ---------------------------------------------------------------
+   Réglages détaillés des 47 effets, d'après les tables « Effect Parameter » du
+   manuel Korg (*11 et *11-3). Bloc effets du Program : octets 135-163.
+     135/136 type eff. 1/2 · 137-140 balance L/R eff. 1 puis 2 · 143 I/O (bits 0-3
+     marche/arrêt, bits 4-5 placement) · 144-151 paramètres eff. 1 · 152/153 source et
+     intensité de modulation eff. 1 · 154-161 paramètres eff. 2 · 162/163 modulation eff. 2.
+   Ces réglages passent par le son complet (Program Dump 40h, regroupé toutes les
+   150 ms) : l'ordre des Parameter Change d'effets ne suit pas le manuel.
+   Types de paramètre : u = octet, s = octet signé, w = 16 bits (octet b + b+1),
+     rt = temps de réverb (0.2 s + n×0.1), hz = vitesse de LFO (table *11-3-2),
+     mg = forme du LFO (bit 0 : sinus/triangle), x2 = valeur stockée /2,
+     er = 100 + n×10 ms, qw = forme de modulation (*11-3-4). */
+const FX_GROUPS = [
+  [[1,2,3,4,5,6], [['Reverb Time',0,'rt',0,97],['High Damp',2,'u',0,99],['Pre Delay',3,'u',0,200,'ms'],['E.R Level',4,'u',0,99],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
+  [[7,8,9], [['Pre Delay',0,'w',0,200,'ms'],['E.R Level',2,'u',1,10],['Reverb Time',3,'u',0,99],['High Damp',4,'u',0,99],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
+  [[10,11,12], [['E.R Time',0,'er',0,70,'ms'],['Pre Delay',1,'u',0,200,'ms'],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
+  [[13,14], [['Delay Time L',0,'w',0,500,'ms'],['Delay Time R',4,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
+  [[15], [['Delay Time L',0,'w',0,500,'ms'],['Feedback L',2,'s',-99,99],['High Damp L',3,'u',0,99],['Delay Time R',4,'w',0,500,'ms'],['Feedback R',6,'s',-99,99],['High Damp R',7,'u',0,99]]],
+  [[16,17,18], [['Delay Time 1',0,'w',0,500,'ms'],['Delay Time 2',2,'w',0,500,'ms'],['Feedback',4,'s',-99,99],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
+  [[19,20], [['Mod Depth',0,'u',0,99],['Mod Speed',1,'hz',0,216,'Hz'],['LFO Waveform',2,'mg',0,1],['Delay Time',4,'u',0,200,'ms'],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
+  [[21,22], [['Delay Time L',0,'u',0,250,'ms'],['Delay Time R',1,'u',0,250,'ms'],['Mod Speed',2,'u',1,99],['Mod Depth',3,'u',0,99],['Mod Waveform',4,'qw',-21,20],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
+  [[23], [['Delay Time L',0,'w',0,500,'ms'],['Delay Time R',2,'w',0,500,'ms'],['Mod Speed',4,'u',1,99],['Mod Depth',5,'u',0,99],['Filter Split Point',6,'u',0,18]]],
+  [[24], [['Mod Depth',0,'u',0,99],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
+  [[25,26,27], [['Delay Time',0,'u',0,200,'ms'],['Mod Depth',1,'u',0,99],['Mod Speed',2,'u',1,99],['Resonance',3,'s',-99,99],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
+  [[28], [['Blend',0,'s',-99,99],['Emphatic Point',1,'u',1,10],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
+  [[29], [['Harmonic Density',0,'u',1,99],['Hot Spot',1,'u',1,20],['Stereo Width',2,'u',0,99],['Delay',3,'u',1,99],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
+  [[30,31], [['Drive',0,'u',1,111],['Hot Spot',1,'u',0,99],['Resonance',2,'u',0,99],['Out Level',3,'u',0,99],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
+  [[32,33], [['Mod Depth',0,'u',0,99],['Mod Speed',1,'hz',0,216,'Hz'],['LFO Waveform',2,'mg',0,1],['Feedback',3,'s',-99,99],['Manual',4,'u',0,99]]],
+  [[34], [['Vibrato Depth',0,'u',0,15],['Acceleration',1,'u',1,15],['Slow Speed',2,'u',1,99],['Fast Speed',3,'u',1,99]]],
+  [[35,36], [['Depth',0,'u',0,99],['Speed',1,'hz',0,216,'Hz'],['LFO Waveform',2,'mg',0,1],['Shape',3,'s',-99,99],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
+  [[37], [['Low Freq',0,'u',0,29],['Low Gain',1,'s',-12,12,'dB'],['Mid Freq',2,'u',0,99],['Mid Gain',3,'s',-12,12,'dB'],['Mid Width',4,'u',0,99],['High Freq',5,'u',0,29],['High Gain',6,'s',-12,12,'dB']]],
+  [[38,39], [['Delay Time',0,'u',0,50,'ms'],['Mod Speed',1,'u',1,99],['Mod Depth',2,'u',0,99],['Feedback',3,'s',-99,99],['Delay Time 2',4,'x2',0,225,'ms'],['Feedback 2',5,'s',-99,99]]],
+  [[40], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['Reverb Time',4,'rt',0,97],['Reverb High Damp',5,'u',0,99],['Pre Delay',6,'u',0,150,'ms']]],
+  [[41], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['Reverb Time',4,'rt',0,47],['Reverb High Damp',6,'u',0,99],['Pre Delay',7,'u',0,150,'ms']]],
+  [[42,43], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['Depth',4,'u',0,99],['Speed',5,'hz',0,216,'Hz'],['LFO Waveform',6,'mg',0,1],['Feedback 2',7,'s',-99,99]]],
+  [[44,45], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['Drive',3,'u',1,111],['Hot Spot',4,'u',1,99],['Resonance',5,'u',0,99],['Out Level',6,'u',1,99]]],
+  [[46], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['Depth',4,'u',0,99],['Speed',5,'hz',0,216,'Hz'],['Feedback 2',6,'s',-99,99]]],
+  [[47], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['Acceleration',3,'u',1,15],['Slow Speed',4,'u',1,99],['Fast Speed',5,'u',1,99]]],
+];
+const FX_PARAMS = {}; for (const [types,ps] of FX_GROUPS) for (const t of types) FX_PARAMS[t]=ps;
+const FX_MODSRC = ['None','Joystick + (CC1)','Joystick − (CC2)','Aftertouch','Pedal 1 (CC12)','Pedal 2 (CC13)','VDA EG'];
+const FXO = {base:[0,144,154], bal:[0,137,139], mod:[0,152,162], type:[0,135,136], io:143};
+function fxRead(slot, p){
+  const [,b,k]=p, o=FXO.base[slot]+b, v=cur[o];
+  switch(k){
+    case 's': case 'qw': return v>127 ? v-256 : v;
+    case 'w': return v | (cur[o+1]<<8);
+    case 'mg': return v & 1;
+    default: return v;
+  }
+}
+function fxWrite(slot, p, v){
+  const [,b,k,mn,mx]=p, o=FXO.base[slot]+b;
+  v=Math.max(mn,Math.min(mx,Math.round(v)));
+  switch(k){
+    case 's': case 'qw': cur[o]=(v+256)&255; break;
+    case 'w': cur[o]=v&255; cur[o+1]=(v>>8)&255; break;
+    case 'mg': cur[o]=(cur[o]&~1)|(v&1); break;
+    default: cur[o]=v&255;
+  }
+}
+function fxFmt(p, v){
+  const k=p[2], u=p[5]?' '+p[5]:'';
+  if (k==='rt') return ((v+2)/10).toFixed(1)+' s';
+  if (k==='hz') return (v<=99 ? ((v+1)*0.03).toFixed(2) : v<=199 ? (3.1+(v-100)*0.1).toFixed(1) : String(14+(v-200)))+' Hz';
+  if (k==='mg') return v ? T('Triangle') : T('Sine');
+  if (k==='x2') return (v*2)+u;
+  if (k==='er') return (100+v*10)+u;
+  if (k==='qw') return v>=0 ? 'S'+(v-10>0?'+':'')+(v-10) : 'T'+(-(v+11)>0?'+':'')+(-(v+11));
+  return (p[3]<0 && v>0 ? '+' : '')+v+u;
+}
+/* valeurs de départ quand on change de type d'effet (le X5 fait de même sur sa face avant) */
+function fxDefaults(slot, type){
+  for (let i=0;i<8;i++) cur[FXO.base[slot]+i]=0;
+  for (const p of (FX_PARAMS[type]||[])){
+    const [,, k, mn, mx]=p;
+    const v = k==='qw' ? 10 : k==='s' ? Math.max(mn,Math.min(mx,0)) : k==='rt' ? 23 : k==='hz' ? 30 : k==='mg' ? 0 : k==='w' ? 250 : Math.round(mn+(mx-mn)*0.4);
+    fxWrite(slot, p, v);
+  }
+  // bits fixés par le manuel pour la forme du LFO (*11-3-3)
+  if ([19,20,32,33,35,36].includes(type)) cur[FXO.base[slot]+2] |= 2;
+  cur[FXO.bal[slot]]=50; cur[FXO.bal[slot]+1]=50;
+}
+let fxT=null;
+function fxChanged(){
+  saveWork(); updDirty();
+  if (!live || !midi.out) return;
+  clearTimeout(fxT); fxT=setTimeout(()=>sendDump(true),150);
+  audition();
+}
+function fxSlider(label, get, set, mn, mx, fmtv){
+  const inp=h('input',{type:'range',min:mn,max:mx,step:1}), out=h('span',{class:'val'});
+  inp.addEventListener('input',()=>{ set(+inp.value); out.textContent=fmtv(+inp.value); fxChanged(); });
+  inp.addEventListener('change',commit);
+  inp.addEventListener('wheel',e=>{ e.preventDefault(); inp.value=+inp.value+(e.deltaY<0?1:-1); inp.dispatchEvent(new Event('input')); clearTimeout(inp._w); inp._w=setTimeout(commit,400); },{passive:false});
+  const upd=()=>{ const v=get(); inp.value=v; out.textContent=fmtv(v); };
+  upd(); return {row:h('div',{class:'row'},h('label',{},label),inp,out), upd};
+}
+function fxCard(slot){
+  const tkey='fx'+slot+'.type';
+  const on=h('input',{type:'checkbox'});
+  const onBits = slot===1 ? 3 : 12;
+  on.addEventListener('change',()=>{ cur[FXO.io] = on.checked ? (cur[FXO.io]|onBits) : (cur[FXO.io]&~onBits); commit(); fxChanged(); });
+  const params=h('div',{}), extra=[];
+  let shown=-1;
+  const render=()=>{
+    const t=val(tkey); shown=t; params.innerHTML=''; extra.length=0;
+    const ps=FX_PARAMS[t];
+    params.parentNode && params.parentNode.classList.toggle('fxoff', !ps);
+    if (!ps){ params.append(h('p',{class:'note'},'Effect off.')); return; }
+    for (const p of ps){
+      const s = p[2]==='mg'
+        ? (()=>{ const sel=h('select',{style:'width:100%'},h('option',{value:0},T('Sine')),h('option',{value:1},T('Triangle'))); sel.onchange=()=>{ fxWrite(slot,p,+sel.value); commit(); fxChanged(); };
+                 return {row:h('div',{class:'row'},h('label',{},p[0]),sel,h('span')), upd:()=>{ sel.value=fxRead(slot,p); }}; })()
+        : fxSlider(p[0], ()=>fxRead(slot,p), v=>fxWrite(slot,p,v), p[3], p[4], v=>fxFmt(p,v));
+      s.upd(); extra.push(s); params.append(s.row);
+    }
+  };
+  // balance sec/effet : L et R liés par défaut
+  const link=h('input',{type:'checkbox',checked:''});
+  const balL=fxSlider('Effect balance L', ()=>cur[FXO.bal[slot]], v=>{ cur[FXO.bal[slot]]=v; if (link.checked) cur[FXO.bal[slot]+1]=v; }, 0, 100, v=>v+' %');
+  const balR=fxSlider('Effect balance R', ()=>cur[FXO.bal[slot]+1], v=>{ cur[FXO.bal[slot]+1]=v; if (link.checked) cur[FXO.bal[slot]]=v; }, 0, 100, v=>v+' %');
+  const ms=h('select',{style:'width:100%'}, ...FX_MODSRC.map((n,i)=>h('option',{value:i},n)));
+  ms.onchange=()=>{ cur[FXO.mod[slot]]=+ms.value; commit(); fxChanged(); };
+  const ma=fxSlider('Modulation amount', ()=>{ const v=cur[FXO.mod[slot]+1]; return v>127?v-256:v; }, v=>{ cur[FXO.mod[slot]+1]=(v+256)&255; }, -15, 15, v=>(v>0?'+':'')+v);
+  const on1=h('div',{class:'fxon'},h('div',{class:'row'},h('label',{},'Balance L = R'),h('div',{},link),h('span')), balL.row, balR.row, h('div',{class:'fxsep'}));
+  const on2=h('div',{class:'fxon'},h('div',{class:'fxsep'}), h('div',{class:'row'},h('label',{},'Modulation source'),ms,h('span')), ma.row);
+  const detail=h('div',{class:'adv'}, on1, params, on2);
+  binds.push({keys:[tkey,'fx'],upd:()=>{
+    on.checked = (cur[FXO.io] & onBits)===onBits;
+    if (val(tkey)!==shown) render();
+    for (const s of extra) s.upd();
+    balL.upd(); balR.upd(); link.checked = cur[FXO.bal[slot]]===cur[FXO.bal[slot]+1] ? link.checked : false;
+    ms.value=Math.min(cur[FXO.mod[slot]],FX_MODSRC.length-1); ma.upd();
+  }});
+  binds.at(-1).upd();
+  const c=card(slot===1?'Effect 1':'Effect 2',
+    h('div',{class:'row'},h('label',{},'On'),h('div',{},on),h('span')), choice(tkey,0,{label:'Type'}), detail);
+  shown=-1; binds.at(-1).upd();
+  return c;
+}
 function buildFX(){
   const p=$('#p-fx'); const g=h('div',{class:'cards'});
   const warn=h('p',{class:'note warn'});
   binds.push({keys:['fx1.type','fx2.type'],upd:()=>{ const a=val('fx1.type'),b=val('fx2.type'); const bad=new Set([19,20,21,22,23,24,32,33,34,35,36,38,39,42,43,46,47]);
-    warn.textContent = ((a===24 && bad.has(b)) || (b===24 && bad.has(a))) ? 'Symphonic Ensemble cannot be combined with the other selected effect: the X5 will refuse it.' : ''; }}); binds.at(-1).upd();
-  g.append(card('Program effects', choice('fx1.type',0), choice('fx2.type',0), choice('fx.place',0), warn,
-    h('p',{class:'note'},'This version: effect types and routing only. Each effect\'s internal settings (reverb time, delay, speed…) are kept as they are and travel unchanged with the sound. They will become editable once the official X5 effects SysEx table is available.')));
+    warn.textContent = ((a===24 && bad.has(b)) || (b===24 && bad.has(a))) ? T('Symphonic Ensemble cannot be combined with the other selected effect: the X5 will refuse it.') : ''; }}); binds.at(-1).upd();
+  const rt=card('Routing', choice('fx.place',0), warn,
+    h('p',{class:'note adv'},'Effect settings are sent to the X5 as a whole sound (a fraction of a second after you move a control).'),
+    h('p',{class:'note simple-only'},'Switch to Full view to edit each effect in detail.'));
+  rt.classList.add('wide');
+  g.append(rt, fxCard(1), fxCard(2)); g.classList.add('fxcards');
   p.append(g);
 }
 /* --- Librairie --- */

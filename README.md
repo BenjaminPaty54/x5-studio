@@ -59,7 +59,7 @@ Then open **http://localhost:8000/x5studio.html** in Chrome and allow access to 
 | **Oscillators** | Single / Double / Drums mode, a choice of 340 multisounds (search, families, random pick), octave, level, pan, sends. |
 | **Filter (VDF)** and **Amp (VDA)** | Envelopes you edit with the mouse, velocity and keyboard sensitivity. You can edit oscillator 1, oscillator 2, or both at once ("linked"). |
 | **Modulation** | Pitch EG, filter LFO, vibrato; in Full view, also aftertouch and joystick. |
-| **Effects** | Choice of the two effects and how they're routed. |
+| **Effects** | Type and routing of the two effects; in Full view, every setting of each of the 47 effects (reverb time, delay time, LFO speed, EQ…), wet/dry balance and dynamic modulation. |
 | **Library** | Read or send a bank of 100 sounds, open and save `.syx` files, keep favourite sounds in the browser. |
 
 Always-visible tools:
@@ -74,7 +74,7 @@ Always-visible tools:
 
 - **Programs only.** The app edits individual sounds (Programs). It does not create or edit **Combinations** (Combis), which layer or split several Programs from the banks into richer setups. A Combi that uses an edited Program will benefit from the changes, but the Combi itself still has to be edited on the synth.
 - **Global settings, Multi mode and the X5DR's GM bank**: not supported.
-- **Effects**: you can choose the type of both effects and their routing, but not their internal settings (reverb time, delay time…). Those settings are kept as they are and travel with the sound.
+- **Effects**: the stereo outputs 3/4 settings (pan and Parallel 3 levels) are not editable; they are kept as they are and travel with the sound. Effect settings are sent as a whole sound, a fraction of a second after each change.
 - **Drum kits**: you can pick a kit in Drums mode, but you can't edit what's inside it.
 - **Writing to memory**: with no official documentation available, the format of the write command was inferred. The app shows the synth's reply; also check the synth's display to confirm the sound was written.
 - **Reading the bank**: on some units you need to start the transfer from the synth (GLOBAL → MIDI Data Dump).

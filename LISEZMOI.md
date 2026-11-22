@@ -59,7 +59,7 @@ Ouvre ensuite **http://localhost:8000/x5studio.html** dans Chrome et accepte l'a
 | **Oscillateurs** | Mode Simple / Double / Batterie, choix parmi les 340 multisounds (recherche, familles, tirage au hasard), octave, niveau, panoramique, envois. |
 | **Filtre (VDF)** et **Ampli (VDA)** | Enveloppes modifiables à la souris, sensibilité à la vélocité et au clavier. Tu peux éditer l'oscillateur 1, l'oscillateur 2, ou les deux à la fois (« liés »). |
 | **Modulation** | Pitch EG, LFO de filtre, vibrato ; en vue Complet, aussi l'aftertouch et le joystick. |
-| **Effets** | Choix des deux effets et de leur placement. |
+| **Effets** | Type et placement des deux effets ; en vue Complet, tous les réglages de chacun des 47 effets (temps de réverb, retard, vitesse du LFO, égaliseur…), la balance sec/effet et la modulation dynamique. |
 | **Librairie** | Lire ou envoyer une banque de 100 sons, ouvrir et enregistrer des fichiers `.syx`, garder ses sons favoris dans le navigateur. |
 
 Outils toujours visibles :
@@ -74,7 +74,7 @@ Outils toujours visibles :
 
 - **Programs uniquement.** L'application édite les sons individuels (Programs). Elle ne crée ni ne modifie les **Combinations** (Combis), qui superposent ou répartissent plusieurs Programs des banques pour former des ensembles plus riches. Une Combi qui utilise un Program retouché en profitera, mais la Combi elle-même s'édite encore sur le synthé.
 - **Réglages Global, mode Multi et banque GM du X5DR** : non pris en charge.
-- **Effets** : on choisit le type des deux effets et leur placement, mais pas leurs réglages internes (durée de réverbération, temps de retard…). Ces réglages sont conservés tels quels et repartent avec le son.
+- **Effets** : les réglages des sorties 3/4 (panoramique et niveaux du mode Parallèle 3) ne sont pas éditables ; ils sont conservés tels quels et repartent avec le son. Les réglages d'effet sont envoyés sous forme de son complet, une fraction de seconde après chaque geste.
 - **Kits de batterie** : on peut choisir un kit en mode Batterie, mais pas modifier son contenu.
 - **Écriture en mémoire** : le format de la commande d'écriture a été déduit, faute de documentation officielle. L'application affiche la réponse du synthé ; vérifie aussi sur son écran que le son a bien été écrit.
 - **Lecture de la banque** : sur certains appareils, il faut lancer le transfert depuis le synthé (GLOBAL → MIDI Data Dump).
