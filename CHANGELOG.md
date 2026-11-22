@@ -4,6 +4,16 @@
 
 All notable changes to X5 Studio are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.8] — 2026-11-22
+
+### Added
+- **Inspiration** (Quick tab, both views): pick a family (Pad, Bass, Lead, Keys, Bell, Percussive, Texture / FX or Surprise) and a new sound is created from scratch. Each family has its own rules (multisound families, envelope shapes, filter, vibrato, Single or Double mode, suitable effects), so results stay playable. **Another one** repeats the same family; **Previous sound** goes back (one undo step).
+- New sounds get a **short name** (10 characters, the X5's limit) built from word lists in the interface language. Word lists live in the language files (`names`), with adjective-after-noun order for French, Italian and Spanish.
+- **Code documentation:** an overview at the top of the script ("How this program works": the central 164-byte buffer, how a change travels to the X5, map of the sections) and an explanation of the role of each section. All code comments are now in English.
+
+### Fixed
+- The name display cut off the 10th character.
+
 ## [1.7.1] — 2026-11-22
 
 ### Changed
@@ -112,6 +122,7 @@ These fixes come from the official X5DR MIDI implementation tables transcribed i
 - Velocity and keyboard sensitivity switches now have their three states (−/0/+).
 - Keyboard tracking has its four modes (Off/Low/High/All).
 
+[1.8]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.8
 [1.7.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7.1
 [1.7]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7
 [1.6]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.6

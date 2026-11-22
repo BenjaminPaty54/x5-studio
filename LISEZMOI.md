@@ -57,7 +57,7 @@ Ouvre ensuite **http://localhost:8000/x5studio.html** dans Chrome et accepte l'a
 
 | Zone | À quoi elle sert |
 |---|---|
-| **Rapide** | Dix macros (Brillance, Attaque, Relâche, Vibrato, Épaisseur…) qui agissent sur plusieurs paramètres à la fois. Chaque geste ajoute ou retire par rapport au son actuel, puis la macro revient au centre. Le bouton **Varier** propose de petites variations aléatoires. |
+| **Rapide** | **Inspiration** : choisis une famille (Nappe, Basse, Lead, Clavier, Cloche, Percussif, Texture / FX, Surprise) et un son neuf, jouable, est créé de zéro avec un nom court. Dix macros (Brillance, Attaque, Relâche, Vibrato, Épaisseur…) qui agissent sur plusieurs paramètres à la fois. Chaque geste ajoute ou retire par rapport au son actuel, puis la macro revient au centre. Le bouton **Varier** propose de petites variations aléatoires. |
 | **Oscillateurs** | Mode Simple / Double / Batterie, choix parmi les 340 multisounds (recherche, familles, tirage au hasard), octave, niveau, panoramique, envois. |
 | **Filtre (VDF)** et **Ampli (VDA)** | Enveloppes modifiables à la souris, sensibilité à la vélocité et au clavier. Tu peux éditer l'oscillateur 1, l'oscillateur 2, ou les deux à la fois (« liés »). |
 | **Modulation** | Pitch EG, LFO de filtre, vibrato ; en vue Complet, aussi l'aftertouch et le joystick. |
@@ -119,10 +119,14 @@ lang/
 Chaque fichier associe chaque texte anglais de l'interface à sa traduction, et contient aussi l'aide de la fenêtre « ? ». Pour corriger une traduction, il suffit de modifier le bon fichier. Pour ajouter une langue :
 
 1. copie `lang/fr.js` en `lang/xx.js` (`xx` = le code de la langue, par exemple `pt`) ;
-2. change `code` et `name` en haut du fichier, puis traduis la partie droite de chaque ligne et l'aide ;
+2. change `code` et `name` en haut du fichier, traduis la partie droite de chaque ligne et l'aide, et adapte les listes de mots `names` utilisées par Inspiration (mots courts : les noms du X5 font 10 caractères) ;
 3. ajoute `<script src="lang/xx.js"></script>` à côté des autres lignes de langue, dans le `<head>` de `x5studio.html`.
 
 Garde tels quels les repères `{0}`, `{1}` et les balises HTML. Un texte manquant s'affiche simplement en anglais.
+
+## Lire le code
+
+`x5studio.html` commence par une présentation commentée, en anglais (« How this program works ») : le tampon central de 164 octets, le chemin d'un réglage jusqu'au X5 et la carte des sections du fichier. Chaque section s'ouvre sur une courte explication de son rôle.
 
 ## Remerciements
 

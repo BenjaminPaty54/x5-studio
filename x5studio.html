@@ -88,7 +88,7 @@ header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:9px 14px;b
 .seg button{border:0;border-radius:0;padding:5px 10px;background:var(--panel2);box-shadow:none}
 .seg button.on{background:var(--pri);color:var(--pritxt);font-weight:600}
 .progbar{display:flex;align-items:center;gap:12px;padding:9px 14px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
-.lcd{font-family:var(--mono);background:var(--lcdbg);color:var(--lcd);border:1px solid var(--lcdline);border-radius:3px;padding:6px 10px;font-size:18px;letter-spacing:2px;width:12.5ch}
+.lcd{font-family:var(--mono);background:var(--lcdbg);color:var(--lcd);border:1px solid var(--lcdline);border-radius:3px;padding:6px 10px;font-size:18px;letter-spacing:2px;width:calc(10ch + 20px + 24px);box-sizing:border-box}
 .dirty{color:var(--acc);font-size:12px}
 nav.tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
 nav.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 12px;color:var(--mute);box-shadow:none;text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:600}
@@ -218,6 +218,9 @@ html[data-view="full"] .simple-only{display:none!important}
 .pgno{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;font-weight:600;color:var(--sec);border:1px solid var(--sec);border-radius:3px;padding:1px 6px;text-transform:none;white-space:nowrap}
 .fxsub{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin:12px 0 2px;color:var(--mute)}
 .fxoff .fxon{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border-radius:99px;padding:6px 14px;font-weight:600}
+.chips button:hover{border-color:var(--sec);color:var(--sec)}
 .cards.fxcards{grid-template-columns:repeat(auto-fill,minmax(420px,1fr))}
 .cards.fxcards .row{grid-template-columns:132px 1fr 66px}
 .cards.fxcards .card.wide .row{max-width:520px}
@@ -240,7 +243,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
 <body>
 <div class="app">
 <header>
-  <div class="brand" title="X5 Studio v1.7.1 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
+  <div class="brand" title="X5 Studio v1.8 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
   <span id="midiState" class="pill">MIDI : en attente</span>
   <div class="grp">
     <span class="led" id="ledOut" title="MIDI output"></span><select id="outSel" title="MIDI output to the X5"></select>
@@ -356,6 +359,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
     <li>Double-click a slider = original value. Mouse wheel = fine adjustment.</li>
     <li><b>SysEx</b> button: a small window (movable, resizable from its corner) showing every message sent ↑ and received ↓, decoded in plain words. The <b>Delay</b> slider adds a pause after each SysEx message (20 ms by default).</li>
     <li>The macros on the Quick tab spring back to the centre: each gesture <i>adds to</i> or <i>takes away from</i> the current sound.</li>
+    <li><b>Inspiration</b> (Quick tab): pick a family (Pad, Bass, Lead…) to create a new, playable sound that already has a name. “Another one” repeats the same family, “Previous sound” goes back.</li>
     <li>The flags at the top right change the interface language.</li>
     <li>The <b>boxed numbers</b> at the top of the cards (for example <code>4A–4E</code>) point to the X5's own edit pages (PROG → EDIT). They change between Single/Drums and Double mode, and with the oscillator being edited.</li>
     <li><b>Essential / Full</b> (left of the tabs): Essential keeps the main settings, Full shows every Program parameter. Both modes edit the same sound.</li>
@@ -364,11 +368,57 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
   <h3>Limitations</h3>
   <p class="note">This version edits <b>Programs</b> (sounds) only, effects included (Full view). <b>Combinations</b> and Global settings cannot be edited.</p>
   <p class="note">Protocol: Korg SysEx, Model ID 36h (shared by X5 / X5D / X5DR / 05R/W). Live parameters: function 41h; full sound: function 40h.</p>
-  <p class="note" style="margin-top:12px">X5 Studio v1.7.1 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
+  <p class="note" style="margin-top:12px">X5 Studio v1.8 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
 </div><div style="text-align:right"><button class="pri">OK</button></div></form></dialog>
 
 <script>
 "use strict";
+/* ##########################################################################
+   X5 STUDIO — HOW THIS PROGRAM WORKS (read me first)
+   ##########################################################################
+   X5 Studio edits the sounds ("Programs") of a Korg X5 / X5D / X5DR / 05R/W
+   from a web browser, through Web MIDI and System Exclusive (SysEx) messages.
+   Everything lives in this one file (plus the optional lang/ folder).
+
+   THE CENTRAL IDEA: ONE 164-BYTE BUFFER
+   A Program is 164 bytes in the X5's memory (name, oscillators, filters,
+   envelopes, LFOs, effects). The editor keeps an exact copy of those bytes
+   in the variable `cur`. Every control on screen reads from and writes to
+   `cur`; nothing else holds the state of the sound. Undo/redo, A/B compare,
+   the library and file import/export all simply swap 164-byte buffers.
+
+   HOW A CHANGE TRAVELS
+     slider moved → setParam(key, value)          (section 4)
+       → setF() writes the value into `cur`       (section 3, codec)
+       → queueParam() sends a 10-byte "Parameter Change" SysEx (function 41h)
+         to the X5, grouped every 15 ms           (section 5, MIDI)
+       → refresh() updates every control showing that parameter (section 6)
+   Effects and big changes (undo, loading a sound) are sent instead as one
+   complete "Program Dump" (function 40h, 194 bytes).
+
+   MAP OF THIS FILE
+     0. Languages         – translation layer; English is built in, others in lang/
+     1. Reference data    – multisound names, LFO shapes, effect names
+     2. Parameter map     – where each parameter sits in the 164 bytes and its
+                            Parameter Change number (from the Korg manual)
+     3. Codec             – read/write a parameter in the buffer, Korg 7→8-bit
+                            packing, builders for every SysEx message
+     4. State & history   – `cur`, `origin`, undo/redo, applyBuffer()
+     5. MIDI              – ports, sending queue, X5 edit/play mode, replies
+     6. UI toolkit        – small helpers that build sliders, menus, cards
+     7. Envelope editor   – the draggable EG graphs
+     8. Pages             – one builder per tab (Quick, Oscillators, Filter…),
+                            effects editor, Inspiration generator, library
+     9. Start-up          – boot(): builds the pages, wires the buttons
+
+   WORDS USED IN THE CODE
+     key      – a parameter name such as 'vdf.cut@1' (filter cutoff of osc 1);
+                '@1' / '@2' = oscillator 1 / 2, no suffix = shared parameter
+     PDEF     – table of every parameter definition, indexed by key
+     scope    – which oscillator the Filter/Amp/Modulation pages edit: 1, 2 or 'both'
+     dump     – the whole Program sent or received in one SysEx message
+     binds    – list of on-screen controls to refresh when the buffer changes
+   ########################################################################## */
 /* ============================================================
    0. Languages
       The interface is written in English. Every other language lives in its
@@ -438,7 +488,7 @@ function setLang(l, initial){
   if (!initial){ trTree(document.body); refreshAll(); renderBank(); renderMine(); }
 }
 function initTheme(){
-  // Thème unique « Atelier » depuis la v1.7.1. Ancien sélecteur Atelier / Nuit, conservé pour mémoire :
+  // Single "Atelier" theme since v1.7.1. The former Atelier / Nuit switch is kept below for reference:
   // let t=null; try{ t=localStorage.getItem('x5s.theme'); }catch(e){}
   // const apply=v=>{ document.documentElement.dataset.theme=v; document.getElementById('btnTheme').textContent = v==='nuit' ? '☀' : '☾'; try{ localStorage.setItem('x5s.theme',v); }catch(e){} };
   // apply(t==='nuit'?'nuit':'atelier');
@@ -465,15 +515,18 @@ function initLang(){
   let l=null; try{ l=localStorage.getItem('x5s.lang'); }catch(e){}
   const nav=(navigator.language||'en').slice(0,2).toLowerCase();
   if (!l) l = LANGS.includes(nav) ? nav : 'en';
-  // langue demandée mais fichier absent (dossier lang/ non copié à côté de la page)
+  // the requested language file is missing (lang/ folder not copied next to the page)
   if (!LANGS.includes(l)) l='en';
   if (LANGS.length===1 && nav!=='en') setTimeout(()=>log('Translation files not found: keep the lang/ folder next to x5studio.html to get other languages.','e'),0);
   setLang(l, true);
   i18nObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['title','placeholder']});
 }
-/* X5 Studio v1.7.1 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
+/* X5 Studio v1.8 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
 /* ============================================================
-   1. Données de référence
+   1. Reference data
+      Fixed lists shown in menus: the 340 multisound names (WAVES, inserted
+      at build time), their families, LFO shapes, keyboard tracking modes and
+      the 47 effect names. Pure data, no logic.
    ============================================================ */
 const WAVES = ["A.Piano 1", "A.Piano1 LP", "A.Piano 2", "E.Piano 1", "E.Piano1 LP", "E.Piano 2", "E.Piano2LP", "Soft EP", "Soft EP LP", "Hard EP", "Hard EP LP", "PianoPad 1", "PianoPad 2", "Clay", "Clay LP", "Harpsicord", "HarpsicdLP", "PercOrgan1", "PercOrg1 LP", "PercOrgan2", "PercOrg2LP", "Organ 1", "Organ 1 LP", "Organ 2", "Organ 2 LP", "Organ 3", "Organ 4", "Organ 5", "RotaryOrg1", "RotaryOrg2", "PipeOrgan1", "PipeOrg1LP", "PipeOrgan2", "PipeOrg2LP", "PipeOrgan3", "PipeOrg3LP", "Musette", "Musette V", "Bandneon", "BandneonLP", "Accordion", "AcordionLP", "Harmonica", "G.Guitar", "G.GuitarLP", "F.Guitar", "F.GuitarLP", "F.Guitar V", "A.Gtr Harm", "E.Guitar 1", "E.Guitar1 V", "E.Guitar 2", "E.Guitar 3", "MuteGuitar", "Funky Gtr", "FunkyGtr V", "E.Gtr Harm", "DistGuitar", "Dist GtrLP", "DistGuitrV", "Over Drive", "OverDry LP", "OverDry F4", "MuteDstGtr", "MtDstGtr V", "PowerChord", "PowerChd V", "OverDvChrd", "Gtr Slide", "GtrSlide V", "Sitar 1", "Sitar 2", "Sitar 2 LP", "Santur", "Bouzouki", "Bouzouki LP", "Banjo", "Shamisen", "Koto", "Uood", "Harp", "MandlinTrm", "A.Bass 1", "A.Bass1 LP", "A.Bass 2", "A.Bass2 LP", "E.Bass 1", "E.Bass1 LP", "E.Bass 2", "E. Bass2 LP", "Pick Bass1", "PicBass1 LP", "Pick Bass2", "Fretless", "FretlessLP", "Slap Bass1", "Slap Bass2", "SlpBass2LP", "Slap Bass3", "SynthBass1", "SynBass1 LP", "SynthBass2", "SynBass2LP", "House Bass", "FM Bass", "FM Bass LP", "Kalimba", "Music Box", "MusicBoxLP", "Log Drum", "Marimba", "Xylophone", "Vibe", "Celesta", "Glocken", "BrightBell", "B.Bell LP", "Metal Bell", "M. Bell LP", "Gamelan", "Pole", "Pole LP", "Tubular", "Split Drum", "Split Bell", "Flute", "Pan Flute", "PanFluteLP", "Shakuhachi", "ShakhachLP", "Bottle", "Recorder", "Ocarina", "Oboe", "EnglishHrn", "Eng.HornLP", "BasoonOboe", "BsonOboeLP", "Clarinet", "ClarinetLP", "Bari Sax", "Bari.SaxLP", "Tenor Sax", "T.Sax LP", "Alto Sax", "A.Sax LP", "SopranoSax", "S.Sax LP", "Tuba", "Tuba LP", "Horn", "FlugelHorn", "Trombone 1", "Trombone 2", "Trumpet", "Trumpet LP", "Mute TP", "Mute TP LP", "Brass 1", "Brass 1 LP", "Brass 2", "Brass 2 LP", "StringEns.", "StrEns. V1", "StrEns. V2", "StrEns. V3", "AnaStrings", "PWM", "Violin", "Cello", "Cello LP", "Pizzicato", "Voice", "Choir", "Soft Choir", "Air Vox", "Doo Voice", "DooVoiceLP", "Syn Vox", "Syn Vox LP", "White Pad", "Ether Bell", "E.Bell LP", "Mega Pad", "Spectrum 1", "Spectrum 2", "Stadium", "Stadium NT", "BrushNoise", "BruNoiseNT", "Steel Drum", "SteelDrmLP", "BrushSwirl", "Belltree", "BelltreeNT", "BeltreV NT", "Tri Roll", "TriRoll NT", "Telephon", "TelephonNT", "Clicker", "Clicker NT", "Crickets 1", "Crickts1NT", "Crickets 2", "Crickts2NT", "Magic Bell", "Sporing", "Rattle", "Kava 1", "Kava 2", "Fever 1", "Fever 2", "Zappers 1", "Zappers 2", "Bugs", "Surfy", "SleighBell", "Elec Beat", "Idling", "EthnicBeat", "Taps", "Tap 1", "Tap 2", "Tap 3", "Tap 4", "Tap 5", "Orch Hit", "SnareRl/Ht", "Syn Snare", "Rev Snare", "PowerSnare", "Orch Perc", "Crash Cym", "CrashCymLP", "CrashLP NT", "China Cym", "Splash Cym", "Orch Crash", "Tite HH", "Tite HH NT", "Bell Ride", "Ping Ride", "Timpani", "Timpani LP", "Cabasa", "Cabasa NT", "Agogo", "Cow Bell", "Low Bongo", "Claves", "Timbale", "WoodBlock1", "WoodBlock2", "WoodBlock3", "Taiko Hit", "Syn Claves", "Melo Tom", "ProccesTom", "Syn Tom 1", "Syn Tom 2", "VocalSnare", "Zap 1", "Zap 2", "Fret Zap 1", "Fret Zap 2", "Vibla Slap", "Indust", "Thing", "Thing NT", "FingerSnap", "FingSnapNT", "Tambourine", "Hand Clap", "HandClapNT", "Gun Shot", "Castanet", "CastanetNT", "Snap", "Snap NT", "Gt Scratch", "Side Stick", "SideStikNT", "TimbleSide", "TimblSidNT", "Syn Rim", "Syn Rim NT", "Open HH", "OpenSyn HH", "CloseSynHH", "Sagat", "Sagat NT", "Sagatty", "Sagatty NT", "JingleBell", "Taiko", "Slap Bongo", "Open Conga", "Slap Conga", "Palm Conga", "Mute Conga", "Tabla 1", "Tabla 2", "Maracas", "SynMaracas", "SynMarcsNT", "MuteTriang", "OpenTriang", "Guiro", "Guiro LP", "Scratch Hi", "ScratcHiNT", "Scratch Lo", "Scratc LoNT", "ScratchDbl", "ScratDblNT", "Mini 1a", "Digital 1", "VS 102", "VS 48", "VS 52", "VS 58", "VS 71", "VS 72", "VS 88", "VS 89", "13 - 35", "DWGSOrgan1", "DWGSOrgan2", "DWGS E.P.", "Saw", "Square", "Ramp", "Pulse 25%", "Pulse 8%", "Pulse 4%", "Syn Sine", "Sine", "DJ Kit 1", "DJ Kit 2"];
 const WAVE_CATS = [[0,'Pianos & keys'],[17,'Organs'],[36,'Accordions & harmonica'],[43,'Guitars'],[70,'World plucked strings'],[82,'Basses'],[106,'Mallets & bells'],[125,'Flutes'],[133,'Reeds & saxophones'],[148,'Brass'],[162,'Strings'],[172,'Voices'],[180,'Pads & synths'],[186,'Effects & noises'],[218,'Rhythms & loops'],[227,'Percussion & drums'],[316,'VS / DWGS waves'],[330,'Basic waveforms'],[338,'DJ kits']];
@@ -486,12 +539,20 @@ const kitName = v => v<8 ? T('Drum kit {0}',v+1) : T('ROM kit {0}',v-7);
 const noteName = n => NOTE_N[n%12] + (Math.floor(n/12)-1);
 
 /* ============================================================
-   2. Carte des paramètres d'un Program (164 octets)
-      [clé, libellé, adresse Parameter Change (41h), encodage dans le dump, min, max, options]
-      Encodages : u8/s8 = octet (signé : complément à 2) · u16 = 2 octets LSB/MSB
-                  bits = champ de bits (s = décalage, m = masque) · bit = 1 bit
-                  tri = interrupteur −/0/+ (bit b = actif, bit b+4 = négatif)
-      Source : panel Ctrlr 05R/W 0.99 (M. De Carolis), plages vérifiées sur la notice X2/X3.
+   2. Parameter map of a Program (164 bytes)
+      Each line describes one parameter:
+        [key, label, Parameter Change number (function 41h), position in the dump, min, max, options]
+      "Position in the dump" tells the codec how the value is stored:
+        u8 / s8 = one byte (s8 = signed, two's complement)
+        u16     = two bytes, low byte first (multisound number)
+        bits    = a group of bits inside a byte (s = shift, m = mask)
+        bit     = a single on/off bit
+        tri     = a −/0/+ switch (bit b = on, bit b+4 = negative)
+      COMMON lists the parameters shared by the whole Program; OSC lists those of
+      one oscillator. Oscillator 2 uses the same table, shifted by 67 Parameter
+      Change numbers and 47 dump bytes (OSC2_ADDR, OSC2_DUMP).
+      Sources: Korg X5DR MIDI implementation tables, first decoded from the
+      Ctrlr 05R/W panel 0.99 (M. De Carolis), ranges checked in the X2/X3 manual.
    ============================================================ */
 const COMMON = [
   ['mode','Mode',0,{t:'u8',o:10},0,2,{opts:['Single','Double','Drums']}],
@@ -594,8 +655,8 @@ const FXP = [
   ['fx.place','Routing',165,{t:'bits',o:143,s:4,m:3},0,3,{opts:['Serial 1 → 2','Parallel 1','Parallel 2','Parallel 3']}],
 ];
 const OSC2_ADDR = 67, OSC2_DUMP = 47;
-const PDEF = {};           // clé complète → définition
-const ADDR = new Map();    // adresse → clé complète
+const PDEF = {};           // full key → definition
+const ADDR = new Map();    // Parameter Change number → full key (to decode changes sent by the X5)
 function reg(list, osc){
   for (const [k,label,addr,enc,min,max,x] of list){
     const key = osc ? k+'@'+osc : k;
@@ -612,7 +673,13 @@ function reg(list, osc){
 reg(COMMON,0); reg(OSC,1); reg(OSC,2); reg(FXP,0);
 
 /* ============================================================
-   3. Codec : buffer ↔ valeurs, Korg 7→8 bits, messages SysEx
+   3. Codec: buffer ↔ values, Korg 7→8-bit packing, SysEx messages
+      getF(buffer, def) reads one parameter from a 164-byte buffer,
+      setF(buffer, def, value) writes it, following the "position in the dump"
+      of section 2. enc78/dec87 convert between 8-bit data and the 7-bit bytes
+      MIDI allows. MSG builds every SysEx message the editor sends; each Korg
+      message starts with F0 42 3n 36 (Korg, channel n, model X5 = 36h) and a
+      function number (41h = one parameter, 40h = whole Program, 10h = request…).
    ============================================================ */
 const PROG_LEN = 164;
 function getF(buf, d){
@@ -641,7 +708,8 @@ function setF(buf, d, v){
     }
   }
 }
-// Korg : chaque groupe de 7 octets est précédé d'un octet contenant leurs bits de poids fort (bit i = octet i)
+// MIDI data bytes can only use 7 bits, so Korg packs 8-bit data in groups of 7 bytes,
+// each group preceded by one byte holding their top bits (bit i = top bit of byte i).
 function enc78(data){
   const out=[];
   for (let i=0;i<data.length;i+=7){
@@ -664,8 +732,8 @@ const hdr = f => [0xF0,0x42,0x30|S.ch,0x36,f];
 const v14 = v => { if (v<0) v+=16384; return [v&127,(v>>7)&127]; };
 const MSG = {
   modeProg: () => [...hdr(0x4E),0x03,0x00,0xF7],   // Mode Change → Prog Edit
-  modePlay: () => [...hdr(0x4E),0x02,0x00,0xF7],   // Mode Change → Program (mode jeu, sortie de l'édition)
-  modeReq: () => [...hdr(0x12),0xF7],              // Mode Request → réponse 42h
+  modePlay: () => [...hdr(0x4E),0x02,0x00,0xF7],   // Mode Change → Program (play mode, leaves editing)
+  modeReq: () => [...hdr(0x12),0xF7],              // Mode Request → the X5 answers with function 42h
   param: (a,v) => [...hdr(0x41), a&127, (a>>7)&127, ...v14(v), 0xF7],
   reqProg: () => [...hdr(0x10),0xF7],
   reqBank: () => [...hdr(0x1C),0x00,0xF7],
@@ -678,7 +746,13 @@ const hex = a => Array.from(a, b=>b.toString(16).padStart(2,'0').toUpperCase()).
 const progName = (buf,off=0) => String.fromCharCode(...buf.slice(off,off+10)).replace(/[^\x20-\x7e]/g,' ');
 
 /* ============================================================
-   4. État, historique
+   4. State & history
+      cur     = the sound being edited (164 bytes)
+      origin  = the sound as loaded, for A/B and "revert"
+      hist    = undo history: commit() stores a copy of `cur` after each finished
+                gesture (mouse released), undo()/redo() move through it.
+      applyBuffer(newBuffer) replaces the whole sound and sends the X5 only what
+      changed (a few Parameter Changes, or one dump when many things changed).
    ============================================================ */
 function initBuffer(){
   const b = new Uint8Array(PROG_LEN);
@@ -693,10 +767,10 @@ function initBuffer(){
   }
   return b;
 }
-let cur = initBuffer();        // son en cours d'édition
-let origin = cur.slice();      // son tel que chargé (A/B, double-clic)
+let cur = initBuffer();        // the sound being edited: THE central buffer of the program
+let origin = cur.slice();      // the sound as it was loaded (used by A/B, revert and double-click on a slider)
 let hist = [cur.slice()], hIdx = 0;
-let scope = 'both';            // Osc édité dans les pages VDF / VDA / LFO : 1, 2 ou 'both'
+let scope = 'both';            // oscillator edited on the Filter / Amp / Modulation pages: 1, 2 or 'both'
 let live = true;
 const val = k => getF(cur, PDEF[k]);
 const isDouble = () => val('mode')===1;
@@ -721,7 +795,9 @@ function loadWork(){
   }catch(e){}
 }
 
-/* Écriture d'un paramètre (par l'utilisateur) : met à jour le buffer et l'envoie au X5 */
+/* Change one parameter on behalf of the user: clamp the value, write it into `cur`,
+   send it to the X5, refresh the screen and (option) replay the test note.
+   Effect types are special: they load starting values and go out as a whole dump. */
 function setParam(key, v, opt={}){
   const d = PDEF[key]; v = Math.max(d.min, Math.min(d.max, Math.round(v)));
   if (getF(cur,d)===v) return;
@@ -731,7 +807,8 @@ function setParam(key, v, opt={}){
   if (!opt.noRefresh) refresh(key);
   if (!opt.noAudition) audition();
 }
-/* clé "de page" (ex. 'vdf.cut') → une ou deux clés réelles selon l'oscillateur choisi */
+/* A page control is defined once (e.g. 'vdf.cut') and turned here into one or two
+   real keys ('vdf.cut@1', 'vdf.cut@2') according to the oscillator scope. */
 function scopedKeys(base){
   if (!PDEF[base+'@1']) return [base];
   if (scope==='both') return isDouble() ? [base+'@1', base+'@2'] : [base+'@1'];
@@ -747,7 +824,7 @@ function applyBuffer(nb, {send=true}={}){
     const e=d.enc; covered.add(e.o); if (e.t==='u16') covered.add(e.o+1);
     if (getF(cur,d)!==getF(nb,d)) changed.push(d);
   }
-  for (let i=135;i<=163;i++) covered.delete(i);   // bloc effets : toujours renvoyé en son complet
+  for (let i=135;i<=163;i++) covered.delete(i);   // effect block: always resent as a complete dump
   for (let i=0;i<PROG_LEN;i++) if (!covered.has(i) && i!==134 && cur[i]!==nb[i]) other=true;
   cur = nb.slice();
   if (send && live && midi.out){
@@ -759,11 +836,16 @@ function applyBuffer(nb, {send=true}={}){
 
 /* ============================================================
    5. MIDI
+      Talks to the X5 through the browser's Web MIDI API: chooses the ports,
+      queues outgoing messages, keeps track of the X5's mode (editing or
+      playing) and decodes every reply (dumps, acknowledgements, edits made
+      on the X5's front panel). Also plays the test notes.
    ============================================================ */
 const midi = {acc:null, out:null, inp:null};
 const pending = new Map(); let flushT=null;
-/* File d'envoi : les messages partent dans l'ordre, espacés de TX.delay ms après chaque SysEx.
-   On tient compte de la durée réelle de transmission MIDI (31 250 bauds ≈ 0,32 ms par octet). */
+/* Sending queue: messages leave in order, with a pause of TX.delay ms after each SysEx
+   (adjustable in the SysEx monitor). The real MIDI transmission time is taken into
+   account: 31,250 baud ≈ 0.32 ms per byte. Web MIDI timestamps do the scheduling. */
 const TX = {delay:20, next:0};
 try{ const d=localStorage.getItem('x5s.delay'); if (d!==null) TX.delay=+d; }catch(e){}
 function rawSend(bytes, quiet){
@@ -785,10 +867,10 @@ function queueParam(addr, v){
   pending.set(addr, v);
   if (!flushT) flushT = setTimeout(flush, 15);
 }
-/* ---------- Mode du X5 : édition (Prog Edit) ou jeu (Program) ----------
-   Doc Korg : un Parameter Change n'est accepté qu'après un Mode Change → Prog Edit (4E 03).
-   On rend la main au X5 (4E 02) à la fermeture de la page ou à la demande.
-   Après une (ré)entrée en édition, le X5 a besoin d'environ 100 ms avant le message suivant. */
+/* ---------- X5 mode: editing (Prog Edit) or playing (Program) ----------
+   Korg manual: a Parameter Change is only accepted after a Mode Change → Prog Edit (4E 03).
+   The X5 is handed back to play mode (4E 02) when the page closes or on request.
+   After (re)entering edit mode, the X5 needs about 100 ms before the next message. */
 const DEV = {edit:false, synced:false, nakT:0, mode:null};
 const MODE_NAMES = ['Combi','Combi Edit','Program','Prog Edit','Multi','Global'];
 function setEdit(on){ DEV.edit=on; updEditBtn(); }
@@ -797,9 +879,9 @@ function updEditBtn(){
   b.textContent = DEV.edit ? '● '+T('Editing') : '○ '+T('Play');
   b.classList.toggle('on', DEV.edit);
 }
-function enterEdit(){     // envoie toujours le Mode Change ; renvoie true si le X5 n'était pas en édition
+function enterEdit(){     // always sends the Mode Change; returns true if the X5 was not in edit mode
   const was = DEV.edit;
-  rawSend(MSG.modeProg(), true);   // le X5 abandonne l'édition MIDI si on touche sa face avant : on renvoie toujours le mode
+  rawSend(MSG.modeProg(), true);   // touching the X5's front panel ends MIDI editing, so the mode is always resent
   if (!was){ TX.next = Math.max(TX.next, performance.now()) + 100; setEdit(true); }
   return !was;
 }
@@ -811,7 +893,7 @@ function leaveEdit(quiet){
 }
 function flush(){
   flushT=null; if (!pending.size) return;
-  // retour en édition après une sortie ou un refus : on renvoie le son entier pour être sûr que le X5 et l'éditeur concordent
+  // back in edit mode after leaving it or after a NAK: resend the whole sound so the X5 and the editor agree
   if (enterEdit() && DEV.synced){ pending.clear(); rawSend(MSG.dumpProg(cur)); return; }
   for (const [a,v] of pending) rawSend(MSG.param(a,v));
   pending.clear();
@@ -823,7 +905,7 @@ function sendDump(quiet){
 }
 function onNak(){
   const now=performance.now();
-  if (now-DEV.nakT < 1500) return;          // le X5 envoie souvent plusieurs NAK d'affilée
+  if (now-DEV.nakT < 1500) return;          // the X5 often sends several NAKs in a row
   DEV.nakT=now; setEdit(false);
   if (!live || !midi.out || !DEV.synced){ toast('X5: data rejected (NAK) — check Memory Protect / mode','bad'); return; }
   toast('The X5 left edit mode: resyncing…');
@@ -833,7 +915,7 @@ function exitOnClose(){ if (DEV.edit && midi.out){ try{ midi.out.send(MSG.modePl
 let ledT={};
 function blink(sel){ const el=$(sel); el.classList.add('on'); clearTimeout(ledT[sel]); ledT[sel]=setTimeout(()=>el.classList.remove('on'),70); }
 
-let waiters=[];   // attentes de réponse {test, resolve, timer}
+let waiters=[];   // replies being waited for: {test, resolve, timer}
 function expect(test, ms){
   return new Promise(res=>{
     const w={test,res}; w.t=setTimeout(()=>{ waiters=waiters.filter(x=>x!==w); res(null); }, ms);
@@ -843,7 +925,7 @@ function expect(test, ms){
 function onMidi(ev){
   const d = ev.data; if (!d || !d.length) return;
   blink('#ledIn'); mon('i', d);
-  if (d[0]!==0xF0) return;   // seuls les SysEx nous intéressent (les notes jouées sur le X5 passent)
+  if (d[0]!==0xF0) return;   // only SysEx matters here (notes played on the X5 are ignored)
   log('← '+(d.length>24 ? hex(d.slice(0,12))+' … ('+d.length+' octets)' : hex(d)),'i');
   for (const w of [...waiters]) if (w.test(d)){ clearTimeout(w.t); waiters=waiters.filter(x=>x!==w); w.res(d); }
   // Identity Reply : F0 7E 0n 06 02 42 36 …
@@ -861,7 +943,7 @@ function onMidi(ev){
     const data = dec87(Array.from(d.slice(6,18749)));
     setBank(Uint8Array.from(data.slice(0,16400)), 'X5');
   } else if (f===0x41 && d.length===10){
-    // le X5 envoie ses propres modifications de face avant → on suit
+    // the X5 reports its own front-panel edits → follow them on screen
     const a = d[5] | (d[6]<<7); let v = d[7] | (d[8]<<7); if (v>8191) v-=16384;
     const k = ADDR.get(a);
     if (k){ setF(cur, PDEF[k], v); refresh(k); }
@@ -959,7 +1041,7 @@ function play(kind){
   }
 }
 let audT=null;
-function audition(){ if (!$('#autoPlay').checked) return; clearTimeout(audT); audT=setTimeout(()=>play(),350); }
+function audition(force){ if (!force && !$('#autoPlay').checked) return; clearTimeout(audT); audT=setTimeout(()=>play(),350); }
 function panic(){ stopPhrase(); if(!midi.out) return; try{ midi.out.clear && midi.out.clear(); }catch(e){} TX.next=0; for (let n=0;n<128;n++) if (held.has(n)) noteOff(n); rawSend([0xB0|S.ch,123,0]); rawSend([0xB0|S.ch,120,0],true); held.clear(); document.querySelectorAll('.key.down').forEach(k=>k.classList.remove('down')); }
 
 /* ---------- moniteur SysEx ---------- */
@@ -1003,14 +1085,14 @@ function mon(dir, bytes){
   b.append(r); while (b.childNodes.length>300) b.firstChild.remove();
   if (stick) b.scrollTop=b.scrollHeight;
 }
-/* rend une fenêtre flottante déplaçable par sa barre de titre */
+/* make a floating window movable by its title bar */
 function makeDraggable(el, hd){
   let dx=0,dy=0,drag=false;
   hd.addEventListener('pointerdown',e=>{ if (e.target.closest('button,input,label,select')) return; drag=true; const r=el.getBoundingClientRect(); dx=e.clientX-r.left; dy=e.clientY-r.top; el.style.transform='none'; el.style.left=r.left+'px'; el.style.top=r.top+'px'; el.style.bottom='auto'; hd.setPointerCapture(e.pointerId); });
   hd.addEventListener('pointermove',e=>{ if(!drag) return; el.style.left=Math.max(0,Math.min(innerWidth-80,e.clientX-dx))+'px'; el.style.top=Math.max(0,Math.min(innerHeight-40,e.clientY-dy))+'px'; });
   hd.addEventListener('pointerup',()=>drag=false);
 }
-/* clavier de test : fenêtre flottante (bouton 🎹), état mémorisé, fermé par défaut */
+/* test keyboard: floating window (🎹 button), state remembered, closed by default */
 function initKbd(){
   const el=$('#kbd');
   const setOpen=o=>{ el.classList.toggle('on',o); $('#btnKbd').classList.toggle('on',o); document.documentElement.classList.toggle('kbon',o); try{localStorage.setItem('x5s.kbd',o?'1':'0')}catch(e){} };
@@ -1038,7 +1120,11 @@ function initMon(){
 }
 
 /* ============================================================
-   6. Interface : utilitaires
+   6. UI toolkit
+      Small helpers used by every page: h() creates an HTML element, toast()
+      shows a short message, slider()/choice()/toggle() build a labelled control
+      bound to a parameter, card() builds a "module" panel. Each control
+      registers itself in `binds` so it is redrawn when the sound changes.
    ============================================================ */
 const $ = s => document.querySelector(s);
 const h = (tag, attrs={}, ...kids) => {
@@ -1063,7 +1149,9 @@ function fmt(d, v){
   return String(v);
 }
 
-/* registre des contrôles à rafraîchir */
+/* registry of on-screen controls: each entry knows which keys it shows (keys) and how
+   to redraw itself (upd). refresh(key) redraws the controls of one parameter,
+   refreshAll() redraws everything after a big change (undo, new sound…). */
 const binds = [];
 function refresh(key){ if (key==='mode'){ refreshAll(); return; } const base=key.split('@')[0]; for (const b of binds) if (b.keys.includes(key)||b.keys.includes(base)) b.upd(); drawEGs(); updDirty(); }
 function refreshAll(){
@@ -1075,7 +1163,8 @@ function refreshAll(){
   updDirty(); drawEGs();
 }
 
-/* curseur générique. base = clé de page (sans @) ou clé complète ; osc = 0 (selon portée), 1 ou 2 */
+/* generic slider row. base = page key (without @) or full key; osc = 0 (follow the scope), 1 or 2.
+   Double-click restores the loaded value, the mouse wheel moves one step. */
 function slider(base, osc, opt={}){
   const keyOf = () => osc ? base+'@'+osc : readKey(base);
   const keysW = () => osc ? [base+'@'+osc] : scopedKeys(base);
@@ -1128,12 +1217,12 @@ function triGroup(prefix, title){   // ex. prefix 'vdf.v' → A D S R
   }
   return wrap;
 }
-/* Mode Essentiel : les éléments marqués adv() sont masqués (voir html[data-view=simple]) */
+/* Essential view: elements wrapped in adv() are hidden by CSS (html[data-view=simple]) */
 function adv(el){ el.classList.add('adv'); return el; }
 function card(title, ...kids){ return h('div',{class:'card'},h('h3',{},title),...kids); }
-/* Numéros des pages d'édition Program du X5 (PROG → EDIT), fournis par l'utilisateur d'après son X5.
-   [mode Simple/Batterie, mode Double pour l'osc 1, mode Double pour l'osc 2]. La page dépend
-   donc du mode et de l'oscillateur édité (portée « Éditer : Osc 1 / Osc 2 / les deux »). */
+/* X5 Program edit page numbers (PROG → EDIT), as shown on the X5's own screen.
+   [Single/Drums mode, Double mode for osc 1, Double mode for osc 2]: the page depends on
+   the oscillator mode and on the oscillator being edited ("Edit: Osc 1 / Osc 2 / both"). */
 const PAGES = {
   arch:['0A–0B','0A–0B'], osc1:['1A–1D','1A–1D'], osc2:[null,'2A–2F'], o12:[null,'2A–2F'],
   peg:['2A–2C','3A–3C'],
@@ -1148,7 +1237,7 @@ function pageText(k){
   if (e.length<3) return e[1]||'';
   return scope==='both' ? e[1]+' · '+e[2] : scope===2 ? e[2] : e[1];
 }
-/* pastille de page dans le titre d'une carte */
+/* small page badge in a card title */
 function pg(el, k){
   const b=h('span',{class:'pgno',title:'Page on the X5 (PROG → EDIT)'});
   const h3=el.querySelector('h3'); h3.append(b);
@@ -1157,11 +1246,15 @@ function pg(el, k){
 }
 
 /* ============================================================
-   7. Éditeur d'enveloppes (glisser les points)
+   7. Envelope editor (drag the points)
+      Draws an envelope as an SVG graph whose points can be dragged:
+      horizontally = segment time, vertically = level. 'kind' selects the
+      filter (vdf), amp (vda) or pitch (peg) envelope. The time scale adapts
+      to the total length, and is frozen while dragging so points stay put.
    ============================================================ */
 const EGs=[];
 function egEditor(kind){
-  // points : t = clé de temps, l = clé de niveau (ou valeur fixe)
+  // points: t = key of the segment time, l = key of the level (or a fixed value)
   const spec = {
     vdf:{start:0, pts:[['vdf.at','vdf.al'],['vdf.dt','vdf.bp'],['vdf.st','vdf.sl'],'SUS',['vdf.rt','vdf.rl']], lmin:-99,lmax:99},
     vda:{start:0, pts:[['vda.at','vda.al'],['vda.dt','vda.bp'],['vda.st','vda.sl'],'SUS',['vda.rt',0]], lmin:0,lmax:99},
@@ -1188,7 +1281,7 @@ function egEditor(kind){
   area.setAttribute('fill','url(#'+gid+')');
   svg.append(defs,zero,area,path,offLine,onL,offL,tip);
   const handles=[];
-  const pts=()=>{  // calcule les coordonnées
+  const pts=()=>{  // compute the screen coordinates of every point
     const k=b=>readKey(b); const out=[];
     let x=P, lv = typeof spec.start==='string' ? val(k(spec.start)) : spec.start;
     out.push({x,y:y(lv),lk:typeof spec.start==='string'?spec.start:null,tk:null});
@@ -1240,6 +1333,11 @@ function drawEGs(){ EGs.forEach(f=>f()); }
 
 /* ============================================================
    8. Pages
+      One build function per tab: buildQuick (macros, Inspiration, Vary),
+      buildOsc, buildVDF (filter), buildVDA (amplifier), buildMod (pitch EG,
+      LFOs) + buildCtl (aftertouch, joystick), buildFX (effects), buildLib
+      (library and files). They only assemble controls from section 6; all
+      the sound logic stays in sections 2 to 5.
    ============================================================ */
 function scopeBar(){
   const seg=h('div',{class:'seg'});
@@ -1291,6 +1389,7 @@ function macroEl(m){
 }
 function buildQuick(){
   const p=$('#p-quick');
+  p.append(h('div',{class:'cards',style:'margin-bottom:14px'},inspireCard()));
   p.append(h('div',{class:'macros'},MACROS.map(macroEl)));
   const sel=h('div',{class:'cols2',style:'margin-top:12px'});
   const amt=h('input',{type:'range',min:1,max:40,value:12});
@@ -1416,26 +1515,28 @@ function buildMod(){
   g2.append(adv(pg(card('Vibrato from controllers', slider('pm.aft',0), slider('pm.joy',0), slider('pm.atjoy',0)),'pm')));
   p.append(g2);
 }
-/* --- Contrôleurs --- */
-/* Contrôleurs (aftertouch, joystick) : en bas de l'onglet Modulation, vue Complet uniquement */
+/* --- Controllers (aftertouch, joystick): bottom of the Modulation tab, Full view only --- */
 function buildCtl(){
   const p=$('#p-mod'); const g=h('div',{class:'cards adv',style:'margin-top:14px'});
   g.append(pg(card('Aftertouch', slider('at.bend',0), slider('at.fc',0), slider('at.mg',0), slider('at.amp',0)),'ctl'));
   g.append(pg(card('Joystick', slider('joy.bend',0), slider('joy.vdf',0), slider('joy.mg',0)),'ctl'));
   p.append(g);
 }
-/* --- Effets ---------------------------------------------------------------
-   Réglages détaillés des 47 effets, d'après les tables « Effect Parameter » du
-   manuel Korg (*11 et *11-3). Bloc effets du Program : octets 135-163.
-     135/136 type eff. 1/2 · 137-140 balance L/R eff. 1 puis 2 · 143 I/O (bits 0-3
-     marche/arrêt, bits 4-5 placement) · 144-151 paramètres eff. 1 · 152/153 source et
-     intensité de modulation eff. 1 · 154-161 paramètres eff. 2 · 162/163 modulation eff. 2.
-   Ces réglages passent par le son complet (Program Dump 40h, regroupé toutes les
-   150 ms) : l'ordre des Parameter Change d'effets ne suit pas le manuel.
-   Types de paramètre : u = octet, s = octet signé, w = 16 bits (octet b + b+1),
-     rt = temps de réverb (0.2 s + n×0.1), hz = vitesse de LFO (table *11-3-2),
-     mg = forme du LFO (bit 0 : sinus/triangle), x2 = valeur stockée /2,
-     er = 100 + n×10 ms, qw = forme de modulation (*11-3-4). */
+/* --- Effects ---------------------------------------------------------------
+   Detailed settings of the 47 effects, from the "Effect Parameter" tables of the
+   Korg manual (*11 and *11-3). Effect block of a Program: bytes 135-163.
+     135/136 type of effect 1/2 · 137-140 balance L/R of effect 1 then 2 ·
+     143 I/O (bits 0-3 on/off, bits 4-5 placement) · 144-151 effect 1 settings ·
+     152/153 effect 1 modulation source and amount · 154-161 effect 2 settings ·
+     162/163 effect 2 modulation.
+   FX_GROUPS lists, for each group of effect types, its settings as
+     [label, byte offset (0-7), kind, min, max, unit]
+   with these kinds: u = byte, s = signed byte, w = 16 bits (bytes b and b+1),
+     rt = reverb time (0.2 s + n×0.1), hz = LFO speed (table *11-3-2),
+     mg = Wave Shape (bit 0: sine/triangle), x2 = stored value is half the shown one,
+     er = 100 + n×10 ms, qw = modulation waveform (*11-3-4).
+   These settings go out as a complete sound (Program Dump 40h, at most every
+   150 ms): the X5's effect Parameter Change numbering does not follow the manual. */
 const FX_GROUPS = [
   [[1,2,3,4,5,6], [['Reverb Time',0,'rt',0,97],['High Damp',2,'u',0,99],['Pre Delay',3,'u',0,200,'ms'],['E.R Level',4,'u',0,99],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
   [[7,8,9], [['Pre Delay',0,'w',0,200,'ms'],['E.R Level',2,'u',1,10],['Reverb Time',3,'u',0,99],['High Damp',4,'u',0,99],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
@@ -1495,7 +1596,7 @@ function fxFmt(p, v){
   if (k==='qw') return v>=0 ? 'S'+(v-10>0?'+':'')+(v-10) : 'T'+(-(v+11)>0?'+':'')+(-(v+11));
   return (p[3]<0 && v>0 ? '+' : '')+v+u;
 }
-/* valeurs de départ quand on change de type d'effet (le X5 fait de même sur sa face avant) */
+/* starting values when the effect type changes (the X5 does the same on its front panel) */
 function fxDefaults(slot, type){
   for (let i=0;i<8;i++) cur[FXO.base[slot]+i]=0;
   for (const p of (FX_PARAMS[type]||[])){
@@ -1503,7 +1604,7 @@ function fxDefaults(slot, type){
     const v = k==='qw' ? 10 : k==='s' ? Math.max(mn,Math.min(mx,0)) : k==='rt' ? 23 : k==='hz' ? 30 : k==='mg' ? 0 : k==='w' ? 250 : Math.round(mn+(mx-mn)*0.4);
     fxWrite(slot, p, v);
   }
-  // bits fixés par le manuel pour la forme du LFO (*11-3-3)
+  // bits that the manual fixes for the LFO shape (*11-3-3)
   if ([19,20,32,33,35,36].includes(type)) cur[FXO.base[slot]+2] |= 2;
   cur[FXO.bal[slot]]=50; cur[FXO.bal[slot]+1]=50;
 }
@@ -1560,7 +1661,7 @@ function fxCard(slot){
   shown=-1; binds.at(-1).upd();
   return c;
 }
-/* balance sec:effet d'un effet (page 20B en mode Double), L et R liés par défaut */
+/* dry:effect balance of one effect (page 20B in Double mode), L and R linked by default */
 function fxBalance(slot){
   const link=h('input',{type:'checkbox',checked:''});
   const balL=fxSlider('Balance L', ()=>cur[FXO.bal[slot]], v=>{ cur[FXO.bal[slot]]=v; if (link.checked) cur[FXO.bal[slot]+1]=v; }, 0, 100, v=>v+' %');
@@ -1580,6 +1681,123 @@ function buildFX(){
   rt.classList.add('wide'); pg(rt,'route');
   g.append(rt, fxCard(1), fxCard(2)); g.classList.add('fxcards');
   p.append(g);
+}
+/* ============================================================
+   8b. Inspiration: guided random sound generator (v1.8)
+   ------------------------------------------------------------
+   Idea (borrowed from the DX7-era "randomizers"): fully random values
+   almost always give unusable sounds, so each FAMILY below describes what
+   makes a pad, a bass, a bell… plausible. A family gives:
+     waves   – multisound ranges to pick from (indexes into WAVES, see WAVE_CATS)
+     dbl     – probability of Double mode (two oscillators, slightly detuned)
+     vda/vdf – [min,max] ranges for the amp and filter envelopes and filter
+     vib     – [min,max] vibrato depth
+     fx      – candidate effect types for effect 1 and effect 2 (0 = off)
+   inspire(family) builds a brand-new Program from initBuffer() using these
+   ranges, picks a short name (max 10 ASCII characters, the X5's limit) and
+   loads it like any other sound: one undo step, sent to the X5 in one dump.
+   ============================================================ */
+const R = (a,b) => a + Math.floor(Math.random()*(b-a+1));      // random integer in [a,b]
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const rr = range => R(range[0], range[1]);                      // random value in a [min,max] pair
+const W = {   // multisound ranges, by musical role (start index, end index inclusive)
+  piano:[0,16], organ:[17,35], guitar:[43,69], world:[70,81], bass:[82,105], mallet:[106,124],
+  wind:[125,147], brass:[148,161], strings:[162,171], voice:[172,179], pad:[180,185],
+  fx:[186,217], loop:[218,226], perc:[227,315], vs:[316,329], basic:[330,337],
+};
+const FAMILIES = {
+  pad:   {waves:['pad','strings','voice','vs','basic'], dbl:.7,
+          vda:{at:[35,75],dt:[30,70],bp:[70,99],st:[30,70],sl:[60,95],rt:[45,80]},
+          vdf:{cut:[25,65],eint:[10,40],at:[30,70],sl:[0,30]}, vib:[0,8], fx:[[1,2,3,7],[19,20,24,21]]},
+  bass:  {waves:['bass','basic'], dbl:.3,
+          vda:{at:[0,3],dt:[20,60],bp:[60,95],st:[20,60],sl:[40,90],rt:[5,22]},
+          vdf:{cut:[12,45],eint:[30,75],at:[0,5],sl:[-20,20]}, vib:[0,0], fx:[[0,0,31,19],[0]]},
+  lead:  {waves:['basic','vs','brass','wind','guitar'], dbl:.45,
+          vda:{at:[0,12],dt:[20,60],bp:[80,99],st:[20,60],sl:[75,99],rt:[10,35]},
+          vdf:{cut:[40,85],eint:[10,50],at:[0,20],sl:[0,40]}, vib:[6,25], fx:[[13,14,16],[4,5,1]]},
+  keys:  {waves:['piano','organ','mallet'], dbl:.25,
+          vda:{at:[0,2],dt:[40,75],bp:[50,85],st:[40,75],sl:[0,45],rt:[15,40]},
+          vdf:{cut:[50,90],eint:[10,40],at:[0,5],sl:[0,30]}, vib:[0,4], fx:[[19,20,34],[4,1,0]]},
+  bell:  {waves:['mallet','vs','basic'], dbl:.5,
+          vda:{at:[0,1],dt:[50,85],bp:[20,60],st:[50,85],sl:[0,15],rt:[40,75]},
+          vdf:{cut:[55,99],eint:[0,30],at:[0,5],sl:[0,20]}, vib:[0,5], fx:[[1,3,7],[13,14,0]]},
+  perc:  {waves:['perc','world','guitar','mallet'], dbl:.1,
+          vda:{at:[0,1],dt:[15,45],bp:[10,50],st:[15,45],sl:[0,0],rt:[5,25]},
+          vdf:{cut:[35,90],eint:[20,60],at:[0,3],sl:[0,10]}, vib:[0,0], fx:[[4,5,6,10],[0]]},
+  texture:{waves:['fx','loop','voice','pad','vs'], dbl:.6,
+          vda:{at:[15,80],dt:[30,80],bp:[50,99],st:[30,80],sl:[40,99],rt:[50,90]},
+          vdf:{cut:[20,80],eint:[10,60],at:[20,80],sl:[0,40]}, vib:[0,15], fx:[[40,41,25,32],[1,2,13]]},
+};
+const FAMILY_ORDER = ['pad','bass','lead','keys','bell','perc','texture','surprise'];
+const FAMILY_LABELS = {pad:'Pad',bass:'Bass',lead:'Lead',keys:'Keys',bell:'Bell',perc:'Percussive',texture:'Texture / FX',surprise:'Surprise'};
+/* Name words. English lists are built in; a language file (lang/xx.js) may bring its own
+   "names" object with the same shape. Accents are removed because the X5 only shows ASCII. */
+const NAME_WORDS = {
+  adj:['Soft','Dark','Warm','Cold','Deep','Glass','Dust','Silk','Hazy','Bold','Lush','Dry','Wild','Pale','Neon','Rusty','Velvet','Frost'],
+  pad:['Pad','Mist','Haze','Aura','Cloud','Dream','Drift','Glow'],
+  bass:['Bass','Sub','Thump','Growl','Low','Root'],
+  lead:['Lead','Solo','Line','Ray','Laser','Voice'],
+  keys:['Keys','Piano','Organ','Ivory','Tines'],
+  bell:['Bell','Chime','Glass','Gong','Star'],
+  perc:['Hit','Pluck','Knock','Tick','Drum','Snap'],
+  texture:['Noise','Space','Storm','Wind','Orbit','Dust'],
+};
+function nameWords(){ const p=LANGPACKS[I18N.lang]; return (p && p.names) || NAME_WORDS; }
+function makeName(fam){
+  const w=nameWords(), nouns=w[fam]||NAME_WORDS[fam];
+  const ascii=t=>t.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\x20-\x7e]/g,'');
+  for (let i=0;i<30;i++){                       // try adjective + noun within 10 characters
+    const a=pick(w.adj), o=pick(nouns), n=ascii(w.order==='noun-adj' ? o+' '+a : a+' '+o);   // French, Italian, Spanish: adjective after the noun
+    if (n.length<=10) return n;
+  }
+  return ascii(pick(nouns)).slice(0,7)+' '+R(1,99);
+}
+let lastFamily='pad';
+function inspire(fam){
+  if (fam==='surprise') fam=pick(FAMILY_ORDER.slice(0,-1));
+  lastFamily=fam;
+  const F=FAMILIES[fam], b=initBuffer(), set=(k,v)=>setF(b,PDEF[k],Math.max(PDEF[k].min,Math.min(PDEF[k].max,Math.round(v))));
+  const waveIn = cat => { const [a,z]=W[cat]; return R(a,z); };
+  const dbl = Math.random()<F.dbl;
+  set('mode', dbl?1:0);
+  const oscs = dbl?[1,2]:[1];
+  for (const o of oscs){
+    set('wave@'+o, waveIn(pick(F.waves)));
+    set('lvl@'+o, o===1?99:R(65,95));
+    for (const [k,r] of Object.entries(F.vda)) set('vda.'+k+'@'+o, rr(r));
+    set('vdf.cut@'+o, rr(F.vdf.cut)); set('vdf.eint@'+o, rr(F.vdf.eint));
+    set('vdf.at@'+o, rr(F.vdf.at)); set('vdf.al@'+o, R(60,99)); set('vdf.dt@'+o, R(20,70));
+    set('vdf.bp@'+o, R(20,80)); set('vdf.st@'+o, R(20,70)); set('vdf.sl@'+o, rr(F.vdf.sl)); set('vdf.rt@'+o, R(10,60));
+    set('vdf.col@'+o, R(0,40));
+    set('vda.vamp@'+o, ['keys','perc','bell'].includes(fam) ? R(25,65) : R(0,30));
+    set('vdf.vint@'+o, ['keys','lead','bass'].includes(fam) ? R(10,45) : R(0,15));
+    const vib=rr(F.vib); set('pm.int@'+o, vib); set('pm.freq@'+o, R(45,70)); set('pm.del@'+o, vib?R(10,40):0); set('pm.fade@'+o, vib?R(10,40):0);
+  }
+  if (fam==='bass' && b[PDEF['wave@1'].enc.o]>=W.basic[0]) set('oct@1',-1);   // synth waves sound better an octave down for basses
+  if (dbl){
+    set('detune', R(3,12));
+    if (['bell','lead','texture'].includes(fam) && Math.random()<.35) set('interval', pick([12,7,-12]));
+    set('pan@1', R(6,13)); set('pan@2', R(17,24));                              // a little stereo spread
+  }
+  if (fam==='texture'){ set('fmg.int', R(10,45)); set('fmg.freq', R(10,50)); set('fmg.osc', 3); }
+  // effects: one candidate per slot, starting values for that type, then a random wet/dry balance
+  const cur0=cur; cur=b;                                                         // fxDefaults() works on `cur`
+  [1,2].forEach(slot=>{ const t=pick(F.fx[slot-1]); setF(b,PDEF['fx'+slot+'.type'],t); fxDefaults(slot,t);
+    if (t){ b[FXO.io]|= slot===1?3:12; b[FXO.bal[slot]]=b[FXO.bal[slot]+1]=R(20,45); } });
+  cur=cur0;
+  makeName(fam).padEnd(10,' ').split('').forEach((c,i)=>b[i]=c.charCodeAt(0));
+  applyBuffer(b); origin=b.slice(); commit();
+  toast(T('New {0}: {1}', T(FAMILY_LABELS[fam]), progName(b).trim()),'ok');
+  audition(true);
+}
+function inspireCard(){
+  const chips=h('div',{class:'chips'}, ...FAMILY_ORDER.map(f=>h('button',{type:'button',onclick:()=>inspire(f)},FAMILY_LABELS[f])));
+  return h('div',{class:'card wide inspire'},h('h3',{},'Inspiration'),
+    h('p',{class:'note',style:'margin-top:0'},'Pick a family: a new sound is created from scratch, with rules that keep it playable, and gets a name you can change in the display.'),
+    chips,
+    h('div',{style:'display:flex;gap:8px;margin-top:10px;align-items:center'},
+      h('button',{class:'pri',type:'button',onclick:()=>inspire(lastFamily)},'✨ Another one'),
+      h('button',{type:'button',onclick:undo},'↶ Previous sound')));
 }
 /* --- Librairie --- */
 let bank=null, bankSel=0, bankFrom='';
@@ -1680,7 +1898,10 @@ function keyEl(m,c,l,w){
 function keyVis(n,on){ const k=document.querySelector(`.key[data-n="${n}"]`); if(k) k.classList.toggle('down',on); }
 
 /* ============================================================
-   9. Démarrage
+   9. Start-up
+      boot() runs once when the page opens: restores the last sound and
+      settings from the browser, builds every tab, connects the buttons and
+      keyboard shortcuts, then asks the browser for MIDI access.
    ============================================================ */
 function showPage(id){ document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===id)); document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+id)); drawEGs(); }
 function undo(){ if (hIdx>0){ hIdx--; applyBuffer(hist[hIdx]); saveWork(); } }

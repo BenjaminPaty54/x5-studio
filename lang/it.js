@@ -5,6 +5,11 @@
    - "strings" maps each English text of the interface (left) to its translation (right).
    - Keep {0}, {1}… placeholders and HTML tags (<b>, <span …>) exactly as they are.
    - A text missing here is simply shown in English.
+   - "names" (optional) holds the words used by the Inspiration button to name new
+     sounds: "adj" = adjectives, then one list of nouns per family. Set order to
+     "noun-adj" when the adjective comes after the noun in this language. Names are
+     limited to 10 characters and accents are removed (the X5 shows plain ASCII),
+     so prefer short words, and adjectives that do not change with gender.
    - "help" is the content of the "?" window.
 */
 X5_LANG({
@@ -39,7 +44,9 @@ X5_LANG({
     "Bank sent": "Banco inviato",
     "Bank: {0}": "Banco: {0}",
     "Basic waveforms": "Forme d'onda di base",
+    "Bass": "Basso",
     "Basses": "Bassi",
+    "Bell": "Campana",
     "Blend": "Miscela",
     "Body": "Corpo",
     "Both (linked)": "Entrambi (collegati)",
@@ -145,8 +152,10 @@ X5_LANG({
     "How volume and filter respond to velocity.": "Reazione di volume e filtro alla velocity.",
     "Identity reply · {0}": "Risposta di identità · {0}",
     "Identity request (channel {0})": "Richiesta di identità (canale {0})",
+    "Inspiration": "Ispirazione",
     "Keep": "Salva",
     "Keyboard tracking": "Inseguimento tastiera",
+    "Keys": "Tastiera",
     "Korg SysEx function {0}h": "SysEx Korg funzione {0}h",
     "Length of the tail after key release.": "Durata della coda dopo il rilascio.",
     "Level": "Livello",
@@ -197,6 +206,7 @@ X5_LANG({
     "neutral": "neutro",
     "new bank": "nuovo banco",
     "New sound (Init, keeps the effects)": "Nuovo suono (Init, mantiene gli effetti)",
+    "New {0}: {1}": "Nuovo suono ({0}): {1}",
     "Next": "Successivo",
     "No acknowledgement from the X5: check its display to confirm the sound was written": "Nessuna conferma dall'X5: verifica sul display che il suono sia stato scritto",
     "No bank": "Nessun banco",
@@ -243,7 +253,9 @@ X5_LANG({
     "Pedal 2 (CC13)": "Pedale 2 (CC13)",
     "Percussion & drums": "Percussioni & batteria",
     "percussive": "percussivo",
+    "Percussive": "Percussivo",
     "Pianos & keys": "Pianoforti & tastiere",
+    "Pick a family: a new sound is created from scratch, with rules that keep it playable, and gets a name you can change in the display.": "Scegli una famiglia: viene creato da zero un nuovo suono, con regole che lo mantengono suonabile, e riceve un nome che puoi modificare nel display.",
     "Pick a MIDI input and output": "Scegli un ingresso e un'uscita MIDI",
     "Pick the MIDI output connected to the X5": "Scegli l'uscita MIDI collegata all'X5",
     "Pitch & LFO": "Intonazione & LFO",
@@ -317,6 +329,7 @@ X5_LANG({
     "Store the current sound in the selected slot": "Metti il suono corrente nella posizione selezionata",
     "Strings": "Archi",
     "Structure": "Struttura",
+    "Surprise": "Sorpresa",
     "Sustain level": "Livello sustain",
     "sustained": "tenuto",
     "Switch to Full view to edit each effect in detail.": "Passa alla vista Completo per regolare ogni effetto in dettaglio.",
@@ -381,6 +394,7 @@ X5_LANG({
     "— none —": "— nessuno —",
     "“All Data” file: not extracted in this version (programs part included)": "File “All Data”: non estratto in questa versione (parte programmi inclusa)",
     "→ Identity Request on all 16 channels": "→ Identity Request sui 16 canali",
+    "↶ Previous sound": "↶ Suono precedente",
     "↶ Undo the variation": "↶ Annulla la variazione",
     "⇧ Send": "⇧ Invia",
     "⇧ Send bank to X5": "⇧ Invia il banco all'X5",
@@ -388,7 +402,19 @@ X5_LANG({
     "⇩ Read X5 bank": "⇩ Leggi il banco dell'X5",
     "▶ Test": "▶ Prova",
     "● modified": "● modificato",
+    "✨ Another one": "✨ Un altro",
     "🎲 Vary": "🎲 Varia"
   },
-  help: "\n  <h3 style=\"margin-top:0\">Per iniziare</h3>\n  <ol>\n    <li>Collega l'X5 al computer (interfaccia MIDI USB: MIDI OUT dell'X5 → IN dell'interfaccia, IN dell'X5 ← OUT). Anche la porta <i>TO HOST</i> funziona con un driver seriale.</li>\n    <li>Sull'X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (altrimenti nessun SysEx passa). Per scrivere: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Apri questa pagina in <b>Chrome</b> o <b>Edge</b>, consenti l'accesso MIDI, scegli le porte e clicca <b>Rileva</b> (il canale globale viene trovato automaticamente).</li>\n    <li>Se Chrome rifiuta l'accesso MIDI quando la pagina è aperta come file, esegui <code>python3 -m http.server</code> nella cartella della pagina, poi apri <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Metti l'X5 in modo PROG sul suono da modificare e clicca <b>⇩ Leggi X5</b>.</li>\n  </ol>\n  <h3>Scorciatoie</h3>\n  <ul>\n    <li>Tastiera del computer = tastiera musicale (fila centrale = tasti bianchi, fila superiore = neri), <kbd>Z</kbd>/<kbd>X</kbd> = ottava.</li>\n    <li><kbd>Spazio</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annulla · <kbd>Ctrl/⌘+Maiusc+Z</kbd> = ripristina.</li>\n    <li>Pulsante <b>🎹</b>: apre la tastiera di prova in una finestra mobile, spostabile dalla barra del titolo. A finestra chiusa, i tasti del computer suonano comunque le note.</li>\n    <li>Doppio clic su un cursore = valore originale. Rotella = regolazione fine.</li>\n    <li>Pulsante <b>SysEx</b>: piccola finestra (spostabile, ridimensionabile dall'angolo) che mostra ogni messaggio inviato ↑ e ricevuto ↓, tradotto in chiaro. Il cursore <b>Ritardo</b> aggiunge una pausa dopo ogni SysEx (20 ms predefiniti).</li>\n    <li>Le macro della scheda Rapido tornano al centro: ogni gesto <i>aggiunge</i> o <i>toglie</i> rispetto al suono attuale.</li>\n    <li>Le bandiere in alto a destra cambiano la lingua dell'interfaccia.</li>\n    <li>I <b>numeri riquadrati</b> in alto nelle schede (es. <code>4A–4E</code>) rimandano alle pagine di edit dell'X5 (PROG → EDIT). Cambiano tra i modi Singolo/Batteria e Doppio, e secondo l'oscillatore modificato.</li>\n    <li><b>Essenziale / Completo</b> (a sinistra delle schede): Essenziale mostra le impostazioni principali, Completo tutti i parametri del Program. Entrambi i modi modificano lo stesso suono.</li>\n    <li>Pulsante <b>● Edit / ○ Play</b>: indica se l'X5 è in modo edit. Un clic gli restituisce il controllo (modo Program); viene rimesso in modo play anche alla chiusura della pagina. Se l'X5 rifiuta una modifica (ad esempio dopo aver usato il pannello frontale), l'app lo rimette in edit e gli reinvia il suono.</li>\n  </ul>\n  <h3>Limiti</h3>\n  <p class=\"note\">Questa versione modifica solo i <b>Program</b> (suoni), effetti compresi (vista Completo). Le <b>Combination</b> e le impostazioni Global non sono modificabili.</p>\n  <p class=\"note\">Protocollo: Korg SysEx, Model ID 36h (comune a X5 / X5D / X5DR / 05R/W). Parametri in diretta: funzione 41h; suono completo: funzione 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.7.1 — © 2026 Benjamin PATY (BenjaminPaty54) — licenza MIT. Korg e X5 sono marchi di Korg Inc.; progetto indipendente e non affiliato.</p>\n"
+  names: {
+    order: "noun-adj",
+    adj: ["Dolce", "Lunare", "Solare", "Polare", "Celeste", "Fragile", "Gentile", "Mobile", "Nobile", "Verde", "Forte", "Lieve", "Breve", "Grigio"],
+    pad: ["Pad", "Nebbia", "Velo", "Aura", "Nuvola", "Sogno", "Luce"],
+    bass: ["Basso", "Sub", "Radice", "Cupo"],
+    lead: ["Lead", "Solo", "Linea", "Raggio", "Laser", "Voce"],
+    keys: ["Piano", "Organo", "Tasti", "Avorio"],
+    bell: ["Campana", "Gong", "Vetro", "Stella"],
+    perc: ["Colpo", "Pizzico", "Tocco", "Tamburo"],
+    texture: ["Rumore", "Spazio", "Tempesta", "Vento", "Orbita"]
+  },
+  help: "\n  <h3 style=\"margin-top:0\">Per iniziare</h3>\n  <ol>\n    <li>Collega l'X5 al computer (interfaccia MIDI USB: MIDI OUT dell'X5 → IN dell'interfaccia, IN dell'X5 ← OUT). Anche la porta <i>TO HOST</i> funziona con un driver seriale.</li>\n    <li>Sull'X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (altrimenti nessun SysEx passa). Per scrivere: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Apri questa pagina in <b>Chrome</b> o <b>Edge</b>, consenti l'accesso MIDI, scegli le porte e clicca <b>Rileva</b> (il canale globale viene trovato automaticamente).</li>\n    <li>Se Chrome rifiuta l'accesso MIDI quando la pagina è aperta come file, esegui <code>python3 -m http.server</code> nella cartella della pagina, poi apri <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Metti l'X5 in modo PROG sul suono da modificare e clicca <b>⇩ Leggi X5</b>.</li>\n  </ol>\n  <h3>Scorciatoie</h3>\n  <ul>\n    <li>Tastiera del computer = tastiera musicale (fila centrale = tasti bianchi, fila superiore = neri), <kbd>Z</kbd>/<kbd>X</kbd> = ottava.</li>\n    <li><kbd>Spazio</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annulla · <kbd>Ctrl/⌘+Maiusc+Z</kbd> = ripristina.</li>\n    <li>Pulsante <b>🎹</b>: apre la tastiera di prova in una finestra mobile, spostabile dalla barra del titolo. A finestra chiusa, i tasti del computer suonano comunque le note.</li>\n    <li>Doppio clic su un cursore = valore originale. Rotella = regolazione fine.</li>\n    <li>Pulsante <b>SysEx</b>: piccola finestra (spostabile, ridimensionabile dall'angolo) che mostra ogni messaggio inviato ↑ e ricevuto ↓, tradotto in chiaro. Il cursore <b>Ritardo</b> aggiunge una pausa dopo ogni SysEx (20 ms predefiniti).</li>\n    <li>Le macro della scheda Rapido tornano al centro: ogni gesto <i>aggiunge</i> o <i>toglie</i> rispetto al suono attuale.</li>\n    <li><b>Ispirazione</b> (scheda Rapido): scegli una famiglia (Pad, Basso, Lead…) per creare un suono nuovo, suonabile e già con un nome. “Un altro” ripete la stessa famiglia, “Suono precedente” torna indietro.</li>\n    <li>Le bandiere in alto a destra cambiano la lingua dell'interfaccia.</li>\n    <li>I <b>numeri riquadrati</b> in alto nelle schede (es. <code>4A–4E</code>) rimandano alle pagine di edit dell'X5 (PROG → EDIT). Cambiano tra i modi Singolo/Batteria e Doppio, e secondo l'oscillatore modificato.</li>\n    <li><b>Essenziale / Completo</b> (a sinistra delle schede): Essenziale mostra le impostazioni principali, Completo tutti i parametri del Program. Entrambi i modi modificano lo stesso suono.</li>\n    <li>Pulsante <b>● Edit / ○ Play</b>: indica se l'X5 è in modo edit. Un clic gli restituisce il controllo (modo Program); viene rimesso in modo play anche alla chiusura della pagina. Se l'X5 rifiuta una modifica (ad esempio dopo aver usato il pannello frontale), l'app lo rimette in edit e gli reinvia il suono.</li>\n  </ul>\n  <h3>Limiti</h3>\n  <p class=\"note\">Questa versione modifica solo i <b>Program</b> (suoni), effetti compresi (vista Completo). Le <b>Combination</b> e le impostazioni Global non sono modificabili.</p>\n  <p class=\"note\">Protocollo: Korg SysEx, Model ID 36h (comune a X5 / X5D / X5DR / 05R/W). Parametri in diretta: funzione 41h; suono completo: funzione 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.8 — © 2026 Benjamin PATY (BenjaminPaty54) — licenza MIT. Korg e X5 sono marchi di Korg Inc.; progetto indipendente e non affiliato.</p>\n"
 });

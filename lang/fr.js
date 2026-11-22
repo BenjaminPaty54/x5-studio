@@ -5,6 +5,11 @@
    - "strings" maps each English text of the interface (left) to its translation (right).
    - Keep {0}, {1}… placeholders and HTML tags (<b>, <span …>) exactly as they are.
    - A text missing here is simply shown in English.
+   - "names" (optional) holds the words used by the Inspiration button to name new
+     sounds: "adj" = adjectives, then one list of nouns per family. Set order to
+     "noun-adj" when the adjective comes after the noun in this language. Names are
+     limited to 10 characters and accents are removed (the X5 shows plain ASCII),
+     so prefer short words, and adjectives that do not change with gender.
    - "help" is the content of the "?" window.
 */
 X5_LANG({
@@ -37,6 +42,8 @@ X5_LANG({
     "Bank sent": "Banque envoyée",
     "Bank: {0}": "Banque : {0}",
     "Basic waveforms": "Formes d'onde de base",
+    "Bass": "Basse",
+    "Bell": "Cloche",
     "Blend": "Mélange",
     "Body": "Corps",
     "Both (linked)": "Les deux (liés)",
@@ -151,6 +158,7 @@ X5_LANG({
     "Keep": "Garder",
     "Key tracking": "Suivi clavier",
     "Keyboard tracking": "Suivi de clavier",
+    "Keys": "Clavier",
     "Korg SysEx function {0}h": "SysEx Korg fonction {0}h",
     "Length of the tail after key release.": "Durée de la queue après le relâchement.",
     "Level": "Niveau",
@@ -197,6 +205,7 @@ X5_LANG({
     "neutral": "neutre",
     "new bank": "nouvelle banque",
     "New sound (Init, keeps the effects)": "Nouveau son (Init, garde les effets)",
+    "New {0}: {1}": "Nouveau son ({0}) : {1}",
     "Next": "Suivant",
     "No acknowledgement from the X5: check its display to confirm the sound was written": "Pas d'accusé du X5 : vérifie sur l'écran que le son est bien écrit",
     "No bank": "Pas de banque",
@@ -227,6 +236,7 @@ X5_LANG({
     "Oscillators": "Oscillateurs",
     "Out Level": "Niveau de sortie",
     "Output OK · without an input, reading from the X5 is impossible": "Sortie OK · sans entrée, la lecture du X5 est impossible",
+    "Pad": "Nappe",
     "Pads & synths": "Pads & synthés",
     "Page on the X5 (PROG → EDIT)": "Page sur le X5 (PROG → EDIT)",
     "Page opened as file:// → open it via http://localhost (see “?” help)": "Page ouverte en file:// → ouvre-la via http://localhost (voir aide « ? »)",
@@ -239,7 +249,9 @@ X5_LANG({
     "Pedal 2 (CC13)": "Pédale 2 (CC13)",
     "Percussion & drums": "Percussions & batterie",
     "percussive": "percussif",
+    "Percussive": "Percussif",
     "Pianos & keys": "Pianos & claviers",
+    "Pick a family: a new sound is created from scratch, with rules that keep it playable, and gets a name you can change in the display.": "Choisis une famille : un nouveau son est créé de zéro, avec des règles qui le gardent jouable, et reçoit un nom que tu peux modifier dans l'afficheur.",
     "Pick a MIDI input and output": "Choisis une entrée et une sortie MIDI",
     "Pick the MIDI output connected to the X5": "Choisis la sortie MIDI reliée au X5",
     "Pitch & LFO": "Hauteur & LFO",
@@ -379,6 +391,7 @@ X5_LANG({
     "— none —": "— aucun —",
     "“All Data” file: not extracted in this version (programs part included)": "Fichier « All Data » : seule la partie programmes n'est pas extraite dans cette version",
     "→ Identity Request on all 16 channels": "→ Identity Request sur les 16 canaux",
+    "↶ Previous sound": "↶ Son précédent",
     "↶ Undo the variation": "↶ Annuler la variation",
     "⇧ Send": "⇧ Envoyer",
     "⇧ Send bank to X5": "⇧ Envoyer la banque au X5",
@@ -386,7 +399,19 @@ X5_LANG({
     "⇩ Read X5 bank": "⇩ Lire la banque du X5",
     "▶ Test": "▶ Tester",
     "● modified": "● modifié",
+    "✨ Another one": "✨ Un autre",
     "🎲 Vary": "🎲 Varier"
   },
-  help: "\n  <h3 style=\"margin-top:0\">Mise en route</h3>\n  <ol>\n    <li>Relie le X5 à l'ordinateur (interface MIDI USB : MIDI OUT du X5 → IN de l'interface, IN du X5 ← OUT). Le port <i>TO HOST</i> fonctionne aussi avec un pilote série.</li>\n    <li>Sur le X5 : <b>GLOBAL → MIDI Filter → EX = ENA</b> (sinon aucun SysEx ne passe). Pour écrire : <b>Memory Protect Program = OFF</b>.</li>\n    <li>Ouvre cette page dans <b>Chrome</b> ou <b>Edge</b>, accepte l'accès MIDI, choisis les ports puis clique <b>Détecter</b> (le canal global est trouvé automatiquement).</li>\n    <li>Si Chrome refuse l'accès MIDI quand la page est ouverte comme fichier, lance dans le dossier de la page <code>python3 -m http.server</code> puis ouvre <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Mets le X5 en mode PROG sur le son à retoucher et clique <b>⇩ Lire le X5</b>.</li>\n  </ol>\n  <h3>Raccourcis</h3>\n  <ul>\n    <li>Clavier de l'ordinateur = clavier musical (rangée du milieu = touches blanches, rangée du dessus = noires), <kbd>W</kbd>/<kbd>X</kbd> (AZERTY) ou <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>\n    <li><kbd>Espace</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annuler · <kbd>Ctrl/⌘+Maj+Z</kbd> = rétablir.</li>\n    <li>Bouton <b>🎹</b> : ouvre le clavier de test dans une fenêtre flottante, déplaçable par sa barre de titre. Fenêtre fermée, les touches de l'ordinateur jouent toujours des notes.</li>\n    <li>Double-clic sur un curseur = valeur d'origine. Molette = réglage fin.</li>\n    <li>Bouton <b>SysEx</b> : petite fenêtre (déplaçable, redimensionnable par le coin) qui montre chaque message envoyé ↑ et reçu ↓, traduit en clair. Le curseur <b>Délai</b> ajoute une pause après chaque SysEx (20 ms par défaut).</li>\n    <li>Les macros de l'onglet Rapide reviennent au centre : chaque geste <i>ajoute</i> ou <i>retire</i> par rapport au son actuel.</li>\n    <li>Les drapeaux en haut à droite changent la langue de l'interface.</li>\n    <li>Les <b>numéros encadrés</b> en haut des cartes (par ex. <code>4A–4E</code>) renvoient aux pages d'édition du X5 (PROG → EDIT). Ils changent entre les modes Simple/Batterie et Double, et selon l'oscillateur édité.</li>\n    <li><b>Essentiel / Complet</b> (à gauche des onglets) : Essentiel garde les réglages principaux, Complet affiche tous les paramètres du Program. Les deux modes agissent sur le même son.</li>\n    <li>Bouton <b>● Édition / ○ Jeu</b> : montre si le X5 est en mode édition. Un clic lui rend la main (mode Program) ; il est aussi remis en mode jeu quand tu fermes la page. Si le X5 refuse un réglage (par exemple après un passage par sa face avant), l'appli le remet en édition et lui renvoie le son.</li>\n  </ul>\n  <h3>Limites</h3>\n  <p class=\"note\">Cette version édite uniquement les <b>Programs</b> (sons), effets compris (vue Complet). Les <b>Combinations</b> et les réglages Global ne sont pas éditables.</p>\n  <p class=\"note\">Protocole : Korg SysEx, Model ID 36h (commun X5 / X5D / X5DR / 05R/W). Paramètres en direct : fonction 41h ; son complet : fonction 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.7.1 — © 2026 Benjamin PATY (BenjaminPaty54) — licence MIT. Korg et X5 sont des marques de Korg Inc. ; projet indépendant non affilié.</p>\n"
+  names: {
+    order: "noun-adj",
+    adj: ["Sombre", "Rouge", "Pale", "Neon", "Calme", "Vide", "Lisse", "Libre", "Fragile", "Etrange", "Magique", "Lunaire", "Solaire", "Polaire", "Sauvage", "Fauve", "Mystique", "Celeste"],
+    pad: ["Nappe", "Brume", "Voile", "Aura", "Nuage", "Reve", "Derive", "Lueur"],
+    bass: ["Basse", "Sub", "Grave", "Sourd", "Racine"],
+    lead: ["Lead", "Solo", "Ligne", "Rayon", "Laser", "Voix"],
+    keys: ["Piano", "Orgue", "Touche", "Ivoire", "Clavier"],
+    bell: ["Cloche", "Carillon", "Verre", "Gong", "Etoile"],
+    perc: ["Coup", "Pince", "Choc", "Tic", "Tambour", "Clac"],
+    texture: ["Bruit", "Espace", "Orage", "Vent", "Orbite", "Poussiere"]
+  },
+  help: "\n  <h3 style=\"margin-top:0\">Mise en route</h3>\n  <ol>\n    <li>Relie le X5 à l'ordinateur (interface MIDI USB : MIDI OUT du X5 → IN de l'interface, IN du X5 ← OUT). Le port <i>TO HOST</i> fonctionne aussi avec un pilote série.</li>\n    <li>Sur le X5 : <b>GLOBAL → MIDI Filter → EX = ENA</b> (sinon aucun SysEx ne passe). Pour écrire : <b>Memory Protect Program = OFF</b>.</li>\n    <li>Ouvre cette page dans <b>Chrome</b> ou <b>Edge</b>, accepte l'accès MIDI, choisis les ports puis clique <b>Détecter</b> (le canal global est trouvé automatiquement).</li>\n    <li>Si Chrome refuse l'accès MIDI quand la page est ouverte comme fichier, lance dans le dossier de la page <code>python3 -m http.server</code> puis ouvre <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Mets le X5 en mode PROG sur le son à retoucher et clique <b>⇩ Lire le X5</b>.</li>\n  </ol>\n  <h3>Raccourcis</h3>\n  <ul>\n    <li>Clavier de l'ordinateur = clavier musical (rangée du milieu = touches blanches, rangée du dessus = noires), <kbd>W</kbd>/<kbd>X</kbd> (AZERTY) ou <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>\n    <li><kbd>Espace</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annuler · <kbd>Ctrl/⌘+Maj+Z</kbd> = rétablir.</li>\n    <li>Bouton <b>🎹</b> : ouvre le clavier de test dans une fenêtre flottante, déplaçable par sa barre de titre. Fenêtre fermée, les touches de l'ordinateur jouent toujours des notes.</li>\n    <li>Double-clic sur un curseur = valeur d'origine. Molette = réglage fin.</li>\n    <li>Bouton <b>SysEx</b> : petite fenêtre (déplaçable, redimensionnable par le coin) qui montre chaque message envoyé ↑ et reçu ↓, traduit en clair. Le curseur <b>Délai</b> ajoute une pause après chaque SysEx (20 ms par défaut).</li>\n    <li>Les macros de l'onglet Rapide reviennent au centre : chaque geste <i>ajoute</i> ou <i>retire</i> par rapport au son actuel.</li>\n    <li><b>Inspiration</b> (onglet Rapide) : choisis une famille (Nappe, Basse, Lead…) pour créer un son neuf, jouable et déjà nommé. « Un autre » relance la même famille, « Son précédent » revient en arrière.</li>\n    <li>Les drapeaux en haut à droite changent la langue de l'interface.</li>\n    <li>Les <b>numéros encadrés</b> en haut des cartes (par ex. <code>4A–4E</code>) renvoient aux pages d'édition du X5 (PROG → EDIT). Ils changent entre les modes Simple/Batterie et Double, et selon l'oscillateur édité.</li>\n    <li><b>Essentiel / Complet</b> (à gauche des onglets) : Essentiel garde les réglages principaux, Complet affiche tous les paramètres du Program. Les deux modes agissent sur le même son.</li>\n    <li>Bouton <b>● Édition / ○ Jeu</b> : montre si le X5 est en mode édition. Un clic lui rend la main (mode Program) ; il est aussi remis en mode jeu quand tu fermes la page. Si le X5 refuse un réglage (par exemple après un passage par sa face avant), l'appli le remet en édition et lui renvoie le son.</li>\n  </ul>\n  <h3>Limites</h3>\n  <p class=\"note\">Cette version édite uniquement les <b>Programs</b> (sons), effets compris (vue Complet). Les <b>Combinations</b> et les réglages Global ne sont pas éditables.</p>\n  <p class=\"note\">Protocole : Korg SysEx, Model ID 36h (commun X5 / X5D / X5DR / 05R/W). Paramètres en direct : fonction 41h ; son complet : fonction 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.8 — © 2026 Benjamin PATY (BenjaminPaty54) — licence MIT. Korg et X5 sont des marques de Korg Inc. ; projet indépendant non affilié.</p>\n"
 });

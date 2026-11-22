@@ -57,7 +57,7 @@ Then open **http://localhost:8000/x5studio.html** in Chrome and allow access to 
 
 | Tab | What it's for |
 |---|---|
-| **Quick** | Ten macros (Brightness, Attack, Release, Vibrato, Width…) that each move several parameters at once. Each gesture adds to or subtracts from the current sound, then the macro springs back to the centre. **Vary** suggests small random variations. |
+| **Quick** | **Inspiration**: pick a family (Pad, Bass, Lead, Keys, Bell, Percussive, Texture / FX, Surprise) and a new, playable sound is created from scratch, with a short name. Ten macros (Brightness, Attack, Release, Vibrato, Width…) that each move several parameters at once. Each gesture adds to or subtracts from the current sound, then the macro springs back to the centre. **Vary** suggests small random variations. |
 | **Oscillators** | Single / Double / Drums mode, a choice of 340 multisounds (search, families, random pick), octave, level, pan, sends. |
 | **Filter (VDF)** and **Amp (VDA)** | Envelopes you edit with the mouse, velocity and keyboard sensitivity. You can edit oscillator 1, oscillator 2, or both at once ("linked"). |
 | **Modulation** | Pitch EG, filter LFO, vibrato; in Full view, also aftertouch and joystick. |
@@ -119,10 +119,14 @@ lang/
 Each file maps every English text of the interface to its translation, and also holds the "?" help window. To fix a translation, edit the right file. To add a language:
 
 1. copy `lang/fr.js` to `lang/xx.js` (`xx` = the language code, for example `pt`);
-2. change `code` and `name` at the top, then translate the right-hand side of each line and the help;
+2. change `code` and `name` at the top, translate the right-hand side of each line and the help, and adapt the `names` word lists used by Inspiration (short words: X5 names are 10 characters);
 3. add `<script src="lang/xx.js"></script>` next to the other language lines in the `<head>` of `x5studio.html`.
 
 Keep the `{0}`, `{1}` placeholders and the HTML tags as they are. A missing text is simply shown in English.
+
+## Reading the code
+
+`x5studio.html` starts with a commented overview ("How this program works"): the central 164-byte buffer, how a change travels to the X5, and a map of the file's sections. Each section opens with a short explanation of its role.
 
 ## Acknowledgements
 
