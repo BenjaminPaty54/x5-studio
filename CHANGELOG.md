@@ -4,6 +4,12 @@
 
 All notable changes to X5 Studio are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.7.1] — 2026-11-22
+
+### Changed
+- **Test keyboard in a floating window**, opened with the **🎹** button in the header, movable by its title bar and resizable. It is closed by default and its state is remembered. The computer keys still play notes when it is closed. The SysEx monitor and the log now sit at the bottom of the screen and move up when the keyboard is open.
+- **Single theme (Atelier).** The dark **Nuit** theme and its ☾ / ☀ button are disabled; the theme is kept as a comment in the code so it can be brought back.
+
 ## [1.7] — 2026-11-22
 
 ### Added
@@ -106,6 +112,7 @@ These fixes come from the official X5DR MIDI implementation tables transcribed i
 - Velocity and keyboard sensitivity switches now have their three states (−/0/+).
 - Keyboard tracking has its four modes (Off/Low/High/All).
 
+[1.7.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7.1
 [1.7]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7
 [1.6]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.6
 [1.5.2]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.2

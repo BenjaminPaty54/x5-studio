@@ -12,7 +12,7 @@ Deux vues : **Essentiel** (les réglages principaux, pour fabriquer ou retoucher
 
 Chaque carte affiche, en haut à droite, le numéro de la **page d'édition correspondante sur le X5** (PROG → EDIT), par exemple `4A–4E`. Les numéros suivent le mode d'oscillateur (Simple/Batterie ou Double) et l'oscillateur édité.
 
-Deux thèmes : **Atelier** (clair, inspiré de l'esthétique des modules Eurorack) et **Nuit** (sombre), à basculer avec le bouton ☾ / ☀.
+L'esthétique s'inspire des modules Eurorack : façades claires, boutons blancs, une couleur par section.
 
 © 2026 Benjamin PATY (BenjaminPaty54)
 
@@ -64,9 +64,9 @@ Ouvre ensuite **http://localhost:8000/x5studio.html** dans Chrome et accepte l'a
 | **Effets** | Type et placement des deux effets ; en vue Complet, tous les réglages de chacun des 47 effets (temps de réverb, retard, vitesse du LFO, égaliseur…), la balance sec/effet et la modulation dynamique. |
 | **Librairie** | Lire ou envoyer une banque de 100 sons, ouvrir et enregistrer des fichiers `.syx`, garder ses sons favoris dans le navigateur. |
 
-Outils toujours visibles :
+Outils :
 
-- **Clavier** à l'écran ou clavier de l'ordinateur (rangée du milieu = touches blanches), **▶ Tester** pour jouer une note, un accord ou un arpège, option **Rejouer à chaque réglage**.
+- **🎹 Clavier de test**, dans une fenêtre flottante qu'on ouvre et déplace à volonté (les touches de l'ordinateur jouent des notes même quand elle est fermée) (rangée du milieu = touches blanches), **▶ Tester** pour jouer une note, un accord ou un arpège, option **Rejouer à chaque réglage**.
 - **↶ / ↷** pour annuler ou rétablir (Ctrl/⌘+Z), **A/B** à maintenir appuyé pour réentendre le son d'origine, et **Revenir à l'origine**.
 - **● Édition / ○ Jeu** : indique si le synthé est en mode édition. Un clic lui rend la main (mode Program) ; c'est aussi fait automatiquement quand tu fermes la page. Si le X5 refuse un réglage (par exemple après un passage par sa face avant), l'appli le remet en édition et lui renvoie le son.
 - **SysEx** : petite fenêtre qui affiche chaque message envoyé ↑ ou reçu ↓, traduit en clair avec ses octets. Le curseur **Délai** ajoute une pause après chaque message SysEx (20 ms par défaut).

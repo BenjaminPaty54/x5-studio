@@ -42,6 +42,9 @@
   --r:4px; --font:"Avenir Next","Avenir","Futura","Century Gothic","Segoe UI",ui-sans-serif,sans-serif;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
 }
+/* Thème « Nuit » (sombre) — désactivé depuis la v1.7.1, conservé pour mémoire.
+   Pour le réactiver : retirer ce commentaire, remettre le bouton #btnTheme dans l'en-tête
+   et le code commenté de initTheme().
 :root[data-theme="nuit"]{
   --bg:#15171a; --panel:#1d2024; --panel2:#24282d; --line:#33383f; --txt:#e6e3dc; --mute:#9a9890; --label:#cfccc4;
   --acc:#e9a23b; --acc2:#5fc4b8; --neg:#e0645a;
@@ -57,6 +60,7 @@
   --c-quick:#e9a23b; --c-osc:#e9a23b; --c-vdf:#e9a23b; --c-vda:#e9a23b; --c-mod:#e9a23b; --c-ctl:#e9a23b; --c-fx:#e9a23b; --c-lib:#e9a23b;
   --r:10px; --font:ui-sans-serif,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
 }
+*/
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font:14px/1.35 var(--font)}
 button,select,input{font:inherit;color:inherit}
@@ -68,7 +72,7 @@ button:disabled{opacity:.45;cursor:default}
 header select{max-width:170px}
 #midiState{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 select,input[type=text],input[type=number]{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:5px 8px}
-.app{display:grid;grid-template-rows:auto auto 1fr auto;height:100vh}
+.app{display:grid;grid-template-rows:auto auto 1fr;height:100vh}
 header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:9px 14px;background:var(--hdr);border-bottom:1px solid var(--hdrline)}
 .brand{font-weight:700;letter-spacing:.14em;font-size:15px;margin-right:6px;text-transform:uppercase}
 .brand b{color:var(--acc);font-weight:700}
@@ -160,7 +164,15 @@ input[type=range]:focus-visible{outline:2px solid var(--sec);outline-offset:2px}
 .wave .nav input{flex:1;min-width:0}
 .wname{font-family:var(--mono);color:var(--lcd);background:var(--lcdbg);border-radius:3px;padding:3px 8px;font-size:14px}
 /* clavier */
-footer{background:var(--hdr);border-top:1px solid var(--hdrline);padding:8px 14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+/* clavier de test : fenêtre flottante, ouverte avec le bouton 🎹 */
+footer{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);width:min(980px,96vw);min-width:520px;resize:horizontal;overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--pop);padding:0 12px 10px;display:none;grid-template-columns:auto 1fr;gap:10px 12px;align-items:center;z-index:56}
+footer.on{display:grid}
+footer .kh{grid-column:1/-1;display:flex;align-items:center;gap:8px;margin:0 -12px;padding:6px 10px;border-bottom:1px solid var(--line);cursor:move;user-select:none;background:var(--panel2)}
+footer .kh b{margin-right:auto;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+footer .kh button{padding:2px 7px;font-size:12px}
+#btnKbd.on{border-color:var(--acc2);color:var(--acc2)}
+html.kbon #mon,html.kbon #log{bottom:160px}
+html.kbon #toast{bottom:170px}
 .kbctl{display:flex;flex-direction:column;gap:6px;min-width:250px}
 .kbctl .grp{flex-wrap:wrap}
 .keys{position:relative;height:86px;user-select:none;touch-action:none}
@@ -178,7 +190,7 @@ footer{background:var(--hdr);border-top:1px solid var(--hdrline);padding:8px 14p
 .item{display:flex;gap:6px;align-items:center;padding:5px 8px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel2)}
 .item span{flex:1;font-family:var(--mono);font-size:13px}
 /* moniteur SysEx, journal, messages */
-#mon{position:fixed;left:12px;bottom:118px;width:min(620px,94vw);height:230px;min-height:120px;min-width:320px;resize:both;overflow:hidden;background:var(--term);color:var(--termtxt);border:1px solid var(--line);border-radius:var(--r);display:none;flex-direction:column;z-index:55;box-shadow:var(--pop)}
+#mon{position:fixed;left:12px;bottom:12px;width:min(620px,94vw);height:230px;min-height:120px;min-width:320px;resize:both;overflow:hidden;background:var(--term);color:var(--termtxt);border:1px solid var(--line);border-radius:var(--r);display:none;flex-direction:column;z-index:55;box-shadow:var(--pop)}
 #mon.on{display:flex}
 #mon .mh{display:flex;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--line);cursor:move;user-select:none;flex-wrap:wrap;font-size:12px;background:var(--panel)}
 #mon .mh b{margin-right:auto;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
@@ -211,10 +223,10 @@ html[data-view="full"] .simple-only{display:none!important}
 .cards.fxcards .card.wide .row{max-width:520px}
 #btnEdit{font-weight:600;min-width:92px}
 #btnEdit.on{color:var(--neg);border-color:var(--neg)}
-#log{position:fixed;right:12px;bottom:118px;width:min(560px,92vw);max-height:40vh;overflow:auto;background:var(--term);color:var(--termtxt);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;font:11px/1.45 var(--mono);display:none;z-index:50;box-shadow:var(--pop)}
+#log{position:fixed;right:12px;bottom:12px;width:min(560px,92vw);max-height:40vh;overflow:auto;background:var(--term);color:var(--termtxt);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;font:11px/1.45 var(--mono);display:none;z-index:50;box-shadow:var(--pop)}
 #log.on{display:block}
 #log .o{color:var(--acc2)} #log .i{color:var(--acc)} #log .e{color:var(--neg)} #log .m{color:var(--mute)}
-#toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:var(--toastbg);color:var(--toasttxt);border:1px solid var(--line);border-radius:var(--r);padding:9px 16px;box-shadow:var(--pop);z-index:60;display:none;max-width:80vw}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--toastbg);color:var(--toasttxt);border:1px solid var(--line);border-radius:var(--r);padding:9px 16px;box-shadow:var(--pop);z-index:60;display:none;max-width:80vw}
 #toast.on{display:block}
 #toast.bad{border-color:var(--neg);border-left:4px solid var(--neg)} #toast.ok{border-color:var(--acc2);border-left:4px solid var(--acc2)}
 dialog{background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:var(--r);max-width:460px;box-shadow:var(--pop)}
@@ -228,7 +240,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
 <body>
 <div class="app">
 <header>
-  <div class="brand" title="X5 Studio v1.7 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
+  <div class="brand" title="X5 Studio v1.7.1 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
   <span id="midiState" class="pill">MIDI : en attente</span>
   <div class="grp">
     <span class="led" id="ledOut" title="MIDI output"></span><select id="outSel" title="MIDI output to the X5"></select>
@@ -251,9 +263,10 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
     <button id="btnWrite" class="pri" title="Writes the sound to the X5 memory">Write</button>
   </div>
   <div class="grp" style="margin-left:auto">
+    <button id="btnKbd" title="Test keyboard (floating window)">🎹</button>
     <button id="btnMon" title="SysEx monitor (sent and received messages)">SysEx</button>
     <button id="btnLog" title="MIDI message log">≡</button>
-    <button id="btnTheme" title="Light / dark theme">☾</button>
+    <!-- <button id="btnTheme" title="Light / dark theme">☾</button>  (thème Nuit désactivé, v1.7.1) -->
     <button id="btnHelp">?</button>
     <div class="flags" id="flags"></div>
   </div>
@@ -290,7 +303,8 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
   <section class="page" id="p-lib"></section>
 </main>
 
-<footer>
+<footer id="kbd">
+  <div class="kh" id="kbdHead"><b>Test keyboard</b><button id="kbdClose" title="Close">✕</button></div>
   <div class="kbctl">
     <div class="grp">
       <button id="octDn" title="Octave − (Z/W key)">Oct −</button><span id="octLbl" class="pill">C3–C5</span><button id="octUp" title="Octave + (X key)">Oct +</button>
@@ -338,6 +352,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
   <ul>
     <li>Computer keyboard = music keyboard (middle row = white keys, row above = black keys), <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>
     <li><kbd>Space</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = undo · <kbd>Ctrl/⌘+Shift+Z</kbd> = redo.</li>
+    <li><b>🎹</b> button: opens the test keyboard in a floating window you can move by its title bar. With the window closed, the computer keys still play notes.</li>
     <li>Double-click a slider = original value. Mouse wheel = fine adjustment.</li>
     <li><b>SysEx</b> button: a small window (movable, resizable from its corner) showing every message sent ↑ and received ↓, decoded in plain words. The <b>Delay</b> slider adds a pause after each SysEx message (20 ms by default).</li>
     <li>The macros on the Quick tab spring back to the centre: each gesture <i>adds to</i> or <i>takes away from</i> the current sound.</li>
@@ -349,7 +364,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
   <h3>Limitations</h3>
   <p class="note">This version edits <b>Programs</b> (sounds) only, effects included (Full view). <b>Combinations</b> and Global settings cannot be edited.</p>
   <p class="note">Protocol: Korg SysEx, Model ID 36h (shared by X5 / X5D / X5DR / 05R/W). Live parameters: function 41h; full sound: function 40h.</p>
-  <p class="note" style="margin-top:12px">X5 Studio v1.7 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
+  <p class="note" style="margin-top:12px">X5 Studio v1.7.1 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
 </div><div style="text-align:right"><button class="pri">OK</button></div></form></dialog>
 
 <script>
@@ -423,10 +438,12 @@ function setLang(l, initial){
   if (!initial){ trTree(document.body); refreshAll(); renderBank(); renderMine(); }
 }
 function initTheme(){
-  let t=null; try{ t=localStorage.getItem('x5s.theme'); }catch(e){}
-  const apply=v=>{ document.documentElement.dataset.theme=v; document.getElementById('btnTheme').textContent = v==='nuit' ? '☀' : '☾'; try{ localStorage.setItem('x5s.theme',v); }catch(e){} };
-  apply(t==='nuit'?'nuit':'atelier');
-  document.getElementById('btnTheme').onclick=()=>apply(document.documentElement.dataset.theme==='nuit'?'atelier':'nuit');
+  // Thème unique « Atelier » depuis la v1.7.1. Ancien sélecteur Atelier / Nuit, conservé pour mémoire :
+  // let t=null; try{ t=localStorage.getItem('x5s.theme'); }catch(e){}
+  // const apply=v=>{ document.documentElement.dataset.theme=v; document.getElementById('btnTheme').textContent = v==='nuit' ? '☀' : '☾'; try{ localStorage.setItem('x5s.theme',v); }catch(e){} };
+  // apply(t==='nuit'?'nuit':'atelier');
+  // document.getElementById('btnTheme').onclick=()=>apply(document.documentElement.dataset.theme==='nuit'?'atelier':'nuit');
+  document.documentElement.dataset.theme='atelier';
 }
 function initView(){
   let v=null; try{ v=localStorage.getItem('x5s.view'); }catch(e){}
@@ -454,7 +471,7 @@ function initLang(){
   setLang(l, true);
   i18nObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['title','placeholder']});
 }
-/* X5 Studio v1.7 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
+/* X5 Studio v1.7.1 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
 /* ============================================================
    1. Données de référence
    ============================================================ */
@@ -986,6 +1003,23 @@ function mon(dir, bytes){
   b.append(r); while (b.childNodes.length>300) b.firstChild.remove();
   if (stick) b.scrollTop=b.scrollHeight;
 }
+/* rend une fenêtre flottante déplaçable par sa barre de titre */
+function makeDraggable(el, hd){
+  let dx=0,dy=0,drag=false;
+  hd.addEventListener('pointerdown',e=>{ if (e.target.closest('button,input,label,select')) return; drag=true; const r=el.getBoundingClientRect(); dx=e.clientX-r.left; dy=e.clientY-r.top; el.style.transform='none'; el.style.left=r.left+'px'; el.style.top=r.top+'px'; el.style.bottom='auto'; hd.setPointerCapture(e.pointerId); });
+  hd.addEventListener('pointermove',e=>{ if(!drag) return; el.style.left=Math.max(0,Math.min(innerWidth-80,e.clientX-dx))+'px'; el.style.top=Math.max(0,Math.min(innerHeight-40,e.clientY-dy))+'px'; });
+  hd.addEventListener('pointerup',()=>drag=false);
+}
+/* clavier de test : fenêtre flottante (bouton 🎹), état mémorisé, fermé par défaut */
+function initKbd(){
+  const el=$('#kbd');
+  const setOpen=o=>{ el.classList.toggle('on',o); $('#btnKbd').classList.toggle('on',o); document.documentElement.classList.toggle('kbon',o); try{localStorage.setItem('x5s.kbd',o?'1':'0')}catch(e){} };
+  let open=false; try{ open = localStorage.getItem('x5s.kbd')==='1'; }catch(e){}
+  setOpen(open);
+  $('#btnKbd').onclick=()=>setOpen(!el.classList.contains('on'));
+  $('#kbdClose').onclick=()=>setOpen(false);
+  makeDraggable(el, $('#kbdHead'));
+}
 function initMon(){
   const el=$('#mon'), dl=$('#monDelay');
   const showDelay=()=>{ $('#monDelayV').textContent=TX.delay+' ms'; };
@@ -1000,11 +1034,7 @@ function initMon(){
   $('#monPause').onclick=()=>{ MON.paused=!MON.paused; $('#monPause').textContent=MON.paused?'▶':'❚❚'; $('#monPause').classList.toggle('pri',MON.paused); };
   $('#monHex').onchange=()=>el.classList.toggle('hidehex',!$('#monHex').checked);
   $('#monCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(MON.rows.join('\n')); toast('Messages copied','ok'); }catch(e){ toast('Copy failed','bad'); } };
-  // déplacer la fenêtre par sa barre de titre
-  const hd=$('#monHead'); let dx=0,dy=0,drag=false;
-  hd.addEventListener('pointerdown',e=>{ if (e.target.closest('button,input,label')) return; drag=true; const r=el.getBoundingClientRect(); dx=e.clientX-r.left; dy=e.clientY-r.top; hd.setPointerCapture(e.pointerId); });
-  hd.addEventListener('pointermove',e=>{ if(!drag) return; el.style.left=Math.max(0,Math.min(innerWidth-80,e.clientX-dx))+'px'; el.style.top=Math.max(0,Math.min(innerHeight-40,e.clientY-dy))+'px'; el.style.bottom='auto'; });
-  hd.addEventListener('pointerup',()=>drag=false);
+  makeDraggable(el, $('#monHead'));
 }
 
 /* ============================================================
@@ -1677,6 +1707,7 @@ function boot(){
   $('#btnEdit').onclick=()=>{ if (!midi.out) return toast('No MIDI output selected','bad'); if (DEV.edit) leaveEdit(); else { if (DEV.synced) sendDump(true); else enterEdit(); toast('Back to editing: the editor\'s sound is sent to the X5 again','ok'); } };
   window.addEventListener('pagehide', exitOnClose); window.addEventListener('beforeunload', exitOnClose);
   initView();
+  initKbd();
   $('#btnUndo').onclick=undo; $('#btnRedo').onclick=redo;
   $('#btnRevert').onclick=()=>{ applyBuffer(origin); commit(); };
   const ab=$('#btnAB'); let abBuf=null;

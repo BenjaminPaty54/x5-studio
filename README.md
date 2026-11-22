@@ -12,7 +12,7 @@ Two views: **Essential** (the main settings, for building or tweaking a sound qu
 
 Each card shows, top right, the number of the matching **edit page on the X5** (PROG → EDIT), such as `4A–4E`. Numbers follow the oscillator mode (Single/Drums or Double) and the oscillator being edited.
 
-Two themes: **Atelier** (light, inspired by the look of Eurorack modules) and **Nuit** (dark), switched with the ☾ / ☀ button.
+The look is inspired by Eurorack modules: light module faces, white knobs, one colour per section.
 
 © 2026 Benjamin PATY (BenjaminPaty54)
 
@@ -64,9 +64,9 @@ Then open **http://localhost:8000/x5studio.html** in Chrome and allow access to 
 | **Effects** | Type and routing of the two effects; in Full view, every setting of each of the 47 effects (reverb time, delay time, LFO speed, EQ…), wet/dry balance and dynamic modulation. |
 | **Library** | Read or send a bank of 100 sounds, open and save `.syx` files, keep favourite sounds in the browser. |
 
-Always-visible tools:
+Tools:
 
-- **Keyboard** on screen or on your computer keyboard (middle row = white keys), **▶ Test** to play a note, a chord or an arpeggio, and **Replay after each change**.
+- **🎹 Test keyboard**, in a floating window you open and move as needed (the computer keys play notes even when it is closed) (middle row = white keys), **▶ Test** to play a note, a chord or an arpeggio, and **Replay after each change**.
 - **↶ / ↷** to undo or redo (Ctrl/⌘+Z), **A/B** (hold it down to hear the original sound), and **Revert to original**.
 - **● Editing / ○ Play**: shows whether the X5 is in edit mode. One click hands control back to the synth (Program mode); this also happens automatically when you close the page. If the X5 rejects a change (for example after you used its front panel), the app puts it back in edit mode and resends the sound.
 - **SysEx**: a small window that shows every message sent ↑ or received ↓, decoded in plain words with its bytes. The **Delay** slider adds a pause after each SysEx message (20 ms by default).

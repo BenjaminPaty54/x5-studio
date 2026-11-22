@@ -4,6 +4,12 @@
 
 Toutes les modifications notables de X5 Studio sont listées ici. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et la numérotation suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.7.1] — 2026-11-22
+
+### Modifié
+- **Clavier de test dans une fenêtre flottante**, ouverte avec le bouton **🎹** de l'en-tête, déplaçable par sa barre de titre et redimensionnable. Fermée par défaut, elle mémorise son état. Les touches de l'ordinateur jouent toujours des notes quand elle est fermée. Le moniteur SysEx et le journal se placent maintenant en bas de l'écran et remontent quand le clavier est ouvert.
+- **Thème unique (Atelier).** Le thème sombre **Nuit** et son bouton ☾ / ☀ sont désactivés ; le thème reste en commentaire dans le code pour pouvoir être réactivé.
+
 ## [1.7] — 2026-11-22
 
 ### Ajouté
@@ -106,6 +112,7 @@ Ces corrections viennent des tables MIDI officielles du X5DR transcrites dans le
 - Les sensibilités à la vélocité et au clavier ont leurs trois états (−/0/+).
 - Le suivi de clavier a ses quatre modes (Off/Bas/Haut/Tout).
 
+[1.7.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7.1
 [1.7]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7
 [1.6]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.6
 [1.5.2]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.2
