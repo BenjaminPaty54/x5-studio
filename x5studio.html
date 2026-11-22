@@ -11,13 +11,19 @@
   Korg, X5, X5D, X5DR et 05R/W sont des marques de Korg Inc. Projet indépendant, non affilié à Korg.
   Korg, X5, X5D, X5DR and 05R/W are trademarks of Korg Inc. Independent project, not affiliated with Korg.
 -->
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="author" content="Benjamin PATY (BenjaminPaty54)">
 <meta name="copyright" content="© 2026 Benjamin PATY">
+<!-- Languages: the interface is in English; each extra language is one file in lang/ -->
+<script>window.X5_LANGPACKS={}; window.X5_LANG=function(p){ window.X5_LANGPACKS[p.code]=p; };</script>
+<script src="lang/fr.js"></script>
+<script src="lang/it.js"></script>
+<script src="lang/es.js"></script>
+<script src="lang/de.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>X5 Studio — éditeur SysEx pour Korg X5 / 05R/W / X5DR</title>
+<title>X5 Studio — SysEx editor for Korg X5 / 05R/W / X5DR</title>
 <style>
 /* ---------- Thèmes : « Atelier » (clair, inspiré des modules Eurorack Mutable Instruments) et « Nuit » ---------- */
 :root, :root[data-theme="atelier"]{
@@ -214,56 +220,56 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
 <body>
 <div class="app">
 <header>
-  <div class="brand" title="X5 Studio v1.5 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
+  <div class="brand" title="X5 Studio v1.5.1 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
   <span id="midiState" class="pill">MIDI : en attente</span>
   <div class="grp">
-    <span class="led" id="ledOut" title="Sortie MIDI"></span><select id="outSel" title="Sortie MIDI vers le X5"></select>
-    <span class="led in" id="ledIn" title="Entrée MIDI"></span><select id="inSel" title="Entrée MIDI depuis le X5"></select>
-    <label title="Canal MIDI global du X5 (Global 2A)">Canal <select id="chSel"></select></label>
-    <button id="btnDetect" title="Cherche le X5 sur les 16 canaux (Identity Request)">Détecter</button>
+    <span class="led" id="ledOut" title="MIDI output"></span><select id="outSel" title="MIDI output to the X5"></select>
+    <span class="led in" id="ledIn" title="MIDI input"></span><select id="inSel" title="MIDI input from the X5"></select>
+    <label title="X5 global MIDI channel (Global 2A)">Channel <select id="chSel"></select></label>
+    <button id="btnDetect" title="Looks for the X5 on all 16 channels (Identity Request)">Detect</button>
   </div>
   <div class="sep"></div>
   <div class="grp">
-    <div class="seg" title="Direct : chaque réglage part tout de suite. Manuel : tu envoies quand tu veux.">
-      <button id="modeLive" class="on">Direct</button><button id="modeMan">Manuel</button>
+    <div class="seg" title="Live: every change is sent immediately. Manual: you send when you want.">
+      <button id="modeLive" class="on">Live</button><button id="modeMan">Manual</button>
     </div>
-    <button id="btnEdit" title="Édition en cours : clique pour rendre la main au X5 (mode Program). En mode jeu : clique pour reprendre l'édition.">○ Jeu</button>
-    <button id="btnRead" title="Lit le son affiché sur le X5 (Program Dump Request)">⇩ Lire le X5</button>
-    <button id="btnSend" title="Envoie le son entier dans la mémoire tampon d'édition du X5">⇧ Envoyer</button>
+    <button id="btnEdit" title="Editing: click to hand control back to the X5 (Program mode). In play mode: click to resume editing.">○ Jeu</button>
+    <button id="btnRead" title="Reads the sound shown on the X5 (Program Dump Request)">⇩ Read X5</button>
+    <button id="btnSend" title="Sends the whole sound to the X5 edit buffer">⇧ Send</button>
   </div>
   <div class="sep"></div>
   <div class="grp">
-    <select id="slotSel" title="Emplacement de destination sur le X5"></select>
-    <button id="btnWrite" class="pri" title="Écrit le son dans la mémoire du X5">Écrire</button>
+    <select id="slotSel" title="Target slot on the X5"></select>
+    <button id="btnWrite" class="pri" title="Writes the sound to the X5 memory">Write</button>
   </div>
   <div class="grp" style="margin-left:auto">
-    <button id="btnMon" title="Moniteur SysEx (messages envoyés et reçus)">SysEx</button>
-    <button id="btnLog" title="Journal des messages MIDI">≡</button>
-    <button id="btnTheme" title="Thème clair / sombre">☾</button>
+    <button id="btnMon" title="SysEx monitor (sent and received messages)">SysEx</button>
+    <button id="btnLog" title="MIDI message log">≡</button>
+    <button id="btnTheme" title="Light / dark theme">☾</button>
     <button id="btnHelp">?</button>
     <div class="flags" id="flags"></div>
   </div>
 </header>
 
 <div class="progbar">
-  <input id="pname" class="lcd" maxlength="10" spellcheck="false" title="Nom du son (10 caractères)">
+  <input id="pname" class="lcd" maxlength="10" spellcheck="false" title="Sound name (10 characters)">
   <span id="dirty" class="dirty"></span>
   <div class="grp">
-    <button id="btnUndo" title="Annuler (Ctrl+Z)">↶</button>
-    <button id="btnRedo" title="Rétablir (Ctrl+Maj+Z)">↷</button>
-    <button id="btnAB" title="Maintiens appuyé pour entendre le son d'origine">A/B : maintenir = origine</button>
-    <button id="btnRevert" title="Revenir au son tel qu'il a été chargé">Revenir à l'origine</button>
+    <button id="btnUndo" title="Undo (Ctrl+Z)">↶</button>
+    <button id="btnRedo" title="Redo (Ctrl+Shift+Z)">↷</button>
+    <button id="btnAB" title="Hold to hear the original sound">A/B: hold = original</button>
+    <button id="btnRevert" title="Go back to the sound as it was loaded">Revert to original</button>
   </div>
-  <div class="seg" id="viewSeg" title="Essentiel : les réglages principaux. Complet : tous les paramètres du Program."><button data-v="simple">Essentiel</button><button data-v="full">Complet</button></div>
+  <div class="seg" id="viewSeg" title="Essential: the main settings. Full: every Program parameter."><button data-v="simple">Essential</button><button data-v="full">Full</button></div>
   <nav class="tabs" id="tabs">
-    <button data-p="quick" class="on">Rapide</button>
-    <button data-p="osc">Oscillateurs</button>
-    <button data-p="vdf">Filtre (VDF)</button>
-    <button data-p="vda">Ampli (VDA)</button>
-    <button data-p="mod">Hauteur & LFO</button>
-    <button data-p="ctl" class="adv">Contrôleurs</button>
-    <button data-p="fx">Effets</button>
-    <button data-p="lib">Librairie</button>
+    <button data-p="quick" class="on">Quick</button>
+    <button data-p="osc">Oscillators</button>
+    <button data-p="vdf">Filter (VDF)</button>
+    <button data-p="vda">Amp (VDA)</button>
+    <button data-p="mod">Pitch & LFO</button>
+    <button data-p="ctl" class="adv">Controllers</button>
+    <button data-p="fx">Effects</button>
+    <button data-p="lib">Library</button>
   </nav>
 </div>
 
@@ -281,16 +287,16 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
 <footer>
   <div class="kbctl">
     <div class="grp">
-      <button id="octDn" title="Octave − (touche W/Z)">Oct −</button><span id="octLbl" class="pill">C3–C5</span><button id="octUp" title="Octave + (touche X)">Oct +</button>
-      <label title="Vélocité des notes de test">Vél <input id="vel" type="range" min="1" max="127" value="96" style="width:80px"></label>
+      <button id="octDn" title="Octave − (Z/W key)">Oct −</button><span id="octLbl" class="pill">C3–C5</span><button id="octUp" title="Octave + (X key)">Oct +</button>
+      <label title="Velocity of test notes">Vel <input id="vel" type="range" min="1" max="127" value="96" style="width:80px"></label>
     </div>
     <div class="grp">
-      <select id="phraseSel" title="Type de test">
-        <option value="note">Note</option><option value="chord">Accord</option><option value="arp">Arpège</option><option value="range">Grave / médium / aigu</option><option value="vel">Doux → fort</option><option value="long">Note tenue 3 s</option>
+      <select id="phraseSel" title="Test type">
+        <option value="note">Note</option><option value="chord">Chord</option><option value="arp">Arpeggio</option><option value="range">Low / mid / high</option><option value="vel">Soft → loud</option><option value="long">Held note 3 s</option>
       </select>
-      <button id="btnPlay" class="pri" title="Barre d'espace">▶ Tester</button>
-      <label title="Rejoue automatiquement le test après chaque réglage"><input type="checkbox" id="autoPlay"> Rejouer à chaque réglage</label>
-      <button id="btnPanic" title="Coupe toutes les notes">■</button>
+      <button id="btnPlay" class="pri" title="Space bar">▶ Test</button>
+      <label title="Replays the test automatically after each change"><input type="checkbox" id="autoPlay"> Replay after each change</label>
+      <button id="btnPanic" title="Stops all notes">■</button>
     </div>
   </div>
   <div class="keys" id="keys"></div>
@@ -300,59 +306,65 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
 <div id="log"></div>
 <div id="mon">
   <div class="mh" id="monHead">
-    <b>Moniteur SysEx</b>
-    <label title="Pause ajoutée après chaque message SysEx envoyé">Délai <input id="monDelay" type="range" min="0" max="150" step="5"> <span id="monDelayV" class="v"></span></label>
-    <label title="Afficher aussi les notes et contrôleurs"><input type="checkbox" id="monNotes"> notes</label>
+    <b>SysEx monitor</b>
+    <label title="Pause added after each SysEx message sent">Delay <input id="monDelay" type="range" min="0" max="150" step="5"> <span id="monDelayV" class="v"></span></label>
+    <label title="Also show notes and controllers"><input type="checkbox" id="monNotes"> notes</label>
     <label><input type="checkbox" id="monHex" checked> hex</label>
-    <button id="monPause" title="Figer l'affichage">❚❚</button>
-    <button id="monClear" title="Effacer">⌫</button>
-    <button id="monCopy" title="Copier tout en texte">⧉</button>
-    <button id="monClose" title="Fermer">✕</button>
+    <button id="monPause" title="Freeze display">❚❚</button>
+    <button id="monClear" title="Clear">⌫</button>
+    <button id="monCopy" title="Copy everything as text">⧉</button>
+    <button id="monClose" title="Close">✕</button>
   </div>
   <div class="mb" id="monBody"></div>
 </div>
 <div id="toast"></div>
-<dialog id="dlg"><form method="dialog"><div id="dlgBody"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button value="no">Annuler</button><button value="yes" class="pri" id="dlgOk">Confirmer</button></div></form></dialog>
+<dialog id="dlg"><form method="dialog"><div id="dlgBody"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button value="no">Cancel</button><button value="yes" class="pri" id="dlgOk">Confirm</button></div></form></dialog>
 <dialog id="helpDlg" style="max-width:620px"><form method="dialog"><div class="help" id="helpBody" data-noi18n>
-  <h3 style="margin-top:0">Mise en route</h3>
+  <h3 style="margin-top:0">Getting started</h3>
   <ol>
-    <li>Relie le X5 à l'ordinateur (interface MIDI USB : MIDI OUT du X5 → IN de l'interface, IN du X5 ← OUT). Le port <i>TO HOST</i> fonctionne aussi avec un pilote série.</li>
-    <li>Sur le X5 : <b>GLOBAL → MIDI Filter → EX = ENA</b> (sinon aucun SysEx ne passe). Pour écrire : <b>Memory Protect Program = OFF</b>.</li>
-    <li>Ouvre cette page dans <b>Chrome</b> ou <b>Edge</b>, accepte l'accès MIDI, choisis les ports puis clique <b>Détecter</b> (le canal global est trouvé automatiquement).</li>
-    <li>Si Chrome refuse l'accès MIDI quand la page est ouverte comme fichier, lance dans le dossier de la page <code>python3 -m http.server</code> puis ouvre <code>http://localhost:8000/x5studio.html</code>.</li>
-    <li>Mets le X5 en mode PROG sur le son à retoucher et clique <b>⇩ Lire le X5</b>.</li>
+    <li>Connect the X5 to the computer (USB MIDI interface: X5 MIDI OUT → interface IN, X5 IN ← interface OUT). The <i>TO HOST</i> port also works with a serial driver.</li>
+    <li>On the X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (otherwise no SysEx gets through). To write: <b>Memory Protect Program = OFF</b>.</li>
+    <li>Open this page in <b>Chrome</b> or <b>Edge</b>, allow MIDI access, pick the ports, then click <b>Detect</b> (the global channel is found automatically).</li>
+    <li>If Chrome refuses MIDI access when the page is opened as a file, run <code>python3 -m http.server</code> in the page's folder, then open <code>http://localhost:8000/x5studio.html</code>.</li>
+    <li>Put the X5 in PROG mode on the sound you want to edit and click <b>⇩ Read X5</b>.</li>
   </ol>
-  <h3>Raccourcis</h3>
+  <h3>Shortcuts</h3>
   <ul>
-    <li>Clavier de l'ordinateur = clavier musical (rangée du milieu = touches blanches, rangée du dessus = noires), <kbd>W</kbd>/<kbd>X</kbd> (AZERTY) ou <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>
-    <li><kbd>Espace</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annuler · <kbd>Ctrl/⌘+Maj+Z</kbd> = rétablir.</li>
-    <li>Double-clic sur un curseur = valeur d'origine. Molette = réglage fin.</li>
-    <li>Bouton <b>SysEx</b> : petite fenêtre (déplaçable, redimensionnable par le coin) qui montre chaque message envoyé ↑ et reçu ↓, traduit en clair. Le curseur <b>Délai</b> ajoute une pause après chaque SysEx (20 ms par défaut).</li>
-    <li>Les macros de l'onglet Rapide reviennent au centre : chaque geste <i>ajoute</i> ou <i>retire</i> par rapport au son actuel.</li>
+    <li>Computer keyboard = music keyboard (middle row = white keys, row above = black keys), <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>
+    <li><kbd>Space</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = undo · <kbd>Ctrl/⌘+Shift+Z</kbd> = redo.</li>
+    <li>Double-click a slider = original value. Mouse wheel = fine adjustment.</li>
+    <li><b>SysEx</b> button: a small window (movable, resizable from its corner) showing every message sent ↑ and received ↓, decoded in plain words. The <b>Delay</b> slider adds a pause after each SysEx message (20 ms by default).</li>
+    <li>The macros on the Quick tab spring back to the centre: each gesture <i>adds to</i> or <i>takes away from</i> the current sound.</li>
+    <li>The flags at the top right change the interface language.</li>
+    <li><b>Essential / Full</b> (left of the tabs): Essential keeps the main settings, Full shows every Program parameter. Both modes edit the same sound.</li>
+    <li><b>● Editing / ○ Play</b> button: shows whether the X5 is in edit mode. One click hands control back to it (Program mode); it is also put back in play mode when you close the page. If the X5 rejects a change (for example after using its front panel), the app puts it back in edit mode and resends the sound.</li>
   </ul>
-  <h3>Limites</h3>
-  <p class="note">Cette version édite uniquement les <b>Programs</b> (sons). Les <b>Combinations</b>, les réglages Global et les paramètres internes des effets ne sont pas encore éditables.</p>
-  <p class="note">Protocole : Korg SysEx, Model ID 36h (commun X5 / X5D / X5DR / 05R/W). Paramètres en direct : fonction 41h ; son complet : fonction 40h.</p>
-  <p class="note" style="margin-top:12px">X5 Studio v1.5 — © 2026 Benjamin PATY (BenjaminPaty54) — licence MIT. Korg et X5 sont des marques de Korg Inc. ; projet indépendant non affilié.</p>
+  <h3>Limitations</h3>
+  <p class="note">This version edits <b>Programs</b> (sounds) only. <b>Combinations</b>, Global settings and the internal effect parameters cannot be edited yet.</p>
+  <p class="note">Protocol: Korg SysEx, Model ID 36h (shared by X5 / X5D / X5DR / 05R/W). Live parameters: function 41h; full sound: function 40h.</p>
+  <p class="note" style="margin-top:12px">X5 Studio v1.5.1 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
 </div><div style="text-align:right"><button class="pri">OK</button></div></form></dialog>
 
 <script>
 "use strict";
 /* ============================================================
-   0. Langues (FR, EN, IT, ES, DE)
-      Le code et l'interface sont écrits en français ; chaque texte affiché
-      est traduit à la volée via le dictionnaire I18N_DICT (clé = texte français).
+   0. Languages
+      The interface is written in English. Every other language lives in its
+      own file in the lang/ folder (lang/fr.js, lang/it.js…), loaded by the
+      <script> tags in <head>. Each file calls X5_LANG({code, name, strings, help}),
+      where strings maps the English text to its translation.
+      To add a language: copy lang/fr.js, translate it, add a <script> tag in <head>.
+      If the lang/ folder is missing, the app simply stays in English.
    ============================================================ */
-const LANGS = ['fr','en','it','es','de'];
-const LANG_NAMES = {fr:'Français',en:'English',it:'Italiano',es:'Español',de:'Deutsch'};
-const I18N_DICT = {" (actuellement « {0} »)": {"en": " (currently “{0}”)", "it": " (attualmente “{0}”)", "es": " (actualmente «{0}»)", "de": " (derzeit „{0}“)"}, " (toutes notes off)": {"en": " (all notes off)", "it": " (tutte le note off)", "es": " (todas las notas off)", "de": " (alle Noten aus)"}, "A/B : maintenir = origine": {"en": "A/B: hold = original", "it": "A/B: tieni premuto = originale", "es": "A/B: mantener = original", "de": "A/B: halten = Original"}, "Accentue la zone du cutoff (caractère, mordant).": {"en": "Emphasises the cutoff region (character, bite).", "it": "Accentua la zona del cutoff (carattere, mordente).", "es": "Acentúa la zona del cutoff (carácter, mordiente).", "de": "Betont den Cutoff-Bereich (Charakter, Biss)."}, "Accord": {"en": "Chord", "it": "Accordo", "es": "Acorde", "de": "Akkord"}, "Accordéons & harmonica": {"en": "Accordions & harmonica", "it": "Fisarmoniche & armonica", "es": "Acordeones & armónica", "de": "Akkordeons & Mundharmonika"}, "Accès MIDI refusé · clic ici pour réessayer": {"en": "MIDI access denied · click here to retry", "it": "Accesso MIDI negato · clicca qui per riprovare", "es": "Acceso MIDI denegado · haz clic aquí para reintentar", "de": "MIDI-Zugriff verweigert · hier klicken zum Wiederholen"}, "Afficher aussi les notes et contrôleurs": {"en": "Also show notes and controllers", "it": "Mostra anche note e controller", "es": "Mostrar también notas y controladores", "de": "Auch Noten und Controller anzeigen"}, "Aftertouch": {"en": "Aftertouch", "it": "Aftertouch", "es": "Aftertouch", "de": "Aftertouch"}, "Agit sur": {"en": "Applies to", "it": "Agisce su", "es": "Actúa sobre", "de": "Wirkt auf"}, "Aléatoire": {"en": "Random", "it": "Casuale", "es": "Aleatorio", "de": "Zufall"}, "Ampleur": {"en": "Amount", "it": "Ampiezza", "es": "Amplitud", "de": "Stärke"}, "Ampli (VDA)": {"en": "Amp (VDA)", "it": "Ampli (VDA)", "es": "Amplificador (VDA)", "de": "Verstärker (VDA)"}, "Anches & saxophones": {"en": "Reeds & saxophones", "it": "Ance & sassofoni", "es": "Lengüetas & saxofones", "de": "Rohrblätter & Saxofone"}, "Annuler": {"en": "Cancel", "it": "Annulla", "es": "Cancelar", "de": "Abbrechen"}, "Annuler (Ctrl+Z)": {"en": "Undo (Ctrl+Z)", "it": "Annulla (Ctrl+Z)", "es": "Deshacer (Ctrl+Z)", "de": "Rückgängig (Strg+Z)"}, "Appareil MIDI inconnu (id {0})": {"en": "Unknown MIDI device (id {0})", "it": "Dispositivo MIDI sconosciuto (id {0})", "es": "Dispositivo MIDI desconocido (id {0})", "de": "Unbekanntes MIDI-Gerät (ID {0})"}, "Apparition": {"en": "Fade in", "it": "Comparsa", "es": "Aparición", "de": "Einblenden"}, "Architecture": {"en": "Structure", "it": "Struttura", "es": "Estructura", "de": "Aufbau"}, "Arpège": {"en": "Arpeggio", "it": "Arpeggio", "es": "Arpegio", "de": "Arpeggio"}, "Attaque": {"en": "Attack", "it": "Attacco", "es": "Ataque", "de": "Attack"}, "Au hasard dans la même famille": {"en": "Random pick in the same family", "it": "A caso nella stessa famiglia", "es": "Al azar en la misma familia", "de": "Zufällig aus derselben Familie"}, "Aucun": {"en": "None", "it": "Nessuno", "es": "Ninguno", "de": "Keiner"}, "Aucun Program X5/05R-W dans ce fichier ({0} messages SysEx)": {"en": "No X5/05R-W Program in this file ({0} SysEx messages)", "it": "Nessun Program X5/05R-W in questo file ({0} messaggi SysEx)", "es": "Ningún Program X5/05R-W en este archivo ({0} mensajes SysEx)", "de": "Kein X5/05R-W-Program in dieser Datei ({0} SysEx-Nachrichten)"}, "Aucune banque chargée.": {"en": "No bank loaded.", "it": "Nessun banco caricato.", "es": "Ningún banco cargado.", "de": "Keine Bank geladen."}, "Aucune sortie MIDI": {"en": "No MIDI output", "it": "Nessuna uscita MIDI", "es": "Ninguna salida MIDI", "de": "Kein MIDI-Ausgang"}, "Aucune sortie MIDI choisie": {"en": "No MIDI output selected", "it": "Nessuna uscita MIDI selezionata", "es": "Ninguna salida MIDI seleccionada", "de": "Kein MIDI-Ausgang gewählt"}, "Balayage filtre (joy ↓)": {"en": "Filter sweep (joy ↓)", "it": "Sweep filtro (joy ↓)", "es": "Barrido de filtro (joy ↓)", "de": "Filter-Sweep (Joy ↓)"}, "Banque : {0}": {"en": "Bank: {0}", "it": "Banco: {0}", "es": "Banco: {0}", "de": "Bank: {0}"}, "Banque chargée ({0}) : 100 sons": {"en": "Bank loaded ({0}): 100 sounds", "it": "Banco caricato ({0}): 100 suoni", "es": "Banco cargado ({0}): 100 sonidos", "de": "Bank geladen ({0}): 100 Klänge"}, "Banque complète ({0} octets)": {"en": "Full bank ({0} bytes)", "it": "Banco completo ({0} byte)", "es": "Banco completo ({0} bytes)", "de": "Komplette Bank ({0} Bytes)"}, "Banque de 100 sons": {"en": "Bank of 100 sounds", "it": "Banco di 100 suoni", "es": "Banco de 100 sonidos", "de": "Bank mit 100 Klängen"}, "Banque envoyée": {"en": "Bank sent", "it": "Banco inviato", "es": "Banco enviado", "de": "Bank gesendet"}, "Barre d'espace": {"en": "Space bar", "it": "Barra spaziatrice", "es": "Barra espaciadora", "de": "Leertaste"}, "Bas": {"en": "Low", "it": "Basso", "es": "Bajo", "de": "Tief"}, "Basses": {"en": "Basses", "it": "Bassi", "es": "Bajos", "de": "Bässe"}, "Batterie": {"en": "Drums", "it": "Batteria", "es": "Batería", "de": "Drums"}, "Brillance": {"en": "Brightness", "it": "Brillantezza", "es": "Brillo", "de": "Helligkeit"}, "Canal": {"en": "Channel", "it": "Canale", "es": "Canal", "de": "Kanal"}, "Canal MIDI global du X5 (Global 2A)": {"en": "X5 global MIDI channel (Global 2A)", "it": "Canale MIDI globale dell'X5 (Global 2A)", "es": "Canal MIDI global del X5 (Global 2A)", "de": "Globaler MIDI-Kanal des X5 (Global 2A)"}, "Carré 1": {"en": "Square 1", "it": "Quadra 1", "es": "Cuadrada 1", "de": "Rechteck 1"}, "Carré 2": {"en": "Square 2", "it": "Quadra 2", "es": "Cuadrada 2", "de": "Rechteck 2"}, "Chaque réglage s'applique aux deux oscillateurs (affiche les valeurs de l'osc 1).": {"en": "Each change applies to both oscillators (shows osc 1 values).", "it": "Ogni modifica si applica a entrambi gli oscillatori (mostra i valori dell'osc 1).", "es": "Cada ajuste se aplica a ambos osciladores (muestra los valores del osc 1).", "de": "Jede Änderung gilt für beide Oszillatoren (zeigt die Werte von Osc 1)."}, "Chargé : ": {"en": "Loaded: ", "it": "Caricato: ", "es": "Cargado: ", "de": "Geladen: "}, "Chargé depuis la banque : ": {"en": "Loaded from bank: ", "it": "Caricato dal banco: ", "es": "Cargado desde el banco: ", "de": "Aus der Bank geladen: "}, "Cherche le X5 sur les 16 canaux (Identity Request)": {"en": "Looks for the X5 on all 16 channels (Identity Request)", "it": "Cerca l'X5 sui 16 canali (Identity Request)", "es": "Busca el X5 en los 16 canales (Identity Request)", "de": "Sucht den X5 auf allen 16 Kanälen (Identity Request)"}, "Choisis la sortie MIDI reliée au X5": {"en": "Pick the MIDI output connected to the X5", "it": "Scegli l'uscita MIDI collegata all'X5", "es": "Elige la salida MIDI conectada al X5", "de": "Wähle den MIDI-Ausgang, der mit dem X5 verbunden ist"}, "Choisis une entrée et une sortie MIDI": {"en": "Pick a MIDI input and output", "it": "Scegli un ingresso e un'uscita MIDI", "es": "Elige una entrada y una salida MIDI", "de": "Wähle einen MIDI-Eingang und -Ausgang"}, "Confirmer": {"en": "Confirm", "it": "Conferma", "es": "Confirmar", "de": "Bestätigen"}, "Contrôleurs": {"en": "Controllers", "it": "Controller", "es": "Controladores", "de": "Controller"}, "Copie impossible": {"en": "Copy failed", "it": "Copia impossibile", "es": "No se pudo copiar", "de": "Kopieren nicht möglich"}, "Copier tout en texte": {"en": "Copy everything as text", "it": "Copia tutto come testo", "es": "Copiar todo como texto", "de": "Alles als Text kopieren"}, "Cordes": {"en": "Strings", "it": "Archi", "es": "Cuerdas", "de": "Streicher"}, "Cordes pincées du monde": {"en": "World plucked strings", "it": "Corde pizzicate etniche", "es": "Cuerdas pulsadas del mundo", "de": "Gezupfte Weltinstrumente"}, "Corps": {"en": "Body", "it": "Corpo", "es": "Cuerpo", "de": "Körper"}, "Couleur": {"en": "Colour", "it": "Colore", "es": "Color", "de": "Farbe"}, "Couleur ← vélocité": {"en": "Colour ← velocity", "it": "Colore ← velocity", "es": "Color ← velocidad", "de": "Farbe ← Anschlag"}, "Coupe la sortie A/B (n'utilise que les envois C/D)": {"en": "Mutes the A/B output (uses only C/D sends)", "it": "Disattiva l'uscita A/B (usa solo le mandate C/D)", "es": "Silencia la salida A/B (solo usa los envíos C/D)", "de": "Schaltet den A/B-Ausgang stumm (nur C/D-Sends)"}, "Coupe toutes les notes": {"en": "Stops all notes", "it": "Ferma tutte le note", "es": "Corta todas las notas", "de": "Stoppt alle Noten"}, "Cuivres": {"en": "Brass", "it": "Ottoni", "es": "Metales", "de": "Blechbläser"}, "Cutoff": {"en": "Cutoff", "it": "Cutoff", "es": "Cutoff", "de": "Cutoff"}, "Cutoff ← clavier": {"en": "Cutoff ← keyboard", "it": "Cutoff ← tastiera", "es": "Cutoff ← teclado", "de": "Cutoff ← Tastatur"}, "Demande d'identité (canal {0})": {"en": "Identity request (channel {0})", "it": "Richiesta di identità (canale {0})", "es": "Solicitud de identidad (canal {0})", "de": "Identitätsanfrage (Kanal {0})"}, "Demande de la banque (100 sons)": {"en": "Bank request (100 sounds)", "it": "Richiesta del banco (100 suoni)", "es": "Solicitud del banco (100 sonidos)", "de": "Bank-Anfrage (100 Klänge)"}, "Demande du son affiché": {"en": "Request for the current sound", "it": "Richiesta del suono corrente", "es": "Solicitud del sonido actual", "de": "Anfrage des aktuellen Klangs"}, "Demande envoyée… (≈ 6 s de transfert)": {"en": "Request sent… (≈ 6 s transfer)", "it": "Richiesta inviata… (≈ 6 s di trasferimento)", "es": "Solicitud enviada… (≈ 6 s de transferencia)", "de": "Anfrage gesendet… (≈ 6 s Übertragung)"}, "Dent de scie ↗": {"en": "Saw up ↗", "it": "Dente di sega ↗", "es": "Diente de sierra ↗", "de": "Sägezahn ↗"}, "Dent de scie ↘": {"en": "Saw down ↘", "it": "Dente di sega ↘", "es": "Diente de sierra ↘", "de": "Sägezahn ↘"}, "Direct": {"en": "Live", "it": "Diretto", "es": "Directo", "de": "Direkt"}, "Direct : chaque réglage part tout de suite. Manuel : tu envoies quand tu veux.": {"en": "Live: every change is sent immediately. Manual: you send when you want.", "it": "Diretto: ogni modifica parte subito. Manuale: invii quando vuoi.", "es": "Directo: cada ajuste se envía al instante. Manual: envías cuando quieras.", "de": "Direkt: jede Änderung wird sofort gesendet. Manuell: du sendest, wann du willst."}, "Double": {"en": "Double", "it": "Doppio", "es": "Doble", "de": "Doppel"}, "Doux → fort": {"en": "Soft → loud", "it": "Piano → forte", "es": "Suave → fuerte", "de": "Leise → laut"}, "Durée de la queue après le relâchement.": {"en": "Length of the tail after key release.", "it": "Durata della coda dopo il rilascio.", "es": "Duración de la cola tras soltar la tecla.", "de": "Länge des Ausklangs nach dem Loslassen."}, "Délai": {"en": "Delay", "it": "Ritardo", "es": "Retardo", "de": "Verzögerung"}, "Désaccord": {"en": "Detune", "it": "Detune", "es": "Desafinación", "de": "Verstimmung"}, "Désaccord entre les deux oscillateurs.": {"en": "Detune between the two oscillators.", "it": "Detune tra i due oscillatori.", "es": "Desafinación entre los dos osciladores.", "de": "Verstimmung zwischen den beiden Oszillatoren."}, "Détecter": {"en": "Detect", "it": "Rileva", "es": "Detectar", "de": "Erkennen"}, "Effacer": {"en": "Clear", "it": "Cancella", "es": "Borrar", "de": "Löschen"}, "Effet 1": {"en": "Effect 1", "it": "Effetto 1", "es": "Efecto 1", "de": "Effekt 1"}, "Effet 2": {"en": "Effect 2", "it": "Effetto 2", "es": "Efecto 2", "de": "Effekt 2"}, "Effet sur le temps A : − raccourcit / + allonge (selon le sens de la sensibilité)": {"en": "Effect on A time: − shortens / + lengthens (depending on sensitivity sign)", "it": "Effetto sul tempo A: − accorcia / + allunga (secondo il segno della sensibilità)", "es": "Efecto sobre el tiempo A: − acorta / + alarga (según el signo de la sensibilidad)", "de": "Wirkung auf die A-Zeit: − verkürzt / + verlängert (je nach Vorzeichen der Empfindlichkeit)"}, "Effet sur le temps D : − raccourcit / + allonge (selon le sens de la sensibilité)": {"en": "Effect on D time: − shortens / + lengthens (depending on sensitivity sign)", "it": "Effetto sul tempo D: − accorcia / + allunga (secondo il segno della sensibilità)", "es": "Efecto sobre el tiempo D: − acorta / + alarga (según el signo de la sensibilidad)", "de": "Wirkung auf die D-Zeit: − verkürzt / + verlängert (je nach Vorzeichen der Empfindlichkeit)"}, "Effet sur le temps R : − raccourcit / + allonge (selon le sens de la sensibilité)": {"en": "Effect on R time: − shortens / + lengthens (depending on sensitivity sign)", "it": "Effetto sul tempo R: − accorcia / + allunga (secondo il segno della sensibilità)", "es": "Efecto sobre el tiempo R: − acorta / + alarga (según el signo de la sensibilidad)", "de": "Wirkung auf die R-Zeit: − verkürzt / + verlängert (je nach Vorzeichen der Empfindlichkeit)"}, "Effet sur le temps S : − raccourcit / + allonge (selon le sens de la sensibilité)": {"en": "Effect on S time: − shortens / + lengthens (depending on sensitivity sign)", "it": "Effetto sul tempo S: − accorcia / + allunga (secondo il segno della sensibilità)", "es": "Efecto sobre el tiempo S: − acorta / + alarga (según el signo de la sensibilidad)", "de": "Wirkung auf die S-Zeit: − verkürzt / + verlängert (je nach Vorzeichen der Empfindlichkeit)"}, "Effets": {"en": "Effects", "it": "Effetti", "es": "Efectos", "de": "Effekte"}, "Effets & bruits": {"en": "Effects & noises", "it": "Effetti & rumori", "es": "Efectos & ruidos", "de": "Effekte & Geräusche"}, "Effets du programme": {"en": "Program effects", "it": "Effetti del programma", "es": "Efectos del programa", "de": "Effekte des Programs"}, "Emplacement de destination sur le X5": {"en": "Target slot on the X5", "it": "Posizione di destinazione sull'X5", "es": "Posición de destino en el X5", "de": "Zielspeicherplatz auf dem X5"}, "Entrée MIDI": {"en": "MIDI input", "it": "Ingresso MIDI", "es": "Entrada MIDI", "de": "MIDI-Eingang"}, "Entrée MIDI depuis le X5": {"en": "MIDI input from the X5", "it": "Ingresso MIDI dall'X5", "es": "Entrada MIDI desde el X5", "de": "MIDI-Eingang vom X5"}, "Entrée et sortie MIDI nécessaires": {"en": "MIDI input and output required", "it": "Servono ingresso e uscita MIDI", "es": "Se necesitan entrada y salida MIDI", "de": "MIDI-Ein- und Ausgang erforderlich"}, "Enveloppe de volume": {"en": "Volume envelope", "it": "Inviluppo del volume", "es": "Envolvente de volumen", "de": "Lautstärke-Hüllkurve"}, "Enveloppe du filtre": {"en": "Filter envelope", "it": "Inviluppo del filtro", "es": "Envolvente del filtro", "de": "Filter-Hüllkurve"}, "Enveloppes": {"en": "Envelopes", "it": "Inviluppi", "es": "Envolventes", "de": "Hüllkurven"}, "Envoi bus C": {"en": "Send bus C", "it": "Mandata bus C", "es": "Envío bus C", "de": "Send Bus C"}, "Envoi bus D": {"en": "Send bus D", "it": "Mandata bus D", "es": "Envío bus D", "de": "Send Bus D"}, "Envoie le son entier dans la mémoire tampon d'édition du X5": {"en": "Sends the whole sound to the X5 edit buffer", "it": "Invia il suono intero al buffer di edit dell'X5", "es": "Envía el sonido completo al búfer de edición del X5", "de": "Sendet den ganzen Klang in den Edit-Puffer des X5"}, "Envoyer la banque entière au X5 ?<br><span class=\"note warn\">Les 100 Programs du X5 seront remplacés. Fais d'abord une sauvegarde (« Lire la banque du X5 » puis « Télécharger »).</span>": {"en": "Send the whole bank to the X5?<br><span class=\"note warn\">All 100 Programs on the X5 will be replaced. Make a backup first (“Read X5 bank”, then “Download”).</span>", "it": "Inviare l'intero banco all'X5?<br><span class=\"note warn\">I 100 Program dell'X5 saranno sostituiti. Fai prima un backup (“Leggi il banco dell'X5”, poi “Scarica”).</span>", "es": "¿Enviar el banco completo al X5?<br><span class=\"note warn\">Se reemplazarán los 100 Programs del X5. Haz antes una copia de seguridad («Leer el banco del X5» y luego «Descargar»).</span>", "de": "Ganze Bank an den X5 senden?<br><span class=\"note warn\">Alle 100 Programs des X5 werden ersetzt. Mach zuerst eine Sicherung („X5-Bank lesen“, dann „Herunterladen“).</span>"}, "Erreur envoi : {0}": {"en": "Send error: {0}", "it": "Errore di invio: {0}", "es": "Error de envío: {0}", "de": "Sendefehler: {0}"}, "Fermer": {"en": "Close", "it": "Chiudi", "es": "Cerrar", "de": "Schließen"}, "Fichier chargé : ": {"en": "File loaded: ", "it": "File caricato: ", "es": "Archivo cargado: ", "de": "Datei geladen: "}, "Fichier « All Data » : seule la partie programmes n'est pas extraite dans cette version": {"en": "“All Data” file: not extracted in this version (programs part included)", "it": "File “All Data”: non estratto in questa versione (parte programmi inclusa)", "es": "Archivo «All Data»: no se extrae en esta versión (incluida la parte de programas)", "de": "„All Data“-Datei: wird in dieser Version nicht ausgelesen (auch nicht der Program-Teil)"}, "Fichiers": {"en": "Files", "it": "File", "es": "Archivos", "de": "Dateien"}, "Figer l'affichage": {"en": "Freeze display", "it": "Blocca la visualizzazione", "es": "Congelar la vista", "de": "Anzeige einfrieren"}, "Filtre": {"en": "Filter", "it": "Filtro", "es": "Filtro", "de": "Filter"}, "Filtre (VDF)": {"en": "Filter (VDF)", "it": "Filtro (VDF)", "es": "Filtro (VDF)", "de": "Filter (VDF)"}, "Filtre — tous oscillateurs": {"en": "Filter — all oscillators", "it": "Filtro — tutti gli oscillatori", "es": "Filtro — todos los osciladores", "de": "Filter — alle Oszillatoren"}, "Flûtes": {"en": "Flutes", "it": "Flauti", "es": "Flautas", "de": "Flöten"}, "Formats lus : Program Dump (40h, 194 octets), All Programs (4Ch, 18 750 octets), et fichiers contenant plusieurs Program Dumps.": {"en": "Readable formats: Program Dump (40h, 194 bytes), All Programs (4Ch, 18,750 bytes), and files containing several Program Dumps.", "it": "Formati letti: Program Dump (40h, 194 byte), All Programs (4Ch, 18.750 byte) e file con più Program Dump.", "es": "Formatos admitidos: Program Dump (40h, 194 bytes), All Programs (4Ch, 18.750 bytes) y archivos con varios Program Dumps.", "de": "Lesbare Formate: Program Dump (40h, 194 Bytes), All Programs (4Ch, 18.750 Bytes) und Dateien mit mehreren Program Dumps."}, "Forme": {"en": "Waveform", "it": "Forma d'onda", "es": "Forma de onda", "de": "Wellenform"}, "Formes VS / DWGS": {"en": "VS / DWGS waves", "it": "Forme VS / DWGS", "es": "Formas VS / DWGS", "de": "VS-/DWGS-Wellen"}, "Formes d'onde de base": {"en": "Basic waveforms", "it": "Forme d'onda di base", "es": "Formas de onda básicas", "de": "Grundwellenformen"}, "Garder": {"en": "Keep", "it": "Salva", "es": "Guardar", "de": "Behalten"}, "Glisse les points. Les réglages fins sont dans l'onglet Ampli.": {"en": "Drag the points. Fine settings are in the Amp tab.", "it": "Trascina i punti. Le regolazioni fini sono nella scheda Ampli.", "es": "Arrastra los puntos. Los ajustes finos están en la pestaña Amplificador.", "de": "Ziehe die Punkte. Feineinstellungen findest du im Tab Verstärker."}, "Grave / médium / aigu": {"en": "Low / mid / high", "it": "Grave / medio / acuto", "es": "Grave / medio / agudo", "de": "Tief / mittel / hoch"}, "Guitares": {"en": "Guitars", "it": "Chitarre", "es": "Guitarras", "de": "Gitarren"}, "Haut": {"en": "High", "it": "Alto", "es": "Alto", "de": "Hoch"}, "Hauteur & LFO": {"en": "Pitch & LFO", "it": "Intonazione & LFO", "es": "Afinación & LFO", "de": "Tonhöhe & LFO"}, "Hold": {"en": "Hold", "it": "Hold", "es": "Hold", "de": "Hold"}, "Il faut une entrée ET une sortie MIDI": {"en": "You need a MIDI input AND output", "it": "Servono un ingresso E un'uscita MIDI", "es": "Hace falta una entrada Y una salida MIDI", "de": "Du brauchst einen MIDI-Eingang UND -Ausgang"}, "Intensité": {"en": "Depth", "it": "Intensità", "es": "Intensidad", "de": "Intensität"}, "Intensité EG": {"en": "EG depth", "it": "Intensità EG", "es": "Intensidad EG", "de": "EG-Intensität"}, "Intensité EG ← vél.": {"en": "EG depth ← vel.", "it": "Intensità EG ← vel.", "es": "Intensidad EG ← vel.", "de": "EG-Intensität ← Anschl."}, "Intensité Pitch EG": {"en": "Pitch EG depth", "it": "Intensità Pitch EG", "es": "Intensidad Pitch EG", "de": "Pitch-EG-Intensität"}, "Intervalle osc 2": {"en": "Osc 2 interval", "it": "Intervallo osc 2", "es": "Intervalo osc 2", "de": "Intervall Osc 2"}, "Journal des messages MIDI": {"en": "MIDI message log", "it": "Registro dei messaggi MIDI", "es": "Registro de mensajes MIDI", "de": "MIDI-Nachrichtenprotokoll"}, "Joystick": {"en": "Joystick", "it": "Joystick", "es": "Joystick", "de": "Joystick"}, "Kit batterie {0}": {"en": "Drum kit {0}", "it": "Kit batteria {0}", "es": "Kit de batería {0}", "de": "Drum-Kit {0}"}, "Kits DJ": {"en": "DJ kits", "it": "Kit DJ", "es": "Kits DJ", "de": "DJ-Kits"}, "L'effet sur chaque oscillateur dépend de son « Pitch EG » (onglet Oscillateurs).": {"en": "The effect on each oscillator depends on its “Pitch EG” setting (Oscillators tab).", "it": "L'effetto su ogni oscillatore dipende dal suo “Pitch EG” (scheda Oscillatori).", "es": "El efecto en cada oscilador depende de su «Pitch EG» (pestaña Osciladores).", "de": "Die Wirkung auf jeden Oszillator hängt von seinem „Pitch EG“ ab (Tab Oszillatoren)."}, "LFO de filtre (VDF MG)": {"en": "Filter LFO (VDF MG)", "it": "LFO del filtro (VDF MG)", "es": "LFO del filtro (VDF MG)", "de": "Filter-LFO (VDF MG)"}, "LFO de hauteur (vibrato)": {"en": "Pitch LFO (vibrato)", "it": "LFO di intonazione (vibrato)", "es": "LFO de afinación (vibrato)", "de": "Tonhöhen-LFO (Vibrato)"}, "LFO filtre": {"en": "Filter LFO", "it": "LFO filtro", "es": "LFO filtro", "de": "Filter-LFO"}, "LFO filtre (joy ↓)": {"en": "Filter LFO (joy ↓)", "it": "LFO filtro (joy ↓)", "es": "LFO filtro (joy ↓)", "de": "Filter-LFO (Joy ↓)"}, "LFO sur le filtre (intensité + vitesse).": {"en": "LFO on the filter (depth + speed).", "it": "LFO sul filtro (intensità + velocità).", "es": "LFO en el filtro (intensidad + velocidad).", "de": "LFO auf dem Filter (Intensität + Tempo)."}, "Les deux (liés)": {"en": "Both (linked)", "it": "Entrambi (collegati)", "es": "Ambos (vinculados)", "de": "Beide (gekoppelt)"}, "Librairie": {"en": "Library", "it": "Libreria", "es": "Biblioteca", "de": "Bibliothek"}, "Lit le son affiché sur le X5 (Program Dump Request)": {"en": "Reads the sound shown on the X5 (Program Dump Request)", "it": "Legge il suono visualizzato sull'X5 (Program Dump Request)", "es": "Lee el sonido mostrado en el X5 (Program Dump Request)", "de": "Liest den auf dem X5 angezeigten Klang (Program Dump Request)"}, "MIDI OK mais aucune interface vue : branche-la puis recharge": {"en": "MIDI OK but no interface found: plug it in, then reload", "it": "MIDI OK ma nessuna interfaccia trovata: collegala e ricarica", "es": "MIDI OK pero no se ve ninguna interfaz: conéctala y recarga", "de": "MIDI OK, aber kein Interface gefunden: anschließen und neu laden"}, "Maintiens appuyé pour entendre le son d'origine": {"en": "Hold to hear the original sound", "it": "Tieni premuto per sentire il suono originale", "es": "Mantén pulsado para oír el sonido original", "de": "Gedrückt halten, um den Originalklang zu hören"}, "Mallets & cloches": {"en": "Mallets & bells", "it": "Percussioni a lamelle & campane", "es": "Mallets & campanas", "de": "Mallets & Glocken"}, "Manuel": {"en": "Manual", "it": "Manuale", "es": "Manual", "de": "Manuell"}, "Mes sons (dans ce navigateur)": {"en": "My sounds (in this browser)", "it": "I miei suoni (in questo browser)", "es": "Mis sonidos (en este navegador)", "de": "Meine Klänge (in diesem Browser)"}, "Messages copiés": {"en": "Messages copied", "it": "Messaggi copiati", "es": "Mensajes copiados", "de": "Nachrichten kopiert"}, "Mode": {"en": "Mode", "it": "Modo", "es": "Modo", "de": "Modus"}, "Mode Simple : un seul oscillateur actif.": {"en": "Single mode: only one oscillator is active.", "it": "Modo Singolo: un solo oscillatore attivo.", "es": "Modo Simple: un solo oscilador activo.", "de": "Single-Modus: nur ein Oszillator aktiv."}, "Modulations": {"en": "Modulations", "it": "Modulazioni", "es": "Modulaciones", "de": "Modulationen"}, "Moniteur SysEx": {"en": "SysEx monitor", "it": "Monitor SysEx", "es": "Monitor SysEx", "de": "SysEx-Monitor"}, "Moniteur SysEx (messages envoyés et reçus)": {"en": "SysEx monitor (sent and received messages)", "it": "Monitor SysEx (messaggi inviati e ricevuti)", "es": "Monitor SysEx (mensajes enviados y recibidos)", "de": "SysEx-Monitor (gesendete und empfangene Nachrichten)"}, "Mono (legato)": {"en": "Mono (legato)", "it": "Mono (legato)", "es": "Mono (legato)", "de": "Mono (legato)"}, "Multisound": {"en": "Multisound", "it": "Multisound", "es": "Multisound", "de": "Multisound"}, "Niveau": {"en": "Level", "it": "Livello", "es": "Nivel", "de": "Pegel"}, "Niveau attaque": {"en": "Attack level", "it": "Livello attacco", "es": "Nivel de ataque", "de": "Attack-Pegel"}, "Niveau d'attaque": {"en": "Attack level", "it": "Livello di attacco", "es": "Nivel de ataque", "de": "Attack-Pegel"}, "Niveau de départ": {"en": "Start level", "it": "Livello iniziale", "es": "Nivel inicial", "de": "Startpegel"}, "Niveau de relâche": {"en": "Release level", "it": "Livello di rilascio", "es": "Nivel de liberación", "de": "Release-Pegel"}, "Niveau maintien": {"en": "Sustain level", "it": "Livello sustain", "es": "Nivel de sostenido", "de": "Sustain-Pegel"}, "Niveau relâche": {"en": "Release level", "it": "Livello rilascio", "es": "Nivel de liberación", "de": "Release-Pegel"}, "Niveau tenu pendant que la touche est enfoncée.": {"en": "Level held while the key is pressed.", "it": "Livello tenuto finché il tasto è premuto.", "es": "Nivel mantenido mientras la tecla está pulsada.", "de": "Pegel, der gehalten wird, solange die Taste gedrückt ist."}, "Niveaux ← vélocité": {"en": "Levels ← velocity", "it": "Livelli ← velocity", "es": "Niveles ← velocidad", "de": "Pegel ← Anschlag"}, "Nom (par défaut celui du son)": {"en": "Name (defaults to the sound's name)", "it": "Nome (predefinito: quello del suono)", "es": "Nombre (por defecto el del sonido)", "de": "Name (standardmäßig der des Klangs)"}, "Nom du son (10 caractères)": {"en": "Sound name (10 characters)", "it": "Nome del suono (10 caratteri)", "es": "Nombre del sonido (10 caracteres)", "de": "Klangname (10 Zeichen)"}, "Note On {0} vél {1} (canal {2})": {"en": "Note On {0} vel {1} (channel {2})", "it": "Note On {0} vel {1} (canale {2})", "es": "Note On {0} vel {1} (canal {2})", "de": "Note On {0} Anschl. {1} (Kanal {2})"}, "Note pivot": {"en": "Pivot key", "it": "Nota perno", "es": "Nota pivote", "de": "Bezugsnote"}, "Note tenue 3 s": {"en": "Held note 3 s", "it": "Nota tenuta 3 s", "es": "Nota sostenida 3 s", "de": "Gehaltene Note 3 s"}, "Nouveau son (Init, garde les effets)": {"en": "New sound (Init, keeps the effects)", "it": "Nuovo suono (Init, mantiene gli effetti)", "es": "Sonido nuevo (Init, conserva los efectos)", "de": "Neuer Klang (Init, Effekte bleiben)"}, "Oct +": {"en": "Oct +", "it": "Ott +", "es": "Oct +", "de": "Okt +"}, "Oct −": {"en": "Oct −", "it": "Ott −", "es": "Oct −", "de": "Okt −"}, "Octave": {"en": "Octave", "it": "Ottava", "es": "Octava", "de": "Oktave"}, "Octave + (touche X)": {"en": "Octave + (X key)", "it": "Ottava + (tasto X)", "es": "Octava + (tecla X)", "de": "Oktave + (Taste X)"}, "Octave − (touche W/Z)": {"en": "Octave − (Z/W key)", "it": "Ottava − (tasto Z/W)", "es": "Octava − (tecla Z/W)", "de": "Oktave − (Taste Y/Z)"}, "Orgues": {"en": "Organs", "it": "Organi", "es": "Órganos", "de": "Orgeln"}, "Osc 1 ↔ Osc 2": {"en": "Osc 1 ↔ Osc 2", "it": "Osc 1 ↔ Osc 2", "es": "Osc 1 ↔ Osc 2", "de": "Osc 1 ↔ Osc 2"}, "Oscillateur 1": {"en": "Oscillator 1", "it": "Oscillatore 1", "es": "Oscilador 1", "de": "Oszillator 1"}, "Oscillateur 2": {"en": "Oscillator 2", "it": "Oscillatore 2", "es": "Oscilador 2", "de": "Oszillator 2"}, "Oscillateurs": {"en": "Oscillators", "it": "Oscillatori", "es": "Osciladores", "de": "Oszillatoren"}, "Ouverture filtre": {"en": "Filter opening", "it": "Apertura filtro", "es": "Apertura de filtro", "de": "Filteröffnung"}, "Ouvre / ferme le filtre (cutoff + un peu d'EG).": {"en": "Opens / closes the filter (cutoff + a little EG).", "it": "Apre / chiude il filtro (cutoff + un po' di EG).", "es": "Abre / cierra el filtro (cutoff + un poco de EG).", "de": "Öffnet / schließt das Filter (Cutoff + etwas EG)."}, "Ouvrir un .syx…": {"en": "Open a .syx…", "it": "Apri un .syx…", "es": "Abrir un .syx…", "de": ".syx öffnen…"}, "Ouvrir un son ou une banque .syx…": {"en": "Open a sound or bank .syx…", "it": "Apri un suono o un banco .syx…", "es": "Abrir un sonido o banco .syx…", "de": "Klang oder Bank (.syx) öffnen…"}, "Pads & synthés": {"en": "Pads & synths", "it": "Pad & synth", "es": "Pads & sintes", "de": "Pads & Synths"}, "Page ouverte en file:// → ouvre-la via http://localhost (voir aide « ? »)": {"en": "Page opened as file:// → open it via http://localhost (see “?” help)", "it": "Pagina aperta come file:// → aprila tramite http://localhost (vedi aiuto “?”)", "es": "Página abierta como file:// → ábrela mediante http://localhost (ver ayuda «?»)", "de": "Seite als file:// geöffnet → über http://localhost öffnen (siehe Hilfe „?“)"}, "Vérifie les autorisations MIDI du site (icône à gauche de l'adresse)": {"en": "Check the site's MIDI permissions (icon left of the address)", "it": "Controlla i permessi MIDI del sito (icona a sinistra dell'indirizzo)", "es": "Revisa los permisos MIDI del sitio (icono a la izquierda de la dirección)", "de": "Prüfe die MIDI-Berechtigungen der Seite (Symbol links neben der Adresse)"}, "Pas d'accusé du X5 : vérifie sur l'écran que le son est bien écrit": {"en": "No acknowledgement from the X5: check its display to confirm the sound was written", "it": "Nessuna conferma dall'X5: verifica sul display che il suono sia stato scritto", "es": "Sin confirmación del X5: comprueba en su pantalla que el sonido se ha escrito", "de": "Keine Bestätigung vom X5: prüfe am Display, ob der Klang geschrieben wurde"}, "Commande envoyée (pas d'entrée MIDI pour confirmer)": {"en": "Command sent (no MIDI input to confirm)", "it": "Comando inviato (nessun ingresso MIDI per confermare)", "es": "Comando enviado (sin entrada MIDI para confirmar)", "de": "Befehl gesendet (kein MIDI-Eingang zur Bestätigung)"}, "Pan A ↔ B": {"en": "Pan A ↔ B", "it": "Pan A ↔ B", "es": "Pan A ↔ B", "de": "Pan A ↔ B"}, "Parallèle 1": {"en": "Parallel 1", "it": "Parallelo 1", "es": "Paralelo 1", "de": "Parallel 1"}, "Parallèle 2": {"en": "Parallel 2", "it": "Parallelo 2", "es": "Paralelo 2", "de": "Parallel 2"}, "Parallèle 3": {"en": "Parallel 3", "it": "Parallelo 3", "es": "Paralelo 3", "de": "Parallel 3"}, "Paramètre #{0} = {1}": {"en": "Parameter #{0} = {1}", "it": "Parametro #{0} = {1}", "es": "Parámetro #{0} = {1}", "de": "Parameter #{0} = {1}"}, "Pas de banque": {"en": "No bank", "it": "Nessun banco", "es": "No hay banco", "de": "Keine Bank"}, "Pas de banque reçue. Sur certains X5 il faut lancer GLOBAL → MIDI Data Dump → Program depuis la face avant.": {"en": "No bank received. On some X5 units you have to start GLOBAL → MIDI Data Dump → Program from the front panel.", "it": "Nessun banco ricevuto. Su alcuni X5 bisogna avviare GLOBAL → MIDI Data Dump → Program dal pannello frontale.", "es": "No se recibió ningún banco. En algunos X5 hay que lanzar GLOBAL → MIDI Data Dump → Program desde el panel frontal.", "de": "Keine Bank empfangen. Bei manchen X5 musst du GLOBAL → MIDI Data Dump → Program am Bedienfeld starten."}, "Pas de réponse : vérifie câbles, ports et GLOBAL → MIDI Filter EX = ENA": {"en": "No reply: check cables, ports and GLOBAL → MIDI Filter EX = ENA", "it": "Nessuna risposta: controlla cavi, porte e GLOBAL → MIDI Filter EX = ENA", "es": "Sin respuesta: revisa cables, puertos y GLOBAL → MIDI Filter EX = ENA", "de": "Keine Antwort: prüfe Kabel, Ports und GLOBAL → MIDI Filter EX = ENA"}, "Pas de réponse du X5 (mode PROG ? MIDI Filter EX = ENA ? bon canal ?)": {"en": "No reply from the X5 (PROG mode? MIDI Filter EX = ENA? right channel?)", "it": "Nessuna risposta dall'X5 (modo PROG? MIDI Filter EX = ENA? canale giusto?)", "es": "Sin respuesta del X5 (¿modo PROG? ¿MIDI Filter EX = ENA? ¿canal correcto?)", "de": "Keine Antwort vom X5 (PROG-Modus? MIDI Filter EX = ENA? richtiger Kanal?)"}, "Pas de sortie MIDI": {"en": "No MIDI output", "it": "Nessuna uscita MIDI", "es": "No hay salida MIDI", "de": "Kein MIDI-Ausgang"}, "Passage en mode Program Edit": {"en": "Switch to Program Edit mode", "it": "Passaggio al modo Program Edit", "es": "Cambio a modo Program Edit", "de": "Wechsel in den Program-Edit-Modus"}, "Pause ajoutée après chaque message SysEx envoyé": {"en": "Pause added after each SysEx message sent", "it": "Pausa aggiunta dopo ogni messaggio SysEx inviato", "es": "Pausa añadida tras cada mensaje SysEx enviado", "de": "Pause nach jeder gesendeten SysEx-Nachricht"}, "Percussions & batterie": {"en": "Percussion & drums", "it": "Percussioni & batteria", "es": "Percusión & batería", "de": "Percussion & Drums"}, "Petites variations aléatoires autour du son actuel. Enchaîne « Varier » puis « Annuler » jusqu'à trouver une piste.": {"en": "Small random variations around the current sound. Alternate “Vary” and “Undo” until you find something you like.", "it": "Piccole variazioni casuali attorno al suono attuale. Alterna “Varia” e “Annulla” finché trovi una pista.", "es": "Pequeñas variaciones aleatorias en torno al sonido actual. Alterna «Variar» y «Deshacer» hasta dar con una idea.", "de": "Kleine zufällige Variationen um den aktuellen Klang. Wechsle zwischen „Variieren“ und „Rückgängig“, bis du etwas findest."}, "Pianos & claviers": {"en": "Pianos & keys", "it": "Pianoforti & tastiere", "es": "Pianos & teclados", "de": "Pianos & Tasten"}, "Pitch EG": {"en": "Pitch EG", "it": "Pitch EG", "es": "Pitch EG", "de": "Pitch EG"}, "Pitch EG (commun aux deux oscillateurs)": {"en": "Pitch EG (shared by both oscillators)", "it": "Pitch EG (comune ai due oscillatori)", "es": "Pitch EG (común a ambos osciladores)", "de": "Pitch EG (für beide Oszillatoren)"}, "Pitch bend": {"en": "Pitch bend", "it": "Pitch bend", "es": "Pitch bend", "de": "Pitch Bend"}, "Pitch bend (joy ↔)": {"en": "Pitch bend (joy ↔)", "it": "Pitch bend (joy ↔)", "es": "Pitch bend (joy ↔)", "de": "Pitch Bend (Joy ↔)"}, "Placement": {"en": "Routing", "it": "Disposizione", "es": "Disposición", "de": "Anordnung"}, "Point de rupture": {"en": "Break point", "it": "Break point", "es": "Punto de ruptura", "de": "Breakpoint"}, "Ports prêts · clique Détecter": {"en": "Ports ready · click Detect", "it": "Porte pronte · clicca Rileva", "es": "Puertos listos · haz clic en Detectar", "de": "Ports bereit · klicke auf Erkennen"}, "Profondeur du LFO de hauteur, avec apparition.": {"en": "Pitch LFO depth, with fade-in.", "it": "Profondità dell'LFO di intonazione, con comparsa.", "es": "Profundidad del LFO de afinación, con aparición.", "de": "Tiefe des Tonhöhen-LFO, mit Einblendung."}, "Précédent": {"en": "Previous", "it": "Precedente", "es": "Anterior", "de": "Zurück"}, "Ranger le son courant dans l'emplacement sélectionné": {"en": "Store the current sound in the selected slot", "it": "Metti il suono corrente nella posizione selezionata", "es": "Guardar el sonido actual en la posición seleccionada", "de": "Aktuellen Klang im gewählten Platz ablegen"}, "Rapide": {"en": "Quick", "it": "Rapido", "es": "Rápido", "de": "Schnell"}, "Recherche du X5…": {"en": "Looking for the X5…", "it": "Ricerca dell'X5…", "es": "Buscando el X5…", "de": "Suche den X5…"}, "Rechercher (piano, pad, saw…)": {"en": "Search (piano, pad, saw…)", "it": "Cerca (piano, pad, saw…)", "es": "Buscar (piano, pad, saw…)", "de": "Suchen (Piano, Pad, Saw…)"}, "Redémarre à chaque note": {"en": "Restarts on each note", "it": "Riparte a ogni nota", "es": "Reinicia en cada nota", "de": "Startet bei jeder Note neu"}, "Rejoue automatiquement le test après chaque réglage": {"en": "Replays the test automatically after each change", "it": "Ripete automaticamente il test dopo ogni modifica", "es": "Repite automáticamente la prueba tras cada ajuste", "de": "Spielt den Test nach jeder Änderung automatisch ab"}, "Rejouer à chaque réglage": {"en": "Replay after each change", "it": "Ripeti a ogni modifica", "es": "Repetir en cada ajuste", "de": "Nach jeder Änderung abspielen"}, "Relâche": {"en": "Release", "it": "Rilascio", "es": "Liberación", "de": "Release"}, "Remplacer le son courant par un son « Init » neutre ?": {"en": "Replace the current sound with a neutral “Init” sound?", "it": "Sostituire il suono corrente con un suono “Init” neutro?", "es": "¿Reemplazar el sonido actual por un sonido «Init» neutro?", "de": "Aktuellen Klang durch einen neutralen „Init“-Klang ersetzen?"}, "Retard osc 2": {"en": "Osc 2 delay", "it": "Ritardo osc 2", "es": "Retardo osc 2", "de": "Verzögerung Osc 2"}, "Revenir au son tel qu'il a été chargé": {"en": "Go back to the sound as it was loaded", "it": "Torna al suono come era stato caricato", "es": "Volver al sonido tal como se cargó", "de": "Zurück zum Klang wie geladen"}, "Revenir à l'origine": {"en": "Revert to original", "it": "Torna all'originale", "es": "Volver al original", "de": "Zum Original zurück"}, "Rien encore. « Garder » mémorise le son courant dans ce navigateur.": {"en": "Nothing yet. “Keep” stores the current sound in this browser.", "it": "Ancora niente. “Salva” memorizza il suono corrente in questo browser.", "es": "Nada todavía. «Guardar» memoriza el sonido actual en este navegador.", "de": "Noch nichts. „Behalten“ speichert den aktuellen Klang in diesem Browser."}, "Rythmes & boucles": {"en": "Rhythms & loops", "it": "Ritmi & loop", "es": "Ritmos & bucles", "de": "Rhythmen & Loops"}, "Réaction du volume et du filtre à la vélocité.": {"en": "How volume and filter respond to velocity.", "it": "Reazione di volume e filtro alla velocity.", "es": "Respuesta del volumen y del filtro a la velocidad.", "de": "Reaktion von Lautstärke und Filter auf den Anschlag."}, "Réponse d'identité · {0}": {"en": "Identity reply · {0}", "it": "Risposta di identità · {0}", "es": "Respuesta de identidad · {0}", "de": "Identitätsantwort · {0}"}, "Rétablir (Ctrl+Maj+Z)": {"en": "Redo (Ctrl+Shift+Z)", "it": "Ripristina (Ctrl+Maiusc+Z)", "es": "Rehacer (Ctrl+Mayús+Z)", "de": "Wiederholen (Strg+Umschalt+Z)"}, "Simple": {"en": "Single", "it": "Singolo", "es": "Simple", "de": "Single"}, "Simple = 1 oscillateur (polyphonie 32). Double = 2 oscillateurs (16 voix). Batterie = un kit de percussions.": {"en": "Single = 1 oscillator (32 voices). Double = 2 oscillators (16 voices). Drums = a percussion kit.", "it": "Singolo = 1 oscillatore (32 voci). Doppio = 2 oscillatori (16 voci). Batteria = un kit di percussioni.", "es": "Simple = 1 oscilador (32 voces). Doble = 2 osciladores (16 voces). Batería = un kit de percusión.", "de": "Single = 1 Oszillator (32 Stimmen). Doppel = 2 Oszillatoren (16 Stimmen). Drums = ein Percussion-Kit."}, "Son complet « {0} » ({1} octets)": {"en": "Full sound “{0}” ({1} bytes)", "it": "Suono completo “{0}” ({1} byte)", "es": "Sonido completo «{0}» ({1} bytes)", "de": "Kompletter Klang „{0}“ ({1} Bytes)"}, "Son envoyé dans la mémoire d'édition du X5": {"en": "Sound sent to the X5 edit buffer", "it": "Suono inviato al buffer di edit dell'X5", "es": "Sonido enviado al búfer de edición del X5", "de": "Klang in den Edit-Puffer des X5 gesendet"}, "Son rangé en {0} de la banque (pas encore sur le X5)": {"en": "Sound stored in {0} of the bank (not yet on the X5)", "it": "Suono messo in {0} del banco (non ancora sull'X5)", "es": "Sonido guardado en {0} del banco (aún no en el X5)", "de": "Klang in {0} der Bank abgelegt (noch nicht auf dem X5)"}, "Son reçu du X5 : ": {"en": "Sound received from the X5: ", "it": "Suono ricevuto dall'X5: ", "es": "Sonido recibido del X5: ", "de": "Klang vom X5 empfangen: "}, "Sons de base": {"en": "Source sounds", "it": "Suoni di base", "es": "Sonidos base", "de": "Grundklänge"}, "Sortie A/B coupée": {"en": "A/B output off", "it": "Uscita A/B spenta", "es": "Salida A/B apagada", "de": "A/B-Ausgang aus"}, "Sortie MIDI": {"en": "MIDI output", "it": "Uscita MIDI", "es": "Salida MIDI", "de": "MIDI-Ausgang"}, "Sortie MIDI vers le X5": {"en": "MIDI output to the X5", "it": "Uscita MIDI verso l'X5", "es": "Salida MIDI hacia el X5", "de": "MIDI-Ausgang zum X5"}, "Sortie OK · sans entrée, la lecture du X5 est impossible": {"en": "Output OK · without an input, reading from the X5 is impossible", "it": "Uscita OK · senza ingresso non si può leggere l'X5", "es": "Salida OK · sin entrada no se puede leer el X5", "de": "Ausgang OK · ohne Eingang kann der X5 nicht gelesen werden"}, "Stockage local indisponible": {"en": "Local storage unavailable", "it": "Archiviazione locale non disponibile", "es": "Almacenamiento local no disponible", "de": "Lokaler Speicher nicht verfügbar"}, "Suivant": {"en": "Next", "it": "Successivo", "es": "Siguiente", "de": "Weiter"}, "Suivi clavier": {"en": "Key tracking", "it": "Key tracking", "es": "Seguimiento de teclado", "de": "Keytracking"}, "Suivi de clavier": {"en": "Keyboard tracking", "it": "Inseguimento tastiera", "es": "Seguimiento de teclado", "de": "Tastaturverfolgung"}, "SysEx Korg fonction {0}h": {"en": "Korg SysEx function {0}h", "it": "SysEx Korg funzione {0}h", "es": "SysEx Korg función {0}h", "de": "Korg-SysEx Funktion {0}h"}, "SysEx universel": {"en": "Universal SysEx", "it": "SysEx universale", "es": "SysEx universal", "de": "Universal-SysEx"}, "Série 1 → 2": {"en": "Serial 1 → 2", "it": "Serie 1 → 2", "es": "Serie 1 → 2", "de": "Seriell 1 → 2"}, "Temps & niveaux": {"en": "Times & levels", "it": "Tempi & livelli", "es": "Tiempos & niveles", "de": "Zeiten & Pegel"}, "Temps & niveaux de l'EG": {"en": "EG times & levels", "it": "Tempi & livelli dell'EG", "es": "Tiempos & niveles del EG", "de": "EG-Zeiten & -Pegel"}, "Temps EG ← clavier": {"en": "EG time ← keyboard", "it": "Tempo EG ← tastiera", "es": "Tiempo EG ← teclado", "de": "EG-Zeit ← Tastatur"}, "Temps EG ← vél.": {"en": "EG time ← vel.", "it": "Tempo EG ← vel.", "es": "Tiempo EG ← vel.", "de": "EG-Zeit ← Anschl."}, "Temps affectés :": {"en": "Affected times:", "it": "Tempi interessati:", "es": "Tiempos afectados:", "de": "Betroffene Zeiten:"}, "Temps attaque": {"en": "Attack time", "it": "Tempo attacco", "es": "Tiempo de ataque", "de": "Attack-Zeit"}, "Temps d'attaque": {"en": "Attack time", "it": "Tempo di attacco", "es": "Tiempo de ataque", "de": "Attack-Zeit"}, "Temps d'attaque du volume et du filtre.": {"en": "Attack time of volume and filter.", "it": "Tempo di attacco di volume e filtro.", "es": "Tiempo de ataque del volumen y del filtro.", "de": "Attack-Zeit von Lautstärke und Filter."}, "Temps de déclin": {"en": "Decay time", "it": "Tempo di decadimento", "es": "Tiempo de caída", "de": "Decay-Zeit"}, "Temps de relâche": {"en": "Release time", "it": "Tempo di rilascio", "es": "Tiempo de liberación", "de": "Release-Zeit"}, "Temps déclin": {"en": "Decay time", "it": "Tempo decadimento", "es": "Tiempo de caída", "de": "Decay-Zeit"}, "Temps pente": {"en": "Slope time", "it": "Tempo pendenza", "es": "Tiempo de pendiente", "de": "Slope-Zeit"}, "Temps relâche": {"en": "Release time", "it": "Tempo rilascio", "es": "Tiempo de liberación", "de": "Release-Zeit"}, "Temps ← vélocité": {"en": "Times ← velocity", "it": "Tempi ← velocity", "es": "Tiempos ← velocidad", "de": "Zeiten ← Anschlag"}, "Timbre": {"en": "Tone", "it": "Timbro", "es": "Timbre", "de": "Klangfarbe"}, "Toucher": {"en": "Touch", "it": "Tocco", "es": "Pulsación", "de": "Anschlag"}, "Tout": {"en": "All", "it": "Tutto", "es": "Todo", "de": "Alle"}, "Triangle": {"en": "Triangle", "it": "Triangolo", "es": "Triángulo", "de": "Dreieck"}, "Type de test": {"en": "Test type", "it": "Tipo di test", "es": "Tipo de prueba", "de": "Testart"}, "Télécharger la banque .syx": {"en": "Download bank .syx", "it": "Scarica il banco .syx", "es": "Descargar el banco .syx", "de": "Bank als .syx herunterladen"}, "Télécharger le son courant (.syx, 194 octets)": {"en": "Download current sound (.syx, 194 bytes)", "it": "Scarica il suono corrente (.syx, 194 byte)", "es": "Descargar el sonido actual (.syx, 194 bytes)", "de": "Aktuellen Klang herunterladen (.syx, 194 Bytes)"}, "Varier le son": {"en": "Vary the sound", "it": "Varia il suono", "es": "Variar el sonido", "de": "Klang variieren"}, "Version 1 : choix des effets et du placement seulement. Les réglages internes de chaque effet (temps de réverbération, retard, vitesse…) sont conservés tels quels et repartent intacts avec le son. Ils seront éditables dès que j'aurai la table SysEx officielle des effets du X5.": {"en": "This version: effect types and routing only. Each effect's internal settings (reverb time, delay, speed…) are kept as they are and travel unchanged with the sound. They will become editable once the official X5 effects SysEx table is available.", "it": "Questa versione: solo tipo di effetto e disposizione. Le impostazioni interne di ogni effetto (tempo di riverbero, ritardo, velocità…) restano invariate e viaggiano con il suono. Saranno modificabili quando sarà disponibile la tabella SysEx ufficiale degli effetti dell'X5.", "es": "Esta versión: solo tipo de efecto y disposición. Los ajustes internos de cada efecto (tiempo de reverberación, retardo, velocidad…) se conservan tal cual y viajan intactos con el sonido. Serán editables cuando se disponga de la tabla SysEx oficial de efectos del X5.", "de": "Diese Version: nur Effekttyp und Anordnung. Die internen Einstellungen jedes Effekts (Hallzeit, Delay, Tempo…) bleiben unverändert und wandern mit dem Klang. Sie werden editierbar, sobald die offizielle SysEx-Effekttabelle des X5 vorliegt."}, "Vibrato": {"en": "Vibrato", "it": "Vibrato", "es": "Vibrato", "de": "Vibrato"}, "Vibrato par contrôleurs": {"en": "Vibrato from controllers", "it": "Vibrato dai controller", "es": "Vibrato por controladores", "de": "Vibrato über Controller"}, "Vibrato ← aftertouch": {"en": "Vibrato ← aftertouch", "it": "Vibrato ← aftertouch", "es": "Vibrato ← aftertouch", "de": "Vibrato ← Aftertouch"}, "Vibrato ← joy ↑": {"en": "Vibrato ← joy ↑", "it": "Vibrato ← joy ↑", "es": "Vibrato ← joy ↑", "de": "Vibrato ← Joy ↑"}, "Vitesse": {"en": "Speed", "it": "Velocità", "es": "Velocidad", "de": "Tempo"}, "Vitesse ← AT + joy": {"en": "Speed ← AT + joy", "it": "Velocità ← AT + joy", "es": "Velocidad ← AT + joy", "de": "Tempo ← AT + Joy"}, "Vitesse ← clavier": {"en": "Speed ← keyboard", "it": "Velocità ← tastiera", "es": "Velocidad ← teclado", "de": "Tempo ← Tastatur"}, "Voix": {"en": "Voices", "it": "Voci", "es": "Voces", "de": "Stimmen"}, "Volume": {"en": "Volume", "it": "Volume", "es": "Volumen", "de": "Lautstärke"}, "Volume (VDA) — tous oscillateurs": {"en": "Volume (VDA) — all oscillators", "it": "Volume (VDA) — tutti gli oscillatori", "es": "Volumen (VDA) — todos los osciladores", "de": "Lautstärke (VDA) — alle Oszillatoren"}, "Volume osc 1 ↔ osc 2.": {"en": "Osc 1 ↔ osc 2 volume.", "it": "Volume osc 1 ↔ osc 2.", "es": "Volumen osc 1 ↔ osc 2.", "de": "Lautstärke Osc 1 ↔ Osc 2."}, "Volume ← clavier": {"en": "Volume ← keyboard", "it": "Volume ← tastiera", "es": "Volumen ← teclado", "de": "Lautstärke ← Tastatur"}, "Volume ← vélocité": {"en": "Volume ← velocity", "it": "Volume ← velocity", "es": "Volumen ← velocidad", "de": "Lautstärke ← Anschlag"}, "Vél": {"en": "Vel", "it": "Vel", "es": "Vel", "de": "Anschl."}, "Vélocité": {"en": "Velocity", "it": "Velocity", "es": "Velocidad", "de": "Anschlag"}, "Vélocité des notes de test": {"en": "Velocity of test notes", "it": "Velocity delle note di test", "es": "Velocidad de las notas de prueba", "de": "Anschlagstärke der Testnoten"}, "Wah / mouvement": {"en": "Wah / movement", "it": "Wah / movimento", "es": "Wah / movimiento", "de": "Wah / Bewegung"}, "Web MIDI autorisé · {0} entrée(s), {1} sortie(s) : {2}": {"en": "Web MIDI allowed · {0} input(s), {1} output(s): {2}", "it": "Web MIDI autorizzato · {0} ingresso/i, {1} uscita/e: {2}", "es": "Web MIDI autorizado · {0} entrada(s), {1} salida(s): {2}", "de": "Web MIDI erlaubt · {0} Eingang/Eingänge, {1} Ausgang/Ausgänge: {2}"}, "Web MIDI indisponible : ouvre la page dans Chrome ou Edge": {"en": "Web MIDI unavailable: open the page in Chrome or Edge", "it": "Web MIDI non disponibile: apri la pagina in Chrome o Edge", "es": "Web MIDI no disponible: abre la página en Chrome o Edge", "de": "Web MIDI nicht verfügbar: öffne die Seite in Chrome oder Edge"}, "Web MIDI refusé : {0}": {"en": "Web MIDI denied: {0}", "it": "Web MIDI negato: {0}", "es": "Web MIDI denegado: {0}", "de": "Web MIDI verweigert: {0}"}, "X5 : données refusées (NAK) — vérifie Memory Protect / mode": {"en": "X5: data rejected (NAK) — check Memory Protect / mode", "it": "X5: dati rifiutati (NAK) — controlla Memory Protect / modo", "es": "X5: datos rechazados (NAK) — revisa Memory Protect / modo", "de": "X5: Daten abgelehnt (NAK) — prüfe Memory Protect / Modus"}, "X5 : données reçues (ACK)": {"en": "X5: data received (ACK)", "it": "X5: dati ricevuti (ACK)", "es": "X5: datos recibidos (ACK)", "de": "X5: Daten empfangen (ACK)"}, "X5 : erreur d'écriture (Memory Protect activé ?)": {"en": "X5: write error (Memory Protect on?)", "it": "X5: errore di scrittura (Memory Protect attivo?)", "es": "X5: error de escritura (¿Memory Protect activado?)", "de": "X5: Schreibfehler (Memory Protect an?)"}, "X5 : format refusé": {"en": "X5: format rejected", "it": "X5: formato rifiutato", "es": "X5: formato rechazado", "de": "X5: Format abgelehnt"}, "X5 : écriture terminée ✔": {"en": "X5: write complete ✔", "it": "X5: scrittura completata ✔", "es": "X5: escritura completada ✔", "de": "X5: Schreiben abgeschlossen ✔"}, "X5 : écriture terminée": {"en": "X5: write complete", "it": "X5: scrittura completata", "es": "X5: escritura completada", "de": "X5: Schreiben abgeschlossen"}, "X5 : erreur d'écriture": {"en": "X5: write error", "it": "X5: errore di scrittura", "es": "X5: error de escritura", "de": "X5: Schreibfehler"}, "X5 : reçu (ACK)": {"en": "X5: received (ACK)", "it": "X5: ricevuto (ACK)", "es": "X5: recibido (ACK)", "de": "X5: empfangen (ACK)"}, "X5 : refusé (NAK)": {"en": "X5: rejected (NAK)", "it": "X5: rifiutato (NAK)", "es": "X5: rechazado (NAK)", "de": "X5: abgelehnt (NAK)"}, "X5 détecté · canal {0}": {"en": "X5 detected · channel {0}", "it": "X5 rilevato · canale {0}", "es": "X5 detectado · canal {0}", "de": "X5 erkannt · Kanal {0}"}, "adr {0}, val {1}": {"en": "addr {0}, val {1}", "it": "ind {0}, val {1}", "es": "dir {0}, val {1}", "de": "Adr {0}, Wert {1}"}, "animé": {"en": "lively", "it": "animato", "es": "animado", "de": "bewegt"}, "aucun": {"en": "none", "it": "nessuno", "es": "ninguno", "de": "keins"}, "brillant": {"en": "bright", "it": "brillante", "es": "brillante", "de": "hell"}, "coloré": {"en": "coloured", "it": "colorato", "es": "coloreado", "de": "farbig"}, "court": {"en": "short", "it": "corto", "es": "corto", "de": "kurz"}, "expressif": {"en": "expressive", "it": "espressivo", "es": "expresivo", "de": "ausdrucksvoll"}, "large": {"en": "wide", "it": "ampio", "es": "amplio", "de": "breit"}, "lent": {"en": "slow", "it": "lento", "es": "lento", "de": "langsam"}, "long": {"en": "long", "it": "lungo", "es": "largo", "de": "lang"}, "net": {"en": "clean", "it": "netto", "es": "limpio", "de": "klar"}, "neutre": {"en": "neutral", "it": "neutro", "es": "neutro", "de": "neutral"}, "notes": {"en": "notes", "it": "note", "es": "notas", "de": "Noten"}, "nouvelle banque": {"en": "new bank", "it": "nuovo banco", "es": "banco nuevo", "de": "neue Bank"}, "percussif": {"en": "percussive", "it": "percussivo", "es": "percusivo", "de": "perkussiv"}, "sec": {"en": "dry", "it": "secco", "es": "seco", "de": "trocken"}, "sombre": {"en": "dark", "it": "scuro", "es": "oscuro", "de": "dunkel"}, "statique": {"en": "static", "it": "statico", "es": "estático", "de": "statisch"}, "tenu": {"en": "sustained", "it": "tenuto", "es": "sostenido", "de": "gehalten"}, "égal": {"en": "even", "it": "uniforme", "es": "uniforme", "de": "gleichmäßig"}, "{0} ({1} sons isolés)": {"en": "{0} ({1} single sounds)", "it": "{0} ({1} suoni singoli)", "es": "{0} ({1} sonidos sueltos)", "de": "{0} ({1} Einzelklänge)"}, "Écrire": {"en": "Write", "it": "Scrivi", "es": "Escribir", "de": "Schreiben"}, "Écrire « <b>{0}</b> » dans l'emplacement <b>{1}</b> du X5{2} ?<br><span class=\"note warn\">Le son qui s'y trouve sera remplacé.</span>": {"en": "Write “<b>{0}</b>” to slot <b>{1}</b> on the X5{2}?<br><span class=\"note warn\">The sound currently there will be replaced.</span>", "it": "Scrivere “<b>{0}</b>” nella posizione <b>{1}</b> dell'X5{2}?<br><span class=\"note warn\">Il suono presente sarà sostituito.</span>", "es": "¿Escribir «<b>{0}</b>» en la posición <b>{1}</b> del X5{2}?<br><span class=\"note warn\">El sonido que hay ahí será reemplazado.</span>", "de": "„<b>{0}</b>“ in Speicherplatz <b>{1}</b> des X5 schreiben{2}?<br><span class=\"note warn\">Der dort gespeicherte Klang wird ersetzt.</span>"}, "Écrit le son dans la mémoire du X5": {"en": "Writes the sound to the X5 memory", "it": "Scrive il suono nella memoria dell'X5", "es": "Escribe el sonido en la memoria del X5", "de": "Schreibt den Klang in den Speicher des X5"}, "Écriture dans {0}": {"en": "Write to {0}", "it": "Scrittura in {0}", "es": "Escritura en {0}", "de": "Schreiben in {0}"}, "Éditer :": {"en": "Edit:", "it": "Modifica:", "es": "Editar:", "de": "Bearbeiten:"}, "Épaisseur": {"en": "Width", "it": "Spessore", "es": "Grosor", "de": "Breite"}, "Équilibre osc": {"en": "Osc balance", "it": "Bilanciamento osc", "es": "Equilibrio osc", "de": "Osc-Balance"}, "→ Identity Request sur les 16 canaux": {"en": "→ Identity Request on all 16 channels", "it": "→ Identity Request sui 16 canali", "es": "→ Identity Request en los 16 canales", "de": "→ Identity Request auf allen 16 Kanälen"}, "↶ Annuler la variation": {"en": "↶ Undo the variation", "it": "↶ Annulla la variazione", "es": "↶ Deshacer la variación", "de": "↶ Variation rückgängig"}, "⇧ Envoyer": {"en": "⇧ Send", "it": "⇧ Invia", "es": "⇧ Enviar", "de": "⇧ Senden"}, "⇧ Envoyer la banque au X5": {"en": "⇧ Send bank to X5", "it": "⇧ Invia il banco all'X5", "es": "⇧ Enviar el banco al X5", "de": "⇧ Bank an X5 senden"}, "⇩ Lire la banque du X5": {"en": "⇩ Read X5 bank", "it": "⇩ Leggi il banco dell'X5", "es": "⇩ Leer el banco del X5", "de": "⇩ X5-Bank lesen"}, "⇩ Lire le X5": {"en": "⇩ Read X5", "it": "⇩ Leggi X5", "es": "⇩ Leer X5", "de": "⇩ X5 lesen"}, "▶ Tester": {"en": "▶ Test", "it": "▶ Prova", "es": "▶ Probar", "de": "▶ Testen"}, "● modifié": {"en": "● modified", "it": "● modificato", "es": "● modificado", "de": "● geändert"}, "🎲 Varier": {"en": "🎲 Vary", "it": "🎲 Varia", "es": "🎲 Variar", "de": "🎲 Variieren"}, "Osc 1 + 2": {"en": "Osc 1 + 2", "it": "Osc 1 + 2", "es": "Osc 1 + 2", "de": "Osc 1 + 2"}, "Kit ROM {0}": {"en": "ROM kit {0}", "it": "Kit ROM {0}", "es": "Kit ROM {0}", "de": "ROM-Kit {0}"}, "Thème clair / sombre": {"en": "Light / dark theme", "it": "Tema chiaro / scuro", "es": "Tema claro / oscuro", "de": "Helles / dunkles Design"}, "Édition": {"en": "Editing", "it": "Edit", "es": "Edición", "de": "Edit"}, "Jeu": {"en": "Play", "it": "Play", "es": "Juego", "de": "Spiel"}, "Édition en cours : clique pour rendre la main au X5 (mode Program). En mode jeu : clique pour reprendre l'édition.": {"en": "Editing: click to hand control back to the X5 (Program mode). In play mode: click to resume editing.", "it": "Edit in corso: clicca per restituire il controllo all'X5 (modo Program). In modo play: clicca per riprendere l'edit.", "es": "Editando: haz clic para devolver el control al X5 (modo Program). En modo juego: haz clic para retomar la edición.", "de": "Bearbeitung läuft: klicken, um die Kontrolle an den X5 zurückzugeben (Program-Modus). Im Spielmodus: klicken, um weiterzubearbeiten."}, "X5 rendu au mode jeu (Program)": {"en": "X5 handed back to play mode (Program)", "it": "X5 riportato in modo play (Program)", "es": "X5 devuelto al modo juego (Program)", "de": "X5 zurück im Spielmodus (Program)"}, "Retour en édition : le son de l'éditeur est renvoyé au X5": {"en": "Back to editing: the editor's sound is sent to the X5 again", "it": "Ritorno all'edit: il suono dell'editor viene reinviato all'X5", "es": "Vuelta a la edición: el sonido del editor se reenvía al X5", "de": "Zurück in der Bearbeitung: der Klang des Editors wird erneut an den X5 gesendet"}, "Le X5 a quitté l'édition : resynchronisation…": {"en": "The X5 left edit mode: resyncing…", "it": "L'X5 è uscito dall'edit: risincronizzazione…", "es": "El X5 salió de la edición: resincronizando…", "de": "Der X5 hat den Edit-Modus verlassen: Neusynchronisierung…"}, "Retour au mode Program (jeu)": {"en": "Back to Program mode (play)", "it": "Ritorno al modo Program (play)", "es": "Vuelta al modo Program (juego)", "de": "Zurück in den Program-Modus (Spiel)"}, "Changement de mode → {0}": {"en": "Mode change → {0}", "it": "Cambio di modo → {0}", "es": "Cambio de modo → {0}", "de": "Moduswechsel → {0}"}, "Demande du mode": {"en": "Mode request", "it": "Richiesta del modo", "es": "Solicitud del modo", "de": "Modus-Anfrage"}, "Mode du X5 : {0}": {"en": "X5 mode: {0}", "it": "Modo dell'X5: {0}", "es": "Modo del X5: {0}", "de": "X5-Modus: {0}"}, "Essentiel": {"en": "Essential", "it": "Essenziale", "es": "Esencial", "de": "Basis"}, "Complet": {"en": "Full", "it": "Completo", "es": "Completo", "de": "Vollständig"}, "Essentiel : les réglages principaux. Complet : tous les paramètres du Program.": {"en": "Essential: the main settings. Full: every Program parameter.", "it": "Essenziale: le impostazioni principali. Completo: tutti i parametri del Program.", "es": "Esencial: los ajustes principales. Completo: todos los parámetros del Program.", "de": "Basis: die wichtigsten Einstellungen. Vollständig: alle Program-Parameter."}};
-const HELP = {"fr": "\n  <h3 style=\"margin-top:0\">Mise en route</h3>\n  <ol>\n    <li>Relie le X5 à l'ordinateur (interface MIDI USB : MIDI OUT du X5 → IN de l'interface, IN du X5 ← OUT). Le port <i>TO HOST</i> fonctionne aussi avec un pilote série.</li>\n    <li>Sur le X5 : <b>GLOBAL → MIDI Filter → EX = ENA</b> (sinon aucun SysEx ne passe). Pour écrire : <b>Memory Protect Program = OFF</b>.</li>\n    <li>Ouvre cette page dans <b>Chrome</b> ou <b>Edge</b>, accepte l'accès MIDI, choisis les ports puis clique <b>Détecter</b> (le canal global est trouvé automatiquement).</li>\n    <li>Si Chrome refuse l'accès MIDI quand la page est ouverte comme fichier, lance dans le dossier de la page <code>python3 -m http.server</code> puis ouvre <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Mets le X5 en mode PROG sur le son à retoucher et clique <b>⇩ Lire le X5</b>.</li>\n  </ol>\n  <h3>Raccourcis</h3>\n  <ul>\n    <li>Clavier de l'ordinateur = clavier musical (rangée du milieu = touches blanches, rangée du dessus = noires), <kbd>W</kbd>/<kbd>X</kbd> (AZERTY) ou <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>\n    <li><kbd>Espace</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annuler · <kbd>Ctrl/⌘+Maj+Z</kbd> = rétablir.</li>\n    <li>Double-clic sur un curseur = valeur d'origine. Molette = réglage fin.</li>\n    <li>Bouton <b>SysEx</b> : petite fenêtre (déplaçable, redimensionnable par le coin) qui montre chaque message envoyé ↑ et reçu ↓, traduit en clair. Le curseur <b>Délai</b> ajoute une pause après chaque SysEx (20 ms par défaut).</li>\n    <li>Les macros de l'onglet Rapide reviennent au centre : chaque geste <i>ajoute</i> ou <i>retire</i> par rapport au son actuel.</li>\n    <li>Les drapeaux en haut à droite changent la langue de l'interface.</li>\n    <li><b>Essentiel / Complet</b> (à gauche des onglets) : Essentiel garde les réglages principaux, Complet affiche tous les paramètres du Program. Les deux modes agissent sur le même son.</li>\n    <li>Bouton <b>● Édition / ○ Jeu</b> : montre si le X5 est en mode édition. Un clic lui rend la main (mode Program) ; il est aussi remis en mode jeu quand tu fermes la page. Si le X5 refuse un réglage (par exemple après un passage par sa face avant), l'appli le remet en édition et lui renvoie le son.</li>\n  </ul>\n  <h3>Limites</h3>\n  <p class=\"note\">Cette version édite uniquement les <b>Programs</b> (sons). Les <b>Combinations</b>, les réglages Global et les paramètres internes des effets ne sont pas encore éditables.</p>\n  <p class=\"note\">Protocole : Korg SysEx, Model ID 36h (commun X5 / X5D / X5DR / 05R/W). Paramètres en direct : fonction 41h ; son complet : fonction 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.5 — © 2026 Benjamin PATY (BenjaminPaty54) — licence MIT. Korg et X5 sont des marques de Korg Inc. ; projet indépendant non affilié.</p>\n", "en": "\n  <h3 style=\"margin-top:0\">Getting started</h3>\n  <ol>\n    <li>Connect the X5 to the computer (USB MIDI interface: X5 MIDI OUT → interface IN, X5 IN ← interface OUT). The <i>TO HOST</i> port also works with a serial driver.</li>\n    <li>On the X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (otherwise no SysEx gets through). To write: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Open this page in <b>Chrome</b> or <b>Edge</b>, allow MIDI access, pick the ports, then click <b>Detect</b> (the global channel is found automatically).</li>\n    <li>If Chrome refuses MIDI access when the page is opened as a file, run <code>python3 -m http.server</code> in the page's folder, then open <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Put the X5 in PROG mode on the sound you want to edit and click <b>⇩ Read X5</b>.</li>\n  </ol>\n  <h3>Shortcuts</h3>\n  <ul>\n    <li>Computer keyboard = music keyboard (middle row = white keys, row above = black keys), <kbd>Z</kbd>/<kbd>X</kbd> (QWERTY) = octave.</li>\n    <li><kbd>Space</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = undo · <kbd>Ctrl/⌘+Shift+Z</kbd> = redo.</li>\n    <li>Double-click a slider = original value. Mouse wheel = fine adjustment.</li>\n    <li><b>SysEx</b> button: a small window (movable, resizable from its corner) showing every message sent ↑ and received ↓, decoded in plain words. The <b>Delay</b> slider adds a pause after each SysEx message (20 ms by default).</li>\n    <li>The macros on the Quick tab spring back to the centre: each gesture <i>adds to</i> or <i>takes away from</i> the current sound.</li>\n    <li>The flags at the top right change the interface language.</li>\n    <li><b>Essential / Full</b> (left of the tabs): Essential keeps the main settings, Full shows every Program parameter. Both modes edit the same sound.</li>\n    <li><b>● Editing / ○ Play</b> button: shows whether the X5 is in edit mode. One click hands control back to it (Program mode); it is also put back in play mode when you close the page. If the X5 rejects a change (for example after using its front panel), the app puts it back in edit mode and resends the sound.</li>\n  </ul>\n  <h3>Limitations</h3>\n  <p class=\"note\">This version edits <b>Programs</b> (sounds) only. <b>Combinations</b>, Global settings and the internal effect parameters cannot be edited yet.</p>\n  <p class=\"note\">Protocol: Korg SysEx, Model ID 36h (shared by X5 / X5D / X5DR / 05R/W). Live parameters: function 41h; full sound: function 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.5 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>\n", "it": "\n  <h3 style=\"margin-top:0\">Per iniziare</h3>\n  <ol>\n    <li>Collega l'X5 al computer (interfaccia MIDI USB: MIDI OUT dell'X5 → IN dell'interfaccia, IN dell'X5 ← OUT). Anche la porta <i>TO HOST</i> funziona con un driver seriale.</li>\n    <li>Sull'X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (altrimenti nessun SysEx passa). Per scrivere: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Apri questa pagina in <b>Chrome</b> o <b>Edge</b>, consenti l'accesso MIDI, scegli le porte e clicca <b>Rileva</b> (il canale globale viene trovato automaticamente).</li>\n    <li>Se Chrome rifiuta l'accesso MIDI quando la pagina è aperta come file, esegui <code>python3 -m http.server</code> nella cartella della pagina, poi apri <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Metti l'X5 in modo PROG sul suono da modificare e clicca <b>⇩ Leggi X5</b>.</li>\n  </ol>\n  <h3>Scorciatoie</h3>\n  <ul>\n    <li>Tastiera del computer = tastiera musicale (fila centrale = tasti bianchi, fila superiore = neri), <kbd>Z</kbd>/<kbd>X</kbd> = ottava.</li>\n    <li><kbd>Spazio</kbd> = test · <kbd>Ctrl/⌘+Z</kbd> = annulla · <kbd>Ctrl/⌘+Maiusc+Z</kbd> = ripristina.</li>\n    <li>Doppio clic su un cursore = valore originale. Rotella = regolazione fine.</li>\n    <li>Pulsante <b>SysEx</b>: piccola finestra (spostabile, ridimensionabile dall'angolo) che mostra ogni messaggio inviato ↑ e ricevuto ↓, tradotto in chiaro. Il cursore <b>Ritardo</b> aggiunge una pausa dopo ogni SysEx (20 ms predefiniti).</li>\n    <li>Le macro della scheda Rapido tornano al centro: ogni gesto <i>aggiunge</i> o <i>toglie</i> rispetto al suono attuale.</li>\n    <li>Le bandiere in alto a destra cambiano la lingua dell'interfaccia.</li>\n    <li><b>Essenziale / Completo</b> (a sinistra delle schede): Essenziale mostra le impostazioni principali, Completo tutti i parametri del Program. Entrambi i modi modificano lo stesso suono.</li>\n    <li>Pulsante <b>● Edit / ○ Play</b>: indica se l'X5 è in modo edit. Un clic gli restituisce il controllo (modo Program); viene rimesso in modo play anche alla chiusura della pagina. Se l'X5 rifiuta una modifica (ad esempio dopo aver usato il pannello frontale), l'app lo rimette in edit e gli reinvia il suono.</li>\n  </ul>\n  <h3>Limiti</h3>\n  <p class=\"note\">Questa versione modifica solo i <b>Program</b> (suoni). Le <b>Combination</b>, le impostazioni Global e i parametri interni degli effetti non sono ancora modificabili.</p>\n  <p class=\"note\">Protocollo: Korg SysEx, Model ID 36h (comune a X5 / X5D / X5DR / 05R/W). Parametri in diretta: funzione 41h; suono completo: funzione 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.5 — © 2026 Benjamin PATY (BenjaminPaty54) — licenza MIT. Korg e X5 sono marchi di Korg Inc.; progetto indipendente e non affiliato.</p>\n", "es": "\n  <h3 style=\"margin-top:0\">Primeros pasos</h3>\n  <ol>\n    <li>Conecta el X5 al ordenador (interfaz MIDI USB: MIDI OUT del X5 → IN de la interfaz, IN del X5 ← OUT). El puerto <i>TO HOST</i> también funciona con un controlador serie.</li>\n    <li>En el X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (si no, no pasa ningún SysEx). Para escribir: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Abre esta página en <b>Chrome</b> o <b>Edge</b>, acepta el acceso MIDI, elige los puertos y haz clic en <b>Detectar</b> (el canal global se encuentra automáticamente).</li>\n    <li>Si Chrome rechaza el acceso MIDI cuando la página se abre como archivo, ejecuta <code>python3 -m http.server</code> en la carpeta de la página y abre <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Pon el X5 en modo PROG en el sonido que quieres editar y haz clic en <b>⇩ Leer X5</b>.</li>\n  </ol>\n  <h3>Atajos</h3>\n  <ul>\n    <li>Teclado del ordenador = teclado musical (fila central = teclas blancas, fila superior = negras), <kbd>Z</kbd>/<kbd>X</kbd> = octava.</li>\n    <li><kbd>Espacio</kbd> = prueba · <kbd>Ctrl/⌘+Z</kbd> = deshacer · <kbd>Ctrl/⌘+Mayús+Z</kbd> = rehacer.</li>\n    <li>Doble clic en un deslizador = valor original. Rueda del ratón = ajuste fino.</li>\n    <li>Botón <b>SysEx</b>: ventana pequeña (movible y redimensionable desde la esquina) que muestra cada mensaje enviado ↑ y recibido ↓, descifrado. El deslizador <b>Retardo</b> añade una pausa tras cada SysEx (20 ms por defecto).</li>\n    <li>Las macros de la pestaña Rápido vuelven al centro: cada gesto <i>añade</i> o <i>quita</i> respecto al sonido actual.</li>\n    <li>Las banderas de arriba a la derecha cambian el idioma de la interfaz.</li>\n    <li><b>Esencial / Completo</b> (a la izquierda de las pestañas): Esencial muestra los ajustes principales, Completo todos los parámetros del Program. Ambos modos editan el mismo sonido.</li>\n    <li>Botón <b>● Edición / ○ Juego</b>: indica si el X5 está en modo edición. Un clic le devuelve el control (modo Program); también vuelve al modo juego al cerrar la página. Si el X5 rechaza un ajuste (por ejemplo, tras usar su panel frontal), la app lo vuelve a poner en edición y le reenvía el sonido.</li>\n  </ul>\n  <h3>Limitaciones</h3>\n  <p class=\"note\">Esta versión edita solo los <b>Programs</b> (sonidos). Las <b>Combinations</b>, los ajustes Global y los parámetros internos de los efectos aún no se pueden editar.</p>\n  <p class=\"note\">Protocolo: Korg SysEx, Model ID 36h (común a X5 / X5D / X5DR / 05R/W). Parámetros en directo: función 41h; sonido completo: función 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.5 — © 2026 Benjamin PATY (BenjaminPaty54) — licencia MIT. Korg y X5 son marcas de Korg Inc.; proyecto independiente y no afiliado.</p>\n", "de": "\n  <h3 style=\"margin-top:0\">Erste Schritte</h3>\n  <ol>\n    <li>Verbinde den X5 mit dem Computer (USB-MIDI-Interface: MIDI OUT des X5 → IN des Interfaces, IN des X5 ← OUT). Der <i>TO HOST</i>-Port funktioniert auch mit einem seriellen Treiber.</li>\n    <li>Am X5: <b>GLOBAL → MIDI Filter → EX = ENA</b> (sonst kommt kein SysEx durch). Zum Schreiben: <b>Memory Protect Program = OFF</b>.</li>\n    <li>Öffne diese Seite in <b>Chrome</b> oder <b>Edge</b>, erlaube den MIDI-Zugriff, wähle die Ports und klicke auf <b>Erkennen</b> (der globale Kanal wird automatisch gefunden).</li>\n    <li>Verweigert Chrome den MIDI-Zugriff, wenn die Seite als Datei geöffnet ist, starte im Ordner der Seite <code>python3 -m http.server</code> und öffne <code>http://localhost:8000/x5studio.html</code>.</li>\n    <li>Schalte den X5 in den PROG-Modus auf den Klang, den du bearbeiten willst, und klicke auf <b>⇩ X5 lesen</b>.</li>\n  </ol>\n  <h3>Tastenkürzel</h3>\n  <ul>\n    <li>Computertastatur = Musiktastatur (mittlere Reihe = weiße Tasten, obere Reihe = schwarze), <kbd>Y</kbd>/<kbd>X</kbd> (QWERTZ) = Oktave.</li>\n    <li><kbd>Leertaste</kbd> = Test · <kbd>Strg/⌘+Z</kbd> = rückgängig · <kbd>Strg/⌘+Umschalt+Z</kbd> = wiederholen.</li>\n    <li>Doppelklick auf einen Regler = Originalwert. Mausrad = Feineinstellung.</li>\n    <li>Schaltfläche <b>SysEx</b>: kleines Fenster (verschiebbar, an der Ecke in der Größe änderbar), das jede gesendete ↑ und empfangene ↓ Nachricht im Klartext zeigt. Der Regler <b>Verzögerung</b> fügt nach jeder SysEx-Nachricht eine Pause ein (standardmäßig 20 ms).</li>\n    <li>Die Makros im Tab Schnell springen in die Mitte zurück: Jede Geste <i>fügt</i> dem aktuellen Klang etwas <i>hinzu</i> oder <i>nimmt</i> etwas weg.</li>\n    <li>Die Flaggen oben rechts ändern die Sprache der Oberfläche.</li>\n    <li><b>Basis / Vollständig</b> (links neben den Tabs): Basis zeigt die wichtigsten Einstellungen, Vollständig alle Program-Parameter. Beide Modi bearbeiten denselben Klang.</li>\n    <li>Schaltfläche <b>● Edit / ○ Spiel</b>: zeigt, ob der X5 im Edit-Modus ist. Ein Klick gibt ihm die Kontrolle zurück (Program-Modus); beim Schließen der Seite wird er ebenfalls in den Spielmodus zurückversetzt. Lehnt der X5 eine Änderung ab (etwa nach Bedienung am Gerät), versetzt ihn die App wieder in den Edit-Modus und sendet den Klang erneut.</li>\n  </ul>\n  <h3>Einschränkungen</h3>\n  <p class=\"note\">Diese Version bearbeitet nur <b>Programs</b> (Klänge). <b>Combinations</b>, Global-Einstellungen und die internen Effektparameter sind noch nicht editierbar.</p>\n  <p class=\"note\">Protokoll: Korg SysEx, Model ID 36h (gemeinsam für X5 / X5D / X5DR / 05R/W). Live-Parameter: Funktion 41h; kompletter Klang: Funktion 40h.</p>\n  <p class=\"note\" style=\"margin-top:12px\">X5 Studio v1.5 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT-Lizenz. Korg und X5 sind Marken der Korg Inc.; unabhängiges, nicht verbundenes Projekt.</p>\n"};
-const I18N = {lang:'fr', map:new Map()};
-for (const [fr,tr] of Object.entries(I18N_DICT)) I18N.map.set(fr,tr);
+const LANGPACKS = window.X5_LANGPACKS || {};
+const LANGS = ['en', ...Object.keys(LANGPACKS).filter(c=>c!=='en')];
+const LANG_NAMES = {en:'English'}; for (const c in LANGPACKS) LANG_NAMES[c]=LANGPACKS[c].name||c;
+const HELP = {en:''};      // English help = the help written in the page, saved at start-up
+const I18N = {lang:'en'};
 function T(s, ...a){
   if (s==null) return s;
   let r = s;
-  if (I18N.lang!=='fr'){ const e=I18N.map.get(s); if (e && e[I18N.lang]) r=e[I18N.lang]; }
+  if (I18N.lang!=='en'){ const p=LANGPACKS[I18N.lang]; const t=p && p.strings[s]; if (t) r=t; }
   return a.length ? r.replace(/\{(\d)\}/g,(m,i)=>a[+i]) : r;
 }
 function trText(n){
@@ -400,7 +412,7 @@ function setLang(l, initial){
   I18N.lang=l; document.documentElement.lang=l;
   try{ localStorage.setItem('x5s.lang',l); }catch(e){}
   document.querySelectorAll('#flags button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
-  const hb=document.getElementById('helpBody'); if (hb && HELP[l]) hb.innerHTML=HELP[l];
+  const hb=document.getElementById('helpBody'); if (hb) hb.innerHTML = (l!=='en' && LANGPACKS[l] && LANGPACKS[l].help) || HELP.en;
   if (!initial){ trTree(document.body); refreshAll(); renderBank(); renderMine(); }
 }
 function initTheme(){
@@ -424,24 +436,29 @@ function initView(){
 }
 function initLang(){
   const f=document.getElementById('flags');
-  for (const l of LANGS){ const b=document.createElement('button'); b.type='button'; b.dataset.l=l; b.title=LANG_NAMES[l]; b.setAttribute('data-noi18n',''); b.innerHTML=FLAGS[l]; b.onclick=()=>setLang(l); f.append(b); }
+  HELP.en = document.getElementById('helpBody').innerHTML;
+  for (const l of LANGS){ const b=document.createElement('button'); b.type='button'; b.dataset.l=l; b.title=LANG_NAMES[l]; b.setAttribute('data-noi18n',''); b.innerHTML=FLAGS[l]||('<b style="font-size:11px;line-height:16px">'+l.toUpperCase()+'</b>'); b.onclick=()=>setLang(l); f.append(b); }
   let l=null; try{ l=localStorage.getItem('x5s.lang'); }catch(e){}
-  if (!l){ const nav=(navigator.language||'en').slice(0,2).toLowerCase(); l = LANGS.includes(nav) ? nav : 'en'; }
+  const nav=(navigator.language||'en').slice(0,2).toLowerCase();
+  if (!l) l = LANGS.includes(nav) ? nav : 'en';
+  // langue demandée mais fichier absent (dossier lang/ non copié à côté de la page)
+  if (!LANGS.includes(l)) l='en';
+  if (LANGS.length===1 && nav!=='en') setTimeout(()=>log('Translation files not found: keep the lang/ folder next to x5studio.html to get other languages.','e'),0);
   setLang(l, true);
   i18nObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['title','placeholder']});
 }
-/* X5 Studio v1.5 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
+/* X5 Studio v1.5.1 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
 /* ============================================================
    1. Données de référence
    ============================================================ */
 const WAVES = ["A.Piano 1", "A.Piano1 LP", "A.Piano 2", "E.Piano 1", "E.Piano1 LP", "E.Piano 2", "E.Piano2LP", "Soft EP", "Soft EP LP", "Hard EP", "Hard EP LP", "PianoPad 1", "PianoPad 2", "Clay", "Clay LP", "Harpsicord", "HarpsicdLP", "PercOrgan1", "PercOrg1 LP", "PercOrgan2", "PercOrg2LP", "Organ 1", "Organ 1 LP", "Organ 2", "Organ 2 LP", "Organ 3", "Organ 4", "Organ 5", "RotaryOrg1", "RotaryOrg2", "PipeOrgan1", "PipeOrg1LP", "PipeOrgan2", "PipeOrg2LP", "PipeOrgan3", "PipeOrg3LP", "Musette", "Musette V", "Bandneon", "BandneonLP", "Accordion", "AcordionLP", "Harmonica", "G.Guitar", "G.GuitarLP", "F.Guitar", "F.GuitarLP", "F.Guitar V", "A.Gtr Harm", "E.Guitar 1", "E.Guitar1 V", "E.Guitar 2", "E.Guitar 3", "MuteGuitar", "Funky Gtr", "FunkyGtr V", "E.Gtr Harm", "DistGuitar", "Dist GtrLP", "DistGuitrV", "Over Drive", "OverDry LP", "OverDry F4", "MuteDstGtr", "MtDstGtr V", "PowerChord", "PowerChd V", "OverDvChrd", "Gtr Slide", "GtrSlide V", "Sitar 1", "Sitar 2", "Sitar 2 LP", "Santur", "Bouzouki", "Bouzouki LP", "Banjo", "Shamisen", "Koto", "Uood", "Harp", "MandlinTrm", "A.Bass 1", "A.Bass1 LP", "A.Bass 2", "A.Bass2 LP", "E.Bass 1", "E.Bass1 LP", "E.Bass 2", "E. Bass2 LP", "Pick Bass1", "PicBass1 LP", "Pick Bass2", "Fretless", "FretlessLP", "Slap Bass1", "Slap Bass2", "SlpBass2LP", "Slap Bass3", "SynthBass1", "SynBass1 LP", "SynthBass2", "SynBass2LP", "House Bass", "FM Bass", "FM Bass LP", "Kalimba", "Music Box", "MusicBoxLP", "Log Drum", "Marimba", "Xylophone", "Vibe", "Celesta", "Glocken", "BrightBell", "B.Bell LP", "Metal Bell", "M. Bell LP", "Gamelan", "Pole", "Pole LP", "Tubular", "Split Drum", "Split Bell", "Flute", "Pan Flute", "PanFluteLP", "Shakuhachi", "ShakhachLP", "Bottle", "Recorder", "Ocarina", "Oboe", "EnglishHrn", "Eng.HornLP", "BasoonOboe", "BsonOboeLP", "Clarinet", "ClarinetLP", "Bari Sax", "Bari.SaxLP", "Tenor Sax", "T.Sax LP", "Alto Sax", "A.Sax LP", "SopranoSax", "S.Sax LP", "Tuba", "Tuba LP", "Horn", "FlugelHorn", "Trombone 1", "Trombone 2", "Trumpet", "Trumpet LP", "Mute TP", "Mute TP LP", "Brass 1", "Brass 1 LP", "Brass 2", "Brass 2 LP", "StringEns.", "StrEns. V1", "StrEns. V2", "StrEns. V3", "AnaStrings", "PWM", "Violin", "Cello", "Cello LP", "Pizzicato", "Voice", "Choir", "Soft Choir", "Air Vox", "Doo Voice", "DooVoiceLP", "Syn Vox", "Syn Vox LP", "White Pad", "Ether Bell", "E.Bell LP", "Mega Pad", "Spectrum 1", "Spectrum 2", "Stadium", "Stadium NT", "BrushNoise", "BruNoiseNT", "Steel Drum", "SteelDrmLP", "BrushSwirl", "Belltree", "BelltreeNT", "BeltreV NT", "Tri Roll", "TriRoll NT", "Telephon", "TelephonNT", "Clicker", "Clicker NT", "Crickets 1", "Crickts1NT", "Crickets 2", "Crickts2NT", "Magic Bell", "Sporing", "Rattle", "Kava 1", "Kava 2", "Fever 1", "Fever 2", "Zappers 1", "Zappers 2", "Bugs", "Surfy", "SleighBell", "Elec Beat", "Idling", "EthnicBeat", "Taps", "Tap 1", "Tap 2", "Tap 3", "Tap 4", "Tap 5", "Orch Hit", "SnareRl/Ht", "Syn Snare", "Rev Snare", "PowerSnare", "Orch Perc", "Crash Cym", "CrashCymLP", "CrashLP NT", "China Cym", "Splash Cym", "Orch Crash", "Tite HH", "Tite HH NT", "Bell Ride", "Ping Ride", "Timpani", "Timpani LP", "Cabasa", "Cabasa NT", "Agogo", "Cow Bell", "Low Bongo", "Claves", "Timbale", "WoodBlock1", "WoodBlock2", "WoodBlock3", "Taiko Hit", "Syn Claves", "Melo Tom", "ProccesTom", "Syn Tom 1", "Syn Tom 2", "VocalSnare", "Zap 1", "Zap 2", "Fret Zap 1", "Fret Zap 2", "Vibla Slap", "Indust", "Thing", "Thing NT", "FingerSnap", "FingSnapNT", "Tambourine", "Hand Clap", "HandClapNT", "Gun Shot", "Castanet", "CastanetNT", "Snap", "Snap NT", "Gt Scratch", "Side Stick", "SideStikNT", "TimbleSide", "TimblSidNT", "Syn Rim", "Syn Rim NT", "Open HH", "OpenSyn HH", "CloseSynHH", "Sagat", "Sagat NT", "Sagatty", "Sagatty NT", "JingleBell", "Taiko", "Slap Bongo", "Open Conga", "Slap Conga", "Palm Conga", "Mute Conga", "Tabla 1", "Tabla 2", "Maracas", "SynMaracas", "SynMarcsNT", "MuteTriang", "OpenTriang", "Guiro", "Guiro LP", "Scratch Hi", "ScratcHiNT", "Scratch Lo", "Scratc LoNT", "ScratchDbl", "ScratDblNT", "Mini 1a", "Digital 1", "VS 102", "VS 48", "VS 52", "VS 58", "VS 71", "VS 72", "VS 88", "VS 89", "13 - 35", "DWGSOrgan1", "DWGSOrgan2", "DWGS E.P.", "Saw", "Square", "Ramp", "Pulse 25%", "Pulse 8%", "Pulse 4%", "Syn Sine", "Sine", "DJ Kit 1", "DJ Kit 2"];
-const WAVE_CATS = [[0,'Pianos & claviers'],[17,'Orgues'],[36,'Accordéons & harmonica'],[43,'Guitares'],[70,'Cordes pincées du monde'],[82,'Basses'],[106,'Mallets & cloches'],[125,'Flûtes'],[133,'Anches & saxophones'],[148,'Cuivres'],[162,'Cordes'],[172,'Voix'],[180,'Pads & synthés'],[186,'Effets & bruits'],[218,'Rythmes & boucles'],[227,'Percussions & batterie'],[316,'Formes VS / DWGS'],[330,'Formes d\'onde de base'],[338,'Kits DJ']];
-const MGW = ['Triangle','Dent de scie ↗','Dent de scie ↘','Carré 1','Aléatoire','Carré 2'];
-const KMODE = ['Off','Bas','Haut','Tout'];
+const WAVE_CATS = [[0,'Pianos & keys'],[17,'Organs'],[36,'Accordions & harmonica'],[43,'Guitars'],[70,'World plucked strings'],[82,'Basses'],[106,'Mallets & bells'],[125,'Flutes'],[133,'Reeds & saxophones'],[148,'Brass'],[162,'Strings'],[172,'Voices'],[180,'Pads & synths'],[186,'Effects & noises'],[218,'Rhythms & loops'],[227,'Percussion & drums'],[316,'VS / DWGS waves'],[330,'Basic waveforms'],[338,'DJ kits']];
+const MGW = ['Triangle','Saw up ↗','Saw down ↘','Square 1','Random','Square 2'];
+const KMODE = ['Off','Low','High','All'];
 const FX = ['— Off —','Reverb: Hall','Reverb: Ensemble Hall','Reverb: Concert Hall','Reverb: Room','Reverb: Large Room','Reverb: Live Stage','Reverb: Wet Plate','Reverb: Dry Plate','Reverb: Spring Reverb','Early Reflection I','Early Reflection II','Early Reflection III','Stereo Delay','Cross Delay','Dual Mono Delay','Multi Tap Delay I','Multi Tap Delay II','Multi Tap Delay III','Stereo Chorus I','Stereo Chorus II','Quadrature Chorus','Crossover Chorus','Harmonic Chorus','Symphonic Ensemble','Flanger I','Flanger II','Crossover Flanger','Exciter','Enhancer','Distortion','Over Drive','Stereo Phaser I','Stereo Phaser II','Rotary Speaker','Auto Pan','Tremolo','Parametric EQ','Chorus-Delay','Flanger-Delay','Delay/Hall','Delay/Room','Delay/Chorus','Delay/Flanger','Delay/Distortion','Delay/Overdrive','Delay/Phaser','Delay/Rotary'];
 const NOTE_N = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 /* Mode Batterie : 0-1 = kits utilisateur (RAM), 8-15 = kits ROM 1-8 */
-const kitName = v => v<8 ? T('Kit batterie {0}',v+1) : T('Kit ROM {0}',v-7);
+const kitName = v => v<8 ? T('Drum kit {0}',v+1) : T('ROM kit {0}',v-7);
 const noteName = n => NOTE_N[n%12] + (Math.floor(n/12)-1);
 
 /* ============================================================
@@ -453,104 +470,104 @@ const noteName = n => NOTE_N[n%12] + (Math.floor(n/12)-1);
       Source : panel Ctrlr 05R/W 0.99 (M. De Carolis), plages vérifiées sur la notice X2/X3.
    ============================================================ */
 const COMMON = [
-  ['mode','Mode',0,{t:'u8',o:10},0,2,{opts:['Simple','Double','Batterie']}],
+  ['mode','Mode',0,{t:'u8',o:10},0,2,{opts:['Single','Double','Drums']}],
   ['mono','Mono',1,{t:'bit',o:11,b:0},0,1],
   ['hold','Hold',2,{t:'bit',o:11,b:1},0,1],
-  ['peg.sl','Niveau de départ',3,{t:'s8',o:21},-99,99],
-  ['peg.at','Temps d\'attaque',4,{t:'u8',o:22},0,99],
-  ['peg.al','Niveau d\'attaque',5,{t:'s8',o:23},-99,99],
-  ['peg.dt','Temps de déclin',6,{t:'u8',o:24},0,99],
-  ['peg.rt','Temps de relâche',7,{t:'u8',o:25},0,99],
-  ['peg.rl','Niveau de relâche',8,{t:'s8',o:26},-99,99],
-  ['peg.vlev','Niveaux ← vélocité',9,{t:'s8',o:28},-99,99],
-  ['peg.vtim','Temps ← vélocité',10,{t:'s8',o:27},-99,99],
-  ['fmg.wave','Forme',11,{t:'bits',o:29,s:0,m:7},0,5,{opts:MGW}],
-  ['fmg.freq','Vitesse',12,{t:'u8',o:30},0,99],
-  ['fmg.int','Intensité',13,{t:'u8',o:32},0,99],
-  ['fmg.del','Délai',14,{t:'u8',o:31},0,99],
-  ['fmg.osc','Agit sur',15,{t:'bits',o:29,s:5,m:3},0,3,{opts:['Aucun','Osc 1','Osc 2','Osc 1 + 2']}],
-  ['fmg.sync','Redémarre à chaque note',16,{t:'bit',o:29,b:7},0,1],
+  ['peg.sl','Start level',3,{t:'s8',o:21},-99,99],
+  ['peg.at','Attack time',4,{t:'u8',o:22},0,99],
+  ['peg.al','Attack level',5,{t:'s8',o:23},-99,99],
+  ['peg.dt','Decay time',6,{t:'u8',o:24},0,99],
+  ['peg.rt','Release time',7,{t:'u8',o:25},0,99],
+  ['peg.rl','Release level',8,{t:'s8',o:26},-99,99],
+  ['peg.vlev','Levels ← velocity',9,{t:'s8',o:28},-99,99],
+  ['peg.vtim','Times ← velocity',10,{t:'s8',o:27},-99,99],
+  ['fmg.wave','Waveform',11,{t:'bits',o:29,s:0,m:7},0,5,{opts:MGW}],
+  ['fmg.freq','Speed',12,{t:'u8',o:30},0,99],
+  ['fmg.int','Depth',13,{t:'u8',o:32},0,99],
+  ['fmg.del','Delay',14,{t:'u8',o:31},0,99],
+  ['fmg.osc','Applies to',15,{t:'bits',o:29,s:5,m:3},0,3,{opts:['None','Osc 1','Osc 2','Osc 1 + 2']}],
+  ['fmg.sync','Restarts on each note',16,{t:'bit',o:29,b:7},0,1],
   ['at.bend','Pitch bend',17,{t:'s8',o:33},-12,12],
-  ['at.fc','Ouverture filtre',18,{t:'s8',o:34},-99,99],
-  ['at.mg','LFO filtre',19,{t:'u8',o:35},0,99],
+  ['at.fc','Filter opening',18,{t:'s8',o:34},-99,99],
+  ['at.mg','Filter LFO',19,{t:'u8',o:35},0,99],
   ['at.amp','Volume',20,{t:'s8',o:36},-99,99],
-  ['joy.mg','LFO filtre (joy ↓)',21,{t:'u8',o:39},0,99],
+  ['joy.mg','Filter LFO (joy ↓)',21,{t:'u8',o:39},0,99],
   ['joy.bend','Pitch bend (joy ↔)',22,{t:'s8',o:37},-12,12],
-  ['joy.vdf','Balayage filtre (joy ↓)',23,{t:'s8',o:38},-99,99],
-  ['interval','Intervalle osc 2',88,{t:'s8',o:18},-12,12],
-  ['detune','Désaccord',89,{t:'s8',o:19},-50,50],
-  ['delay','Retard osc 2',90,{t:'u8',o:20},0,99],
+  ['joy.vdf','Filter sweep (joy ↓)',23,{t:'s8',o:38},-99,99],
+  ['interval','Osc 2 interval',88,{t:'s8',o:18},-12,12],
+  ['detune','Detune',89,{t:'s8',o:19},-50,50],
+  ['delay','Osc 2 delay',90,{t:'u8',o:20},0,99],
 ];
 const OSC = [
   ['wave','Multisound',24,{t:'u16',o:[12,15]},0,339],
-  ['lvl','Niveau',25,{t:'u8',o:65},0,99],
+  ['lvl','Level',25,{t:'u8',o:65},0,99],
   ['oct','Octave',26,{t:'s8',o:[14,17]},-2,1,{opts:{'-2':"32'",'-1':"16'",'0':"8'",'1':"4'"}}],
-  ['pitch','Intensité Pitch EG',27,{t:'s8',o:40},-99,99],
+  ['pitch','Pitch EG depth',27,{t:'s8',o:40},-99,99],
   ['pan','Pan A ↔ B',28,{t:'s8',o:86},-1,30],
-  ['sendC','Envoi bus C',29,{t:'bits',o:82,s:4,m:15},0,9],
-  ['sendD','Envoi bus D',30,{t:'bits',o:82,s:0,m:15},0,9],
+  ['sendC','Send bus C',29,{t:'bits',o:82,s:4,m:15},0,9],
+  ['sendD','Send bus D',30,{t:'bits',o:82,s:0,m:15},0,9],
   ['vdf.cut','Cutoff',31,{t:'u8',o:50},0,99],
-  ['vdf.eint','Intensité EG',32,{t:'u8',o:53},0,99],
-  ['vdf.col','Couleur',33,{t:'u8',o:83},0,99],
-  ['vdf.colv','Couleur ← vélocité',34,{t:'s8',o:84},-99,99],
-  ['vdf.at','Temps attaque',35,{t:'u8',o:57},0,99],
-  ['vdf.al','Niveau attaque',36,{t:'s8',o:58},-99,99],
-  ['vdf.dt','Temps déclin',37,{t:'u8',o:59},0,99],
-  ['vdf.bp','Point de rupture',38,{t:'s8',o:60},-99,99],
-  ['vdf.st','Temps pente',39,{t:'u8',o:61},0,99],
-  ['vdf.sl','Niveau maintien',40,{t:'s8',o:62},-99,99],
-  ['vdf.rt','Temps relâche',41,{t:'u8',o:63},0,99],
-  ['vdf.rl','Niveau relâche',42,{t:'s8',o:64},-99,99],
-  ['vdf.vint','Intensité EG ← vél.',43,{t:'s8',o:56},-99,99],
-  ['vdf.vtim','Temps EG ← vél.',44,{t:'u8',o:55},0,99],
+  ['vdf.eint','EG depth',32,{t:'u8',o:53},0,99],
+  ['vdf.col','Colour',33,{t:'u8',o:83},0,99],
+  ['vdf.colv','Colour ← velocity',34,{t:'s8',o:84},-99,99],
+  ['vdf.at','Attack time',35,{t:'u8',o:57},0,99],
+  ['vdf.al','Attack level',36,{t:'s8',o:58},-99,99],
+  ['vdf.dt','Decay time',37,{t:'u8',o:59},0,99],
+  ['vdf.bp','Break point',38,{t:'s8',o:60},-99,99],
+  ['vdf.st','Slope time',39,{t:'u8',o:61},0,99],
+  ['vdf.sl','Sustain level',40,{t:'s8',o:62},-99,99],
+  ['vdf.rt','Release time',41,{t:'u8',o:63},0,99],
+  ['vdf.rl','Release level',42,{t:'s8',o:64},-99,99],
+  ['vdf.vint','EG depth ← vel.',43,{t:'s8',o:56},-99,99],
+  ['vdf.vtim','EG time ← vel.',44,{t:'u8',o:55},0,99],
   ['vdf.va','A',45,{t:'tri',o:79,b:0},-1,1],
   ['vdf.vd','D',46,{t:'tri',o:79,b:1},-1,1],
   ['vdf.vs','S',47,{t:'tri',o:79,b:2},-1,1],
   ['vdf.vr','R',48,{t:'tri',o:79,b:3},-1,1],
-  ['vdf.kkey','Note pivot',49,{t:'u8',o:51},0,127],
-  ['vdf.kmode','Suivi clavier',50,{t:'bits',o:85,s:0,m:3},0,3,{opts:KMODE}],
-  ['vdf.kint','Cutoff ← clavier',51,{t:'s8',o:52},-99,99],
-  ['vdf.ktim','Temps EG ← clavier',52,{t:'u8',o:54},0,99],
+  ['vdf.kkey','Pivot key',49,{t:'u8',o:51},0,127],
+  ['vdf.kmode','Key tracking',50,{t:'bits',o:85,s:0,m:3},0,3,{opts:KMODE}],
+  ['vdf.kint','Cutoff ← keyboard',51,{t:'s8',o:52},-99,99],
+  ['vdf.ktim','EG time ← keyboard',52,{t:'u8',o:54},0,99],
   ['vdf.ka','A',53,{t:'tri',o:78,b:0},-1,1],
   ['vdf.kd','D',54,{t:'tri',o:78,b:1},-1,1],
   ['vdf.ks','S',55,{t:'tri',o:78,b:2},-1,1],
   ['vdf.kr','R',56,{t:'tri',o:78,b:3},-1,1],
-  ['vda.at','Temps attaque',57,{t:'u8',o:71},0,99],
-  ['vda.al','Niveau attaque',58,{t:'u8',o:72},0,99],
-  ['vda.dt','Temps déclin',59,{t:'u8',o:73},0,99],
-  ['vda.bp','Point de rupture',60,{t:'u8',o:74},0,99],
-  ['vda.st','Temps pente',61,{t:'u8',o:75},0,99],
-  ['vda.sl','Niveau maintien',62,{t:'u8',o:76},0,99],
-  ['vda.rt','Temps relâche',63,{t:'u8',o:77},0,99],
-  ['vda.vamp','Volume ← vélocité',64,{t:'s8',o:68},-99,99],
-  ['vda.vtim','Temps EG ← vél.',65,{t:'u8',o:70},0,99],
+  ['vda.at','Attack time',57,{t:'u8',o:71},0,99],
+  ['vda.al','Attack level',58,{t:'u8',o:72},0,99],
+  ['vda.dt','Decay time',59,{t:'u8',o:73},0,99],
+  ['vda.bp','Break point',60,{t:'u8',o:74},0,99],
+  ['vda.st','Slope time',61,{t:'u8',o:75},0,99],
+  ['vda.sl','Sustain level',62,{t:'u8',o:76},0,99],
+  ['vda.rt','Release time',63,{t:'u8',o:77},0,99],
+  ['vda.vamp','Volume ← velocity',64,{t:'s8',o:68},-99,99],
+  ['vda.vtim','EG time ← vel.',65,{t:'u8',o:70},0,99],
   ['vda.va','A',66,{t:'tri',o:81,b:0},-1,1],
   ['vda.vd','D',67,{t:'tri',o:81,b:1},-1,1],
   ['vda.vs','S',68,{t:'tri',o:81,b:2},-1,1],
   ['vda.vr','R',69,{t:'tri',o:81,b:3},-1,1],
-  ['vda.kkey','Note pivot',70,{t:'u8',o:66},0,127],
-  ['vda.kmode','Suivi clavier',71,{t:'bits',o:85,s:4,m:3},0,3,{opts:KMODE}],
-  ['vda.kamp','Volume ← clavier',72,{t:'s8',o:67},-99,99],
-  ['vda.ktim','Temps EG ← clavier',73,{t:'u8',o:69},0,99],
+  ['vda.kkey','Pivot key',70,{t:'u8',o:66},0,127],
+  ['vda.kmode','Key tracking',71,{t:'bits',o:85,s:4,m:3},0,3,{opts:KMODE}],
+  ['vda.kamp','Volume ← keyboard',72,{t:'s8',o:67},-99,99],
+  ['vda.ktim','EG time ← keyboard',73,{t:'u8',o:69},0,99],
   ['vda.ka','A',74,{t:'tri',o:80,b:0},-1,1],
   ['vda.kd','D',75,{t:'tri',o:80,b:1},-1,1],
   ['vda.ks','S',76,{t:'tri',o:80,b:2},-1,1],
   ['vda.kr','R',77,{t:'tri',o:80,b:3},-1,1],
-  ['pm.wave','Forme',78,{t:'bits',o:41,s:0,m:7},0,5,{opts:MGW}],
-  ['pm.freq','Vitesse',79,{t:'u8',o:42},0,99],
-  ['pm.int','Intensité',80,{t:'u8',o:45},0,99],
-  ['pm.del','Délai',81,{t:'u8',o:43},0,99],
-  ['pm.fade','Apparition',82,{t:'u8',o:44},0,99],
-  ['pm.sync','Redémarre à chaque note',83,{t:'bit',o:41,b:7},0,1],
-  ['pm.ktrk','Vitesse ← clavier',84,{t:'s8',o:46},-99,99],
-  ['pm.atjoy','Vitesse ← AT + joy',85,{t:'u8',o:49},0,9],
+  ['pm.wave','Waveform',78,{t:'bits',o:41,s:0,m:7},0,5,{opts:MGW}],
+  ['pm.freq','Speed',79,{t:'u8',o:42},0,99],
+  ['pm.int','Depth',80,{t:'u8',o:45},0,99],
+  ['pm.del','Delay',81,{t:'u8',o:43},0,99],
+  ['pm.fade','Fade in',82,{t:'u8',o:44},0,99],
+  ['pm.sync','Restarts on each note',83,{t:'bit',o:41,b:7},0,1],
+  ['pm.ktrk','Speed ← keyboard',84,{t:'s8',o:46},-99,99],
+  ['pm.atjoy','Speed ← AT + joy',85,{t:'u8',o:49},0,9],
   ['pm.aft','Vibrato ← aftertouch',86,{t:'u8',o:47},0,99],
   ['pm.joy','Vibrato ← joy ↑',87,{t:'u8',o:48},0,99],
 ];
 const FXP = [
-  ['fx1.type','Effet 1',155,{t:'u8',o:135},0,47,{opts:FX}],
-  ['fx2.type','Effet 2',156,{t:'u8',o:136},0,47,{opts:FX}],
-  ['fx.place','Placement',165,{t:'bits',o:143,s:4,m:3},0,3,{opts:['Série 1 → 2','Parallèle 1','Parallèle 2','Parallèle 3']}],
+  ['fx1.type','Effect 1',155,{t:'u8',o:135},0,47,{opts:FX}],
+  ['fx2.type','Effect 2',156,{t:'u8',o:136},0,47,{opts:FX}],
+  ['fx.place','Routing',165,{t:'bits',o:143,s:4,m:3},0,3,{opts:['Serial 1 → 2','Parallel 1','Parallel 2','Parallel 3']}],
 ];
 const OSC2_ADDR = 67, OSC2_DUMP = 47;
 const PDEF = {};           // clé complète → définition
@@ -667,7 +684,7 @@ function commit(){
 }
 function updDirty(){
   const d = !origin.every((v,i)=>v===cur[i]);
-  $('#dirty').textContent = d ? '● modifié' : '';
+  $('#dirty').textContent = d ? '● modified' : '';
   $('#btnUndo').disabled = hIdx<=0; $('#btnRedo').disabled = hIdx>=hist.length-1;
 }
 function saveWork(){ try{ localStorage.setItem('x5s.cur', hex(cur)); localStorage.setItem('x5s.org', hex(origin)); }catch(e){} }
@@ -729,7 +746,7 @@ function rawSend(bytes, quiet){
   const t = Math.max(now, TX.next);
   TX.next = t + bytes.length*0.32 + (bytes[0]===0xF0 ? TX.delay : 0);
   try { if (t > now+1) midi.out.send(bytes, t); else midi.out.send(bytes); }
-  catch(e){ log(T('Erreur envoi : {0}',e.message),'e'); return false; }
+  catch(e){ log(T('Send error: {0}',e.message),'e'); return false; }
   const fire=()=>{
     blink('#ledOut'); mon('o', bytes);
     if (!quiet) log('→ '+(bytes.length>24 ? hex(bytes.slice(0,12))+' … ('+bytes.length+' octets)' : hex(bytes)),'o');
@@ -751,7 +768,7 @@ const MODE_NAMES = ['Combi','Combi Edit','Program','Prog Edit','Multi','Global']
 function setEdit(on){ DEV.edit=on; updEditBtn(); }
 function updEditBtn(){
   const b=document.getElementById('btnEdit'); if (!b) return;
-  b.textContent = DEV.edit ? '● '+T('Édition') : '○ '+T('Jeu');
+  b.textContent = DEV.edit ? '● '+T('Editing') : '○ '+T('Play');
   b.classList.toggle('on', DEV.edit);
 }
 function enterEdit(){     // envoie toujours le Mode Change ; renvoie true si le X5 n'était pas en édition
@@ -764,7 +781,7 @@ function leaveEdit(quiet){
   if (!midi.out) return;
   clearTimeout(flushT); flushT=null; pending.clear();
   rawSend(MSG.modePlay(), true); setEdit(false);
-  if (!quiet) toast('X5 rendu au mode jeu (Program)','ok');
+  if (!quiet) toast('X5 handed back to play mode (Program)','ok');
 }
 function flush(){
   flushT=null; if (!pending.size) return;
@@ -774,16 +791,16 @@ function flush(){
   pending.clear();
 }
 function sendDump(quiet){
-  if (!midi.out){ toast('Aucune sortie MIDI choisie','bad'); return; }
+  if (!midi.out){ toast('No MIDI output selected','bad'); return; }
   enterEdit(); rawSend(MSG.dumpProg(cur)); DEV.synced=true;
-  if (!quiet) toast('Son envoyé dans la mémoire d\'édition du X5','ok');
+  if (!quiet) toast('Sound sent to the X5 edit buffer','ok');
 }
 function onNak(){
   const now=performance.now();
   if (now-DEV.nakT < 1500) return;          // le X5 envoie souvent plusieurs NAK d'affilée
   DEV.nakT=now; setEdit(false);
-  if (!live || !midi.out || !DEV.synced){ toast('X5 : données refusées (NAK) — vérifie Memory Protect / mode','bad'); return; }
-  toast('Le X5 a quitté l\'édition : resynchronisation…');
+  if (!live || !midi.out || !DEV.synced){ toast('X5: data rejected (NAK) — check Memory Protect / mode','bad'); return; }
+  toast('The X5 left edit mode: resyncing…');
   setTimeout(()=>{ enterEdit(); rawSend(MSG.dumpProg(cur)); }, 50);
 }
 function exitOnClose(){ if (DEV.edit && midi.out){ try{ midi.out.send(MSG.modePlay()); }catch(e){} DEV.edit=false; } }
@@ -805,15 +822,15 @@ function onMidi(ev){
   for (const w of [...waiters]) if (w.test(d)){ clearTimeout(w.t); waiters=waiters.filter(x=>x!==w); w.res(d); }
   // Identity Reply : F0 7E 0n 06 02 42 36 …
   if (d[1]===0x7E && d[3]===0x06 && d[4]===0x02){
-    if (d[5]===0x42 && d[6]===0x36){ setChannel(d[2]&15); status(T('X5 détecté · canal {0}',(d[2]&15)+1),'ok'); rawSend(MSG.modeReq()); }
-    else status(T('Appareil MIDI inconnu (id {0})',hex(d.slice(5,7))),'bad');
+    if (d[5]===0x42 && d[6]===0x36){ setChannel(d[2]&15); status(T('X5 detected · channel {0}',(d[2]&15)+1),'ok'); rawSend(MSG.modeReq()); }
+    else status(T('Unknown MIDI device (id {0})',hex(d.slice(5,7))),'bad');
     return;
   }
   if (d[1]!==0x42 || (d[2]&0xF0)!==0x30 || d[3]!==0x36) return;
   const f=d[4];
   if (f===0x40 && d.length===194){
     const data = dec87(Array.from(d.slice(5,193)));
-    loadProgram(Uint8Array.from(data.slice(0,PROG_LEN)), 'Son reçu du X5 : '); DEV.synced=true;
+    loadProgram(Uint8Array.from(data.slice(0,PROG_LEN)), 'Sound received from the X5: '); DEV.synced=true;
   } else if (f===0x4C && d.length===18750){
     const data = dec87(Array.from(d.slice(6,18749)));
     setBank(Uint8Array.from(data.slice(0,16400)), 'X5');
@@ -822,26 +839,26 @@ function onMidi(ev){
     const a = d[5] | (d[6]<<7); let v = d[7] | (d[8]<<7); if (v>8191) v-=16384;
     const k = ADDR.get(a);
     if (k){ setF(cur, PDEF[k], v); refresh(k); }
-  } else if (f===0x21) toast('X5 : écriture terminée ✔','ok');
-  else if (f===0x22) toast('X5 : erreur d\'écriture (Memory Protect activé ?)','bad');
+  } else if (f===0x21) toast('X5: write complete ✔','ok');
+  else if (f===0x22) toast('X5: write error (Memory Protect on?)','bad');
   else if (f===0x24) onNak();
   else if ((f===0x4E || f===0x42) && d.length>=8){ DEV.mode=d[5]; setEdit(d[5]===3); }
-  else if (f===0x26) toast('X5 : format refusé','bad');
+  else if (f===0x26) toast('X5: format rejected','bad');
 }
 async function initMidi(){
-  if (!navigator.requestMIDIAccess){ status('Web MIDI indisponible : ouvre la page dans Chrome ou Edge','bad'); return; }
+  if (!navigator.requestMIDIAccess){ status('Web MIDI unavailable: open the page in Chrome or Edge','bad'); return; }
   try { midi.acc = await navigator.requestMIDIAccess({sysex:true}); }
   catch(e){
     const fileUrl = location.protocol==='file:';
-    status('Accès MIDI refusé · clic ici pour réessayer','bad');
-    log(T('Web MIDI refusé : {0}',e.name+' — '+e.message),'e');
-    log(fileUrl ? 'Page ouverte en file:// → ouvre-la via http://localhost (voir aide « ? »)' : 'Vérifie les autorisations MIDI du site (icône à gauche de l\'adresse)','e');
+    status('MIDI access denied · click here to retry','bad');
+    log(T('Web MIDI denied: {0}',e.name+' — '+e.message),'e');
+    log(fileUrl ? 'Page opened as file:// → open it via http://localhost (see “?” help)' : 'Check the site\'s MIDI permissions (icon left of the address)','e');
     $('#log').classList.add('on');
     $('#midiState').style.cursor='pointer'; $('#midiState').onclick=()=>{ $('#midiState').onclick=null; initMidi(); };
     return;
   }
-  log(T('Web MIDI autorisé · {0} entrée(s), {1} sortie(s) : {2}',midi.acc.inputs.size,midi.acc.outputs.size,[...midi.acc.outputs.values()].map(p=>p.name).join(', ')),'m');
-  if (!midi.acc.outputs.size) status('MIDI OK mais aucune interface vue : branche-la puis recharge','bad');
+  log(T('Web MIDI allowed · {0} input(s), {1} output(s): {2}',midi.acc.inputs.size,midi.acc.outputs.size,[...midi.acc.outputs.values()].map(p=>p.name).join(', ')),'m');
+  if (!midi.acc.outputs.size) status('MIDI OK but no interface found: plug it in, then reload','bad');
   midi.acc.onstatechange = fillPorts; fillPorts();
 }
 function fillPorts(){
@@ -849,7 +866,7 @@ function fillPorts(){
   const outs=[...midi.acc.outputs.values()], ins=[...midi.acc.inputs.values()];
   const fill=(sel,list,key)=>{
     const keep = sel.value || pref(key);
-    sel.innerHTML = '<option value="">— aucun —</option>' + list.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+    sel.innerHTML = '<option value="">'+T('— none —')+'</option>' + list.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
     const m = list.find(p=>p.id===keep || p.name===keep) || list.find(p=>/x5|05r|korg/i.test(p.name)) || (list.length===1?list[0]:null);
     sel.value = m ? m.id : '';
   };
@@ -862,36 +879,36 @@ function pickPorts(){
   midi.inp = midi.acc.inputs.get($('#inSel').value) || null;
   if (midi.inp) midi.inp.onmidimessage = onMidi;
   try{ if (midi.out) localStorage.setItem('x5s.out', midi.out.name); if (midi.inp) localStorage.setItem('x5s.in', midi.inp.name);}catch(e){}
-  if (midi.out && midi.inp) status('Ports prêts · clique Détecter','ok');
-  else if (midi.out) status('Sortie OK · sans entrée, la lecture du X5 est impossible','');
-  else status('Choisis la sortie MIDI reliée au X5','bad');
+  if (midi.out && midi.inp) status('Ports ready · click Detect','ok');
+  else if (midi.out) status('Output OK · without an input, reading from the X5 is impossible','');
+  else status('Pick the MIDI output connected to the X5','bad');
 }
 function setChannel(c){ S.ch=c; $('#chSel').value=c; try{localStorage.setItem('x5s.ch',c)}catch(e){} }
 async function detect(){
-  if (!midi.out || !midi.inp){ toast('Choisis une entrée et une sortie MIDI','bad'); return; }
-  status('Recherche du X5…','');
+  if (!midi.out || !midi.inp){ toast('Pick a MIDI input and output','bad'); return; }
+  status('Looking for the X5…','');
   const p = expect(d=>d[1]===0x7E && d[4]===0x02, 2500);
   for (let c=0;c<16;c++) rawSend(MSG.ident(c), true);
-  log('→ Identity Request sur les 16 canaux','o');
+  log('→ Identity Request on all 16 channels','o');
   const r = await p;
-  if (!r) status('Pas de réponse : vérifie câbles, ports et GLOBAL → MIDI Filter EX = ENA','bad');
+  if (!r) status('No reply: check cables, ports and GLOBAL → MIDI Filter EX = ENA','bad');
 }
 async function readX5(){
-  if (!midi.out || !midi.inp){ toast('Il faut une entrée ET une sortie MIDI','bad'); return; }
+  if (!midi.out || !midi.inp){ toast('You need a MIDI input AND output','bad'); return; }
   enterEdit(); rawSend(MSG.reqProg());
   const r = await expect(d=>d[1]===0x42 && d[4]===0x40, 3000);
-  if (!r) toast('Pas de réponse du X5 (mode PROG ? MIDI Filter EX = ENA ? bon canal ?)','bad');
+  if (!r) toast('No reply from the X5 (PROG mode? MIDI Filter EX = ENA? right channel?)','bad');
 }
 async function writeX5(){
-  if (!midi.out){ toast('Aucune sortie MIDI','bad'); return; }
+  if (!midi.out){ toast('No MIDI output','bad'); return; }
   const slot = +$('#slotSel').value;
-  const tgt = bank ? T(' (actuellement « {0} »)', progName(bank, slot*PROG_LEN).trim()) : '';
-  if (!await ask(T('Écrire « <b>{0}</b> » dans l\'emplacement <b>{1}</b> du X5{2} ?<br><span class="note warn">Le son qui s\'y trouve sera remplacé.</span>', progName(cur).trim(), 'A'+String(slot).padStart(2,'0'), tgt))) return;
+  const tgt = bank ? T(' (currently “{0}”)', progName(bank, slot*PROG_LEN).trim()) : '';
+  if (!await ask(T('Write “<b>{0}</b>” to slot <b>{1}</b> on the X5{2}?<br><span class="note warn">The sound currently there will be replaced.</span>', progName(cur).trim(), 'A'+String(slot).padStart(2,'0'), tgt))) return;
   sendDump(true);
   await new Promise(r=>setTimeout(r,150));
   rawSend(MSG.write(slot));
   const r = await expect(d=>d[1]===0x42 && [0x21,0x22,0x24,0x26].includes(d[4]), 3000);
-  if (!r) toast(midi.inp ? 'Pas d\'accusé du X5 : vérifie sur l\'écran que le son est bien écrit' : 'Commande envoyée (pas d\'entrée MIDI pour confirmer)', '');
+  if (!r) toast(midi.inp ? 'No acknowledgement from the X5: check its display to confirm the sound was written' : 'Command sent (no MIDI input to confirm)', '');
   else if (r[4]===0x21){ origin = cur.slice(); if (bank){ bank.set(cur, slot*PROG_LEN); renderBank(); } updDirty(); saveWork(); }
 }
 
@@ -922,26 +939,26 @@ function panic(){ stopPhrase(); if(!midi.out) return; try{ midi.out.clear && mid
 /* ---------- moniteur SysEx ---------- */
 const MON = {t0:performance.now(), paused:false, rows:[]};
 function describe(d){
-  if (d[0]===0xF0 && d[1]===0x7E) return d[4]===0x01 ? T('Demande d\'identité (canal {0})',(d[2]&15)+1) : d[4]===0x02 ? T('Réponse d\'identité · {0}',(d[5]===0x42&&d[6]===0x36?'Korg X5 / 05R/W':'id '+hex(d.slice(5,7)))) : T('SysEx universel');
+  if (d[0]===0xF0 && d[1]===0x7E) return d[4]===0x01 ? T('Identity request (channel {0})',(d[2]&15)+1) : d[4]===0x02 ? T('Identity reply · {0}',(d[5]===0x42&&d[6]===0x36?'Korg X5 / 05R/W':'id '+hex(d.slice(5,7)))) : T('Universal SysEx');
   if (d[0]===0xF0 && d[1]===0x42 && d[3]===0x36){
     const f=d[4];
-    if (f===0x4E) return d[5]===3 ? T('Passage en mode Program Edit') : d[5]===2 ? T('Retour au mode Program (jeu)') : T('Changement de mode → {0}', MODE_NAMES[d[5]]||d[5]);
-    if (f===0x12) return T('Demande du mode');
-    if (f===0x42) return T('Mode du X5 : {0}', MODE_NAMES[d[5]]||d[5]);
+    if (f===0x4E) return d[5]===3 ? T('Switch to Program Edit mode') : d[5]===2 ? T('Back to Program mode (play)') : T('Mode change → {0}', MODE_NAMES[d[5]]||d[5]);
+    if (f===0x12) return T('Mode request');
+    if (f===0x42) return T('X5 mode: {0}', MODE_NAMES[d[5]]||d[5]);
     if (f===0x41){ const a=d[5]|(d[6]<<7); let v=d[7]|(d[8]<<7); if(v>8191) v-=16384; const k=ADDR.get(a);
-      if (!k) return T('Paramètre #{0} = {1}',a,v);
-      const pd=PDEF[k]; return (pd.osc?'Osc '+pd.osc+' · ':'')+T(pd.label)+' = '+fmt(pd,v)+'  ('+T('adr {0}, val {1}',a,v)+')'; }
-    if (f===0x40) return T('Son complet « {0} » ({1} octets)',progName(Uint8Array.from(dec87(Array.from(d.slice(5,193))).slice(0,10))).trim(),d.length);
-    if (f===0x10) return T('Demande du son affiché');
-    if (f===0x1C) return T('Demande de la banque (100 sons)');
-    if (f===0x4C) return T('Banque complète ({0} octets)',d.length);
-    if (f===0x11) return T('Écriture dans {0}','A'+String(d[6]).padStart(2,'0'));
-    return T(({0x21:'X5 : écriture terminée',0x22:'X5 : erreur d\'écriture',0x23:'X5 : reçu (ACK)',0x24:'X5 : refusé (NAK)',0x26:'X5 : format refusé'})[f] || '') || T('SysEx Korg fonction {0}h',f.toString(16).toUpperCase());
+      if (!k) return T('Parameter #{0} = {1}',a,v);
+      const pd=PDEF[k]; return (pd.osc?'Osc '+pd.osc+' · ':'')+T(pd.label)+' = '+fmt(pd,v)+'  ('+T('addr {0}, val {1}',a,v)+')'; }
+    if (f===0x40) return T('Full sound “{0}” ({1} bytes)',progName(Uint8Array.from(dec87(Array.from(d.slice(5,193))).slice(0,10))).trim(),d.length);
+    if (f===0x10) return T('Request for the current sound');
+    if (f===0x1C) return T('Bank request (100 sounds)');
+    if (f===0x4C) return T('Full bank ({0} bytes)',d.length);
+    if (f===0x11) return T('Write to {0}','A'+String(d[6]).padStart(2,'0'));
+    return T(({0x21:'X5: write complete',0x22:'X5: write error',0x23:'X5: received (ACK)',0x24:'X5: rejected (NAK)',0x26:'X5: format rejected'})[f] || '') || T('Korg SysEx function {0}h',f.toString(16).toUpperCase());
   }
   const st=d[0]&0xF0, ch=(d[0]&15)+1;
-  if (st===0x90 && d[2]>0) return T('Note On {0} vél {1} (canal {2})',noteName(d[1]),d[2],ch);
+  if (st===0x90 && d[2]>0) return T('Note On {0} vel {1} (channel {2})',noteName(d[1]),d[2],ch);
   if (st===0x80 || st===0x90) return 'Note Off '+noteName(d[1]);
-  if (st===0xB0) return 'CC '+d[1]+' = '+d[2]+(d[1]===123?T(' (toutes notes off)'):'');
+  if (st===0xB0) return 'CC '+d[1]+' = '+d[2]+(d[1]===123?T(' (all notes off)'):'');
   if (st===0xE0) return 'Pitch bend';
   if (st===0xD0) return 'Aftertouch '+d[1];
   if (st===0xC0) return 'Program Change '+d[1];
@@ -973,7 +990,7 @@ function initMon(){
   $('#monClear').onclick=()=>{ $('#monBody').innerHTML=''; MON.rows=[]; MON.t0=performance.now(); };
   $('#monPause').onclick=()=>{ MON.paused=!MON.paused; $('#monPause').textContent=MON.paused?'▶':'❚❚'; $('#monPause').classList.toggle('pri',MON.paused); };
   $('#monHex').onchange=()=>el.classList.toggle('hidehex',!$('#monHex').checked);
-  $('#monCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(MON.rows.join('\n')); toast('Messages copiés','ok'); }catch(e){ toast('Copie impossible','bad'); } };
+  $('#monCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(MON.rows.join('\n')); toast('Messages copied','ok'); }catch(e){ toast('Copy failed','bad'); } };
   // déplacer la fenêtre par sa barre de titre
   const hd=$('#monHead'); let dx=0,dy=0,drag=false;
   hd.addEventListener('pointerdown',e=>{ if (e.target.closest('button,input,label')) return; drag=true; const r=el.getBoundingClientRect(); dx=e.clientX-r.left; dy=e.clientY-r.top; hd.setPointerCapture(e.pointerId); });
@@ -1063,7 +1080,7 @@ function toggle(base, osc, label){
 function triGroup(prefix, title){   // ex. prefix 'vdf.v' → A D S R
   const wrap=h('div',{class:'tris'},h('span',{},title));
   for (const s of ['a','d','s','r']){
-    const base=prefix+s, t=h('div',{class:'tri',title:'Effet sur le temps '+s.toUpperCase()+' : − raccourcit / + allonge (selon le sens de la sensibilité)'});
+    const base=prefix+s, t=h('div',{class:'tri',title:'Effect on '+s.toUpperCase()+' time: − shortens / + lengthens (depending on sensitivity sign)'});
     const bs=[-1,0,1].map(v=>{ const b=h('button',{type:'button'},v<0?'−':v>0?'+':'0'); b.onclick=()=>{ for (const k of scopedKeys(base)) setParam(k,v); commit(); }; return b; });
     t.append(...bs);
     wrap.append(h('span',{class:'trik'},h('b',{},s.toUpperCase()), t));
@@ -1163,27 +1180,27 @@ function drawEGs(){ EGs.forEach(f=>f()); }
    ============================================================ */
 function scopeBar(){
   const seg=h('div',{class:'seg'});
-  const bs=[['1','Osc 1'],['2','Osc 2'],['both','Les deux (liés)']].map(([v,t])=>{
+  const bs=[['1','Osc 1'],['2','Osc 2'],['both','Both (linked)']].map(([v,t])=>{
     const b=h('button',{type:'button'},t); b.onclick=()=>{ scope = v==='both'?'both':+v; refreshAll(); document.querySelectorAll('.scopeseg').forEach(s=>s._upd()); }; return [v,b]; });
   bs.forEach(([,b])=>seg.append(b)); seg.classList.add('scopeseg');
   seg._upd=()=>{ bs.forEach(([v,b])=>{ b.classList.toggle('on', String(scope)===v); b.disabled = v==='2' && !isDouble(); }); };
   seg._upd(); binds.push({keys:['mode'],upd:seg._upd});
-  const n=h('span',{class:'note'}); binds.push({keys:['mode'],upd:()=>{ n.textContent = isDouble() ? (scope==='both'?'Chaque réglage s\'applique aux deux oscillateurs (affiche les valeurs de l\'osc 1).':'') : 'Mode Simple : un seul oscillateur actif.'; }}); binds.at(-1).upd();
-  return h('div',{class:'scope'},h('b',{},'Éditer :'),seg,n);
+  const n=h('span',{class:'note'}); binds.push({keys:['mode'],upd:()=>{ n.textContent = isDouble() ? (scope==='both'?'Each change applies to both oscillators (shows osc 1 values).':'') : 'Single mode: only one oscillator is active.'; }}); binds.at(-1).upd();
+  return h('div',{class:'scope'},h('b',{},'Edit:'),seg,n);
 }
 
 /* --- Rapide : macros --- */
 const MACROS = [
-  {n:'Brillance', d:'Ouvre / ferme le filtre (cutoff + un peu d\'EG).', lo:'sombre', hi:'brillant', t:[['vdf.cut',1],['vdf.eint',.4]]},
-  {n:'Couleur', d:'Accentue la zone du cutoff (caractère, mordant).', lo:'neutre', hi:'coloré', t:[['vdf.col',1]]},
-  {n:'Attaque', d:'Temps d\'attaque du volume et du filtre.', lo:'percussif', hi:'lent', t:[['vda.at',1],['vdf.at',.7]]},
-  {n:'Corps', d:'Niveau tenu pendant que la touche est enfoncée.', lo:'court', hi:'tenu', t:[['vda.sl',1],['vda.bp',.6],['vdf.sl',.5]]},
-  {n:'Relâche', d:'Durée de la queue après le relâchement.', lo:'sec', hi:'long', t:[['vda.rt',1],['vdf.rt',.8]]},
-  {n:'Toucher', d:'Réaction du volume et du filtre à la vélocité.', lo:'égal', hi:'expressif', t:[['vda.vamp',1],['vdf.vint',.8],['vdf.colv',.4]]},
-  {n:'Vibrato', d:'Profondeur du LFO de hauteur, avec apparition.', lo:'aucun', hi:'large', t:[['pm.int',.8],['pm.fade',.5]]},
-  {n:'Wah / mouvement', d:'LFO sur le filtre (intensité + vitesse).', lo:'statique', hi:'animé', t:[['fmg.int',1],['fmg.freq',.4]]},
-  {n:'Épaisseur', d:'Désaccord entre les deux oscillateurs.', lo:'net', hi:'large', t:[['detune',.5]], dbl:true},
-  {n:'Équilibre osc', d:'Volume osc 1 ↔ osc 2.', lo:'osc 1', hi:'osc 2', t:[['lvl@1',-1],['lvl@2',1]], dbl:true, abs:true},
+  {n:'Brightness', d:'Opens / closes the filter (cutoff + a little EG).', lo:'dark', hi:'bright', t:[['vdf.cut',1],['vdf.eint',.4]]},
+  {n:'Colour', d:'Emphasises the cutoff region (character, bite).', lo:'neutral', hi:'coloured', t:[['vdf.col',1]]},
+  {n:'Attack', d:'Attack time of volume and filter.', lo:'percussive', hi:'slow', t:[['vda.at',1],['vdf.at',.7]]},
+  {n:'Body', d:'Level held while the key is pressed.', lo:'short', hi:'sustained', t:[['vda.sl',1],['vda.bp',.6],['vdf.sl',.5]]},
+  {n:'Release', d:'Length of the tail after key release.', lo:'dry', hi:'long', t:[['vda.rt',1],['vdf.rt',.8]]},
+  {n:'Touch', d:'How volume and filter respond to velocity.', lo:'even', hi:'expressive', t:[['vda.vamp',1],['vdf.vint',.8],['vdf.colv',.4]]},
+  {n:'Vibrato', d:'Pitch LFO depth, with fade-in.', lo:'none', hi:'wide', t:[['pm.int',.8],['pm.fade',.5]]},
+  {n:'Wah / movement', d:'LFO on the filter (depth + speed).', lo:'static', hi:'lively', t:[['fmg.int',1],['fmg.freq',.4]]},
+  {n:'Width', d:'Detune between the two oscillators.', lo:'clean', hi:'wide', t:[['detune',.5]], dbl:true},
+  {n:'Osc balance', d:'Osc 1 ↔ osc 2 volume.', lo:'osc 1', hi:'osc 2', t:[['lvl@1',-1],['lvl@2',1]], dbl:true, abs:true},
 ];
 function macroEl(m){
   const thumb=h('div',{class:'thumb'}), tr=h('div',{class:'track'},h('div',{class:'mid'}),h('span',{class:'lo'},'← ',h('span',{},m.lo)),h('span',{class:'hi'},h('span',{},m.hi),' →'),thumb);
@@ -1229,16 +1246,16 @@ function buildQuick(){
     commit(); refreshAll(); audition();
   };
   sel.append(
-    card('Varier le son',
-      h('div',{class:'row'},h('label',{},'Ampleur'),amt,h('span')),
-      h('div',{class:'tris'},...Object.entries({timbre:'Timbre',env:'Enveloppes',mod:'Modulations',wave:'Multisound'}).map(([k,t])=>h('label',{},fam[k],' '+t))),
-      h('div',{style:'display:flex;gap:8px;margin-top:8px'},h('button',{class:'pri',onclick:mutate},'🎲 Varier'),h('button',{onclick:undo},'↶ Annuler la variation')),
-      h('p',{class:'note'},'Petites variations aléatoires autour du son actuel. Enchaîne « Varier » puis « Annuler » jusqu\'à trouver une piste.')),
-    card('Volume (VDA) — tous oscillateurs', egEditor('vda'), h('p',{class:'note'},'Glisse les points. Les réglages fins sont dans l\'onglet Ampli.'))
+    card('Vary the sound',
+      h('div',{class:'row'},h('label',{},'Amount'),amt,h('span')),
+      h('div',{class:'tris'},...Object.entries({timbre:'Tone',env:'Envelopes',mod:'Modulations',wave:'Multisound'}).map(([k,t])=>h('label',{},fam[k],' '+t))),
+      h('div',{style:'display:flex;gap:8px;margin-top:8px'},h('button',{class:'pri',onclick:mutate},'🎲 Vary'),h('button',{onclick:undo},'↶ Undo the variation')),
+      h('p',{class:'note'},'Small random variations around the current sound. Alternate “Vary” and “Undo” until you find something you like.')),
+    card('Volume (VDA) — all oscillators', egEditor('vda'), h('p',{class:'note'},'Drag the points. Fine settings are in the Amp tab.'))
   );
   p.append(sel);
   const ow=h('div',{class:'cards',style:'margin-top:12px'});
-  ow.append(card('Sons de base', waveMini(1), waveMini(2)), card('Filtre — tous oscillateurs', egEditor('vdf')));
+  ow.append(card('Source sounds', waveMini(1), waveMini(2)), card('Filter — all oscillators', egEditor('vdf')));
   p.append(ow);
 }
 function waveMini(o){
@@ -1251,7 +1268,7 @@ function waveMini(o){
 /* --- Oscillateurs --- */
 function wavePicker(o){
   const key='wave@'+o;
-  const q=h('input',{type:'text',placeholder:'Rechercher (piano, pad, saw…)',style:'width:100%'});
+  const q=h('input',{type:'text',placeholder:'Search (piano, pad, saw…)',style:'width:100%'});
   const list=h('div',{class:'wlist'});
   const name=h('div',{class:'wname'});
   let items=[];
@@ -1274,26 +1291,26 @@ function wavePicker(o){
   binds.push({keys:[key,'mode'],upd:()=>{ const w=val(key); name.textContent = val('mode')===2 ? kitName(w) : String(w).padStart(3,'0')+' · '+(WAVES[w]||'?') + ' — ' + T((WAVE_CATS.filter(x=>x[0]<=w).at(-1)||[0,''])[1]); name.title=name.textContent; if (lastMode!==val('mode')){ lastMode=val('mode'); fill(); } else mark(false); }});
   binds.at(-1).upd();
   new IntersectionObserver(es=>{ if (es[0].isIntersecting) mark(true); }).observe(list);
-  return h('div',{class:'wave'},h('div',{class:'top'},h('button',{onclick:()=>step(-1),title:'Précédent'},'◀'),name,h('button',{onclick:()=>step(1),title:'Suivant'},'▶'),h('button',{onclick:rnd,title:'Au hasard dans la même famille'},'🎲')),q,list);
+  return h('div',{class:'wave'},h('div',{class:'top'},h('button',{onclick:()=>step(-1),title:'Previous'},'◀'),name,h('button',{onclick:()=>step(1),title:'Next'},'▶'),h('button',{onclick:rnd,title:'Random pick in the same family'},'🎲')),q,list);
 }
 function panRow(o){
   const key='pan@'+o; const d=PDEF[key];
-  const inp=h('input',{type:'range',min:0,max:30}), out=h('span',{class:'val'}), off=h('input',{type:'checkbox',title:'Coupe la sortie A/B (n\'utilise que les envois C/D)'});
+  const inp=h('input',{type:'range',min:0,max:30}), out=h('span',{class:'val'}), off=h('input',{type:'checkbox',title:'Mutes the A/B output (uses only C/D sends)'});
   inp.addEventListener('input',()=>{ setParam(key,+inp.value,{noRefresh:true}); out.textContent=fmt(d,+inp.value); off.checked=false; });
   inp.addEventListener('change',commit);
   inp.addEventListener('dblclick',()=>{ setParam(key,15); commit(); });
   off.addEventListener('change',()=>{ setParam(key, off.checked?-1:15); commit(); });
   binds.push({keys:[key],upd:()=>{ const v=val(key); off.checked=v<0; inp.disabled=v<0; inp.value=v<0?15:v; out.textContent=fmt(d,v); }}); binds.at(-1).upd();
-  return h('div',{},h('div',{class:'row'},h('label',{},'Pan A ↔ B'),inp,out),h('div',{class:'row'},h('label',{},'Sortie A/B coupée'),h('div',{},off),h('span')));
+  return h('div',{},h('div',{class:'row'},h('label',{},'Pan A ↔ B'),inp,out),h('div',{class:'row'},h('label',{},'A/B output off'),h('div',{},off),h('span')));
 }
 function buildOsc(){
   const p=$('#p-osc');
   const g=h('div',{class:'cards'});
-  g.append(card('Architecture', choice('mode',0), toggle('mono',0,'Mono (legato)'), adv(toggle('hold',0,'Hold')),
-    h('p',{class:'note'},'Simple = 1 oscillateur (polyphonie 32). Double = 2 oscillateurs (16 voix). Batterie = un kit de percussions.')));
+  g.append(card('Structure', choice('mode',0), toggle('mono',0,'Mono (legato)'), adv(toggle('hold',0,'Hold')),
+    h('p',{class:'note'},'Single = 1 oscillator (32 voices). Double = 2 oscillators (16 voices). Drums = a percussion kit.')));
   const o2=card('Osc 1 ↔ Osc 2', slider('interval',0), slider('detune',0), adv(slider('delay',0))); o2.dataset.needDouble=1; g.append(o2);
   for (const o of [1,2]){
-    const c=card('Oscillateur '+o, wavePicker(o), choice('oct',o), slider('lvl',o), adv(slider('pitch',o,{label:'Pitch EG'})), adv(panRow(o)), adv(slider('sendC',o)), adv(slider('sendD',o)));
+    const c=card('Oscillator '+o, wavePicker(o), choice('oct',o), slider('lvl',o), adv(slider('pitch',o,{label:'Pitch EG'})), adv(panRow(o)), adv(slider('sendC',o)), adv(slider('sendD',o)));
     if (o===2) c.dataset.needDouble=1;
     g.append(c);
   }
@@ -1303,36 +1320,36 @@ function buildOsc(){
 function buildVDF(){
   const p=$('#p-vdf'); p.append(scopeBar());
   const g=h('div',{class:'cards'});
-  g.append(h('div',{class:'card wide'},h('h3',{},'Enveloppe du filtre'),egEditor('vdf')));
-  g.append(card('Filtre', slider('vdf.cut',0), slider('vdf.eint',0), slider('vdf.col',0), adv(slider('vdf.colv',0))));
-  g.append(adv(card('Temps & niveaux de l\'EG', ...['at','al','dt','bp','st','sl','rt','rl'].map(s=>slider('vdf.'+s,0)))));
-  g.append(card('Vélocité', slider('vdf.vint',0), adv(slider('vdf.vtim',0)), adv(triGroup('vdf.v','Temps affectés :'))));
-  g.append(adv(card('Suivi de clavier', choice('vdf.kmode',0), slider('vdf.kkey',0), slider('vdf.kint',0), slider('vdf.ktim',0), triGroup('vdf.k','Temps affectés :'))));
+  g.append(h('div',{class:'card wide'},h('h3',{},'Filter envelope'),egEditor('vdf')));
+  g.append(card('Filter', slider('vdf.cut',0), slider('vdf.eint',0), slider('vdf.col',0), adv(slider('vdf.colv',0))));
+  g.append(adv(card('EG times & levels', ...['at','al','dt','bp','st','sl','rt','rl'].map(s=>slider('vdf.'+s,0)))));
+  g.append(card('Velocity', slider('vdf.vint',0), adv(slider('vdf.vtim',0)), adv(triGroup('vdf.v','Affected times:'))));
+  g.append(adv(card('Keyboard tracking', choice('vdf.kmode',0), slider('vdf.kkey',0), slider('vdf.kint',0), slider('vdf.ktim',0), triGroup('vdf.k','Affected times:'))));
   p.append(g);
 }
 /* --- VDA --- */
 function buildVDA(){
   const p=$('#p-vda'); p.append(scopeBar());
   const g=h('div',{class:'cards'});
-  g.append(h('div',{class:'card wide'},h('h3',{},'Enveloppe de volume'),egEditor('vda')));
-  g.append(adv(card('Temps & niveaux', ...['at','al','dt','bp','st','sl','rt'].map(s=>slider('vda.'+s,0)))));
-  g.append(card('Vélocité', slider('vda.vamp',0), adv(slider('vda.vtim',0)), adv(triGroup('vda.v','Temps affectés :'))));
-  g.append(adv(card('Suivi de clavier', choice('vda.kmode',0), slider('vda.kkey',0), slider('vda.kamp',0), slider('vda.ktim',0), triGroup('vda.k','Temps affectés :'))));
+  g.append(h('div',{class:'card wide'},h('h3',{},'Volume envelope'),egEditor('vda')));
+  g.append(adv(card('Times & levels', ...['at','al','dt','bp','st','sl','rt'].map(s=>slider('vda.'+s,0)))));
+  g.append(card('Velocity', slider('vda.vamp',0), adv(slider('vda.vtim',0)), adv(triGroup('vda.v','Affected times:'))));
+  g.append(adv(card('Keyboard tracking', choice('vda.kmode',0), slider('vda.kkey',0), slider('vda.kamp',0), slider('vda.ktim',0), triGroup('vda.k','Affected times:'))));
   p.append(g);
 }
 /* --- Hauteur & LFO --- */
 function buildMod(){
   const p=$('#p-mod');
   const g=h('div',{class:'cards'});
-  g.append(h('div',{class:'card wide adv'},h('h3',{},'Pitch EG (commun aux deux oscillateurs)'),egEditor('peg'),
+  g.append(h('div',{class:'card wide adv'},h('h3',{},'Pitch EG (shared by both oscillators)'),egEditor('peg'),
     h('div',{class:'cols2'},h('div',{},...['peg.sl','peg.at','peg.al','peg.dt'].map(k=>slider(k,0))),h('div',{},...['peg.rt','peg.rl','peg.vlev','peg.vtim'].map(k=>slider(k,0)))),
-    h('p',{class:'note'},'L\'effet sur chaque oscillateur dépend de son « Pitch EG » (onglet Oscillateurs).')));
-  g.append(card('LFO de filtre (VDF MG)', choice('fmg.wave',0), slider('fmg.freq',0), slider('fmg.int',0), adv(slider('fmg.del',0)), choice('fmg.osc',0), adv(toggle('fmg.sync',0))));
+    h('p',{class:'note'},'The effect on each oscillator depends on its “Pitch EG” setting (Oscillators tab).')));
+  g.append(card('Filter LFO (VDF MG)', choice('fmg.wave',0), slider('fmg.freq',0), slider('fmg.int',0), adv(slider('fmg.del',0)), choice('fmg.osc',0), adv(toggle('fmg.sync',0))));
   p.append(g);
   p.append(h('div',{style:'margin-top:12px'},scopeBar()));
   const g2=h('div',{class:'cards'});
-  g2.append(card('LFO de hauteur (vibrato)', choice('pm.wave',0), slider('pm.freq',0), slider('pm.int',0), slider('pm.del',0), slider('pm.fade',0), adv(toggle('pm.sync',0)), adv(slider('pm.ktrk',0))));
-  g2.append(adv(card('Vibrato par contrôleurs', slider('pm.aft',0), slider('pm.joy',0), slider('pm.atjoy',0))));
+  g2.append(card('Pitch LFO (vibrato)', choice('pm.wave',0), slider('pm.freq',0), slider('pm.int',0), slider('pm.del',0), slider('pm.fade',0), adv(toggle('pm.sync',0)), adv(slider('pm.ktrk',0))));
+  g2.append(adv(card('Vibrato from controllers', slider('pm.aft',0), slider('pm.joy',0), slider('pm.atjoy',0))));
   p.append(g2);
 }
 /* --- Contrôleurs --- */
@@ -1347,21 +1364,21 @@ function buildFX(){
   const p=$('#p-fx'); const g=h('div',{class:'cards'});
   const warn=h('p',{class:'note warn'});
   binds.push({keys:['fx1.type','fx2.type'],upd:()=>{ const a=val('fx1.type'),b=val('fx2.type'); const bad=new Set([19,20,21,22,23,24,32,33,34,35,36,38,39,42,43,46,47]);
-    warn.textContent = ((a===24 && bad.has(b)) || (b===24 && bad.has(a))) ? 'Symphonic Ensemble ne peut pas être combiné avec l\'autre effet choisi : le X5 le refusera.' : ''; }}); binds.at(-1).upd();
-  g.append(card('Effets du programme', choice('fx1.type',0), choice('fx2.type',0), choice('fx.place',0), warn,
-    h('p',{class:'note'},'Version 1 : choix des effets et du placement seulement. Les réglages internes de chaque effet (temps de réverbération, retard, vitesse…) sont conservés tels quels et repartent intacts avec le son. Ils seront éditables dès que j\'aurai la table SysEx officielle des effets du X5.')));
+    warn.textContent = ((a===24 && bad.has(b)) || (b===24 && bad.has(a))) ? 'Symphonic Ensemble cannot be combined with the other selected effect: the X5 will refuse it.' : ''; }}); binds.at(-1).upd();
+  g.append(card('Program effects', choice('fx1.type',0), choice('fx2.type',0), choice('fx.place',0), warn,
+    h('p',{class:'note'},'This version: effect types and routing only. Each effect\'s internal settings (reverb time, delay, speed…) are kept as they are and travel unchanged with the sound. They will become editable once the official X5 effects SysEx table is available.')));
   p.append(g);
 }
 /* --- Librairie --- */
 let bank=null, bankSel=0, bankFrom='';
-function setBank(b, from){ bank=b; bankFrom=from; renderBank(); toast(T('Banque chargée ({0}) : 100 sons',from),'ok'); showPage('lib'); }
+function setBank(b, from){ bank=b; bankFrom=from; renderBank(); toast(T('Bank loaded ({0}): 100 sounds',from),'ok'); showPage('lib'); }
 function renderBank(){
   const el=$('#bankGrid'); if (!el) return; el.innerHTML='';
-  $('#bankInfo').textContent = bank ? T('Banque : {0}',bankFrom) : T('Aucune banque chargée.');
+  $('#bankInfo').textContent = bank ? T('Bank: {0}',bankFrom) : T('No bank loaded.');
   if (!bank) return;
   for (let i=0;i<100;i++){
-    const s=h('div',{class:'slot'+(i===bankSel?' sel':''),title:'Clic : charger dans l\'éditeur'},h('b',{},'A'+String(i).padStart(2,'0')),progName(bank,i*PROG_LEN));
-    s.onclick=()=>{ bankSel=i; $('#slotSel').value=i; loadProgram(bank.slice(i*PROG_LEN,(i+1)*PROG_LEN),'Chargé depuis la banque : ',true); renderBank(); };
+    const s=h('div',{class:'slot'+(i===bankSel?' sel':''),title:'Click: load into the editor'},h('b',{},'A'+String(i).padStart(2,'0')),progName(bank,i*PROG_LEN));
+    s.onclick=()=>{ bankSel=i; $('#slotSel').value=i; loadProgram(bank.slice(i*PROG_LEN,(i+1)*PROG_LEN),'Loaded from bank: ',true); renderBank(); };
     el.append(s);
   }
 }
@@ -1383,18 +1400,18 @@ function parseSyx(u8){
     if (m[1]!==0x42 || m[3]!==0x36) continue;
     if (m[4]===0x40 && m.length===194) singles.push(Uint8Array.from(dec87(Array.from(m.slice(5,193))).slice(0,PROG_LEN)));
     if (m[4]===0x4C && m.length===18750) b=Uint8Array.from(dec87(Array.from(m.slice(6,18749))).slice(0,16400));
-    if (m[4]===0x50) log('Fichier « All Data » : seule la partie programmes n\'est pas extraite dans cette version','m');
+    if (m[4]===0x50) log('“All Data” file: not extracted in this version (programs part included)','m');
   }
   return {msgs:msgs.length,singles,bank:b};
 }
 let mine=[];
 function loadMine(){ try{ mine=JSON.parse(localStorage.getItem('x5s.mine')||'[]'); }catch(e){ mine=[]; } }
-function saveMine(){ try{ localStorage.setItem('x5s.mine',JSON.stringify(mine)); }catch(e){ toast('Stockage local indisponible','bad'); } }
+function saveMine(){ try{ localStorage.setItem('x5s.mine',JSON.stringify(mine)); }catch(e){ toast('Local storage unavailable','bad'); } }
 function renderMine(){
   const el=$('#mineList'); el.innerHTML='';
-  if (!mine.length) el.append(h('p',{class:'note'},'Rien encore. « Garder » mémorise le son courant dans ce navigateur.'));
+  if (!mine.length) el.append(h('p',{class:'note'},'Nothing yet. “Keep” stores the current sound in this browser.'));
   mine.forEach((m,i)=>el.append(h('div',{class:'item'},h('span',{},m.name),h('small',{class:'note'},m.date),
-    h('button',{onclick:()=>loadProgram(Uint8Array.from(m.data),'Chargé : ',true)},'Charger'),
+    h('button',{onclick:()=>loadProgram(Uint8Array.from(m.data),'Loaded: ',true)},'Charger'),
     h('button',{onclick:()=>download(m.name.trim().replace(/[^\w\-]+/g,'_')+'.syx',MSG.dumpProg(Uint8Array.from(m.data)))},'.syx'),
     h('button',{class:'warn',onclick:()=>{ mine.splice(i,1); saveMine(); renderMine(); }},'✕'))));
 }
@@ -1404,30 +1421,30 @@ function buildLib(){
   file.addEventListener('change',async()=>{
     const f=file.files[0]; if(!f) return; const u=new Uint8Array(await f.arrayBuffer()); const r=parseSyx(u);
     if (r.bank) setBank(r.bank, f.name);
-    if (r.singles.length===1) loadProgram(r.singles[0],'Fichier chargé : ',true);
-    else if (r.singles.length>1){ const b=new Uint8Array(16400); r.singles.slice(0,100).forEach((s,i)=>b.set(s,i*PROG_LEN)); setBank(b, T('{0} ({1} sons isolés)',f.name,r.singles.length)); }
-    if (!r.bank && !r.singles.length) toast(T('Aucun Program X5/05R-W dans ce fichier ({0} messages SysEx)',r.msgs),'bad');
+    if (r.singles.length===1) loadProgram(r.singles[0],'File loaded: ',true);
+    else if (r.singles.length>1){ const b=new Uint8Array(16400); r.singles.slice(0,100).forEach((s,i)=>b.set(s,i*PROG_LEN)); setBank(b, T('{0} ({1} single sounds)',f.name,r.singles.length)); }
+    if (!r.bank && !r.singles.length) toast(T('No X5/05R-W Program in this file ({0} SysEx messages)',r.msgs),'bad');
     file.value='';
   });
-  const bankCard=h('div',{class:'card wide'},h('h3',{},'Banque de 100 sons',h('span',{class:'note',id:'bankInfo'})),
+  const bankCard=h('div',{class:'card wide'},h('h3',{},'Bank of 100 sounds',h('span',{class:'note',id:'bankInfo'})),
     h('div',{style:'display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px'},
-      h('button',{onclick:async()=>{ if(!midi.out||!midi.inp){toast('Entrée et sortie MIDI nécessaires','bad');return;} enterEdit(); rawSend(MSG.reqBank()); toast('Demande envoyée… (≈ 6 s de transfert)'); const r=await expect(d=>d[1]===0x42&&d[4]===0x4C,15000); if(!r) toast('Pas de banque reçue. Sur certains X5 il faut lancer GLOBAL → MIDI Data Dump → Program depuis la face avant.','bad'); }},'⇩ Lire la banque du X5'),
-      h('button',{onclick:()=>file.click()},'Ouvrir un .syx…'),
-      h('button',{onclick:()=>{ if(!bank){ bank=new Uint8Array(16400); for(let i=0;i<100;i++) bank.set(initBuffer(),i*PROG_LEN); bankFrom=T('nouvelle banque'); } bank.set(cur,bankSel*PROG_LEN); renderBank(); toast(T('Son rangé en {0} de la banque (pas encore sur le X5)','A'+String(bankSel).padStart(2,'0'))); }},'Ranger le son courant dans l\'emplacement sélectionné'),
-      h('button',{onclick:()=>{ if(!bank) return toast('Pas de banque','bad'); download('X5_banque.syx',MSG.dumpBank(bank)); }},'Télécharger la banque .syx'),
-      h('button',{class:'warn',onclick:async()=>{ if(!bank) return toast('Pas de banque','bad'); if(!midi.out) return toast('Pas de sortie MIDI','bad'); if(await ask('Envoyer la banque entière au X5 ?<br><span class="note warn">Les 100 Programs du X5 seront remplacés. Fais d\'abord une sauvegarde (« Lire la banque du X5 » puis « Télécharger »).</span>')){ rawSend(MSG.dumpBank(bank)); toast('Banque envoyée'); } }},'⇧ Envoyer la banque au X5')),
+      h('button',{onclick:async()=>{ if(!midi.out||!midi.inp){toast('MIDI input and output required','bad');return;} enterEdit(); rawSend(MSG.reqBank()); toast('Request sent… (≈ 6 s transfer)'); const r=await expect(d=>d[1]===0x42&&d[4]===0x4C,15000); if(!r) toast('No bank received. On some X5 units you have to start GLOBAL → MIDI Data Dump → Program from the front panel.','bad'); }},'⇩ Read X5 bank'),
+      h('button',{onclick:()=>file.click()},'Open a .syx…'),
+      h('button',{onclick:()=>{ if(!bank){ bank=new Uint8Array(16400); for(let i=0;i<100;i++) bank.set(initBuffer(),i*PROG_LEN); bankFrom=T('new bank'); } bank.set(cur,bankSel*PROG_LEN); renderBank(); toast(T('Sound stored in {0} of the bank (not yet on the X5)','A'+String(bankSel).padStart(2,'0'))); }},'Store the current sound in the selected slot'),
+      h('button',{onclick:()=>{ if(!bank) return toast('No bank','bad'); download('X5_banque.syx',MSG.dumpBank(bank)); }},'Download bank .syx'),
+      h('button',{class:'warn',onclick:async()=>{ if(!bank) return toast('No bank','bad'); if(!midi.out) return toast('No MIDI output','bad'); if(await ask('Send the whole bank to the X5?<br><span class="note warn">All 100 Programs on the X5 will be replaced. Make a backup first (“Read X5 bank”, then “Download”).</span>')){ rawSend(MSG.dumpBank(bank)); toast('Bank sent'); } }},'⇧ Send bank to X5')),
     h('div',{class:'bank',id:'bankGrid'}), file);
   g.append(bankCard);
-  const nm=h('input',{type:'text',placeholder:'Nom (par défaut celui du son)'});
-  g.append(card('Mes sons (dans ce navigateur)',
-    h('div',{style:'display:flex;gap:6px;margin-bottom:8px'},nm,h('button',{class:'pri',onclick:()=>{ mine.unshift({name:(nm.value||progName(cur)).slice(0,24),date:new Date().toLocaleString(I18N.lang),data:Array.from(cur)}); nm.value=''; saveMine(); renderMine(); }},'Garder')),
+  const nm=h('input',{type:'text',placeholder:'Name (defaults to the sound\'s name)'});
+  g.append(card('My sounds (in this browser)',
+    h('div',{style:'display:flex;gap:6px;margin-bottom:8px'},nm,h('button',{class:'pri',onclick:()=>{ mine.unshift({name:(nm.value||progName(cur)).slice(0,24),date:new Date().toLocaleString(I18N.lang),data:Array.from(cur)}); nm.value=''; saveMine(); renderMine(); }},'Keep')),
     h('div',{class:'list',id:'mineList'})));
-  g.append(card('Fichiers',
+  g.append(card('Files',
     h('div',{style:'display:grid;gap:8px'},
-      h('button',{onclick:()=>download(progName(cur).trim().replace(/[^\w\-]+/g,'_')+'.syx',MSG.dumpProg(cur))},'Télécharger le son courant (.syx, 194 octets)'),
-      h('button',{onclick:()=>file.click()},'Ouvrir un son ou une banque .syx…'),
-      h('button',{onclick:async()=>{ if(await ask('Remplacer le son courant par un son « Init » neutre ?')){ const b=initBuffer(); b.set(cur.slice(135,164),135); cur=b; commit(); if(live&&midi.out) sendDump(true); refreshAll(); } }},'Nouveau son (Init, garde les effets)')),
-    h('p',{class:'note'},'Formats lus : Program Dump (40h, 194 octets), All Programs (4Ch, 18 750 octets), et fichiers contenant plusieurs Program Dumps.')));
+      h('button',{onclick:()=>download(progName(cur).trim().replace(/[^\w\-]+/g,'_')+'.syx',MSG.dumpProg(cur))},'Download current sound (.syx, 194 bytes)'),
+      h('button',{onclick:()=>file.click()},'Open a sound or bank .syx…'),
+      h('button',{onclick:async()=>{ if(await ask('Replace the current sound with a neutral “Init” sound?')){ const b=initBuffer(); b.set(cur.slice(135,164),135); cur=b; commit(); if(live&&midi.out) sendDump(true); refreshAll(); } }},'New sound (Init, keeps the effects)')),
+    h('p',{class:'note'},'Readable formats: Program Dump (40h, 194 bytes), All Programs (4Ch, 18,750 bytes), and files containing several Program Dumps.')));
   p.append(g); renderBank(); loadMine(); renderMine();
 }
 
@@ -1475,7 +1492,7 @@ function boot(){
   $('#btnLog').onclick=()=>$('#log').classList.toggle('on');
   initMon();
   $('#btnHelp').onclick=()=>$('#helpDlg').showModal();
-  $('#btnEdit').onclick=()=>{ if (!midi.out) return toast('Aucune sortie MIDI choisie','bad'); if (DEV.edit) leaveEdit(); else { if (DEV.synced) sendDump(true); else enterEdit(); toast('Retour en édition : le son de l\'éditeur est renvoyé au X5','ok'); } };
+  $('#btnEdit').onclick=()=>{ if (!midi.out) return toast('No MIDI output selected','bad'); if (DEV.edit) leaveEdit(); else { if (DEV.synced) sendDump(true); else enterEdit(); toast('Back to editing: the editor\'s sound is sent to the X5 again','ok'); } };
   window.addEventListener('pagehide', exitOnClose); window.addEventListener('beforeunload', exitOnClose);
   initView();
   $('#btnUndo').onclick=undo; $('#btnRedo').onclick=redo;

@@ -4,9 +4,9 @@
 
 A sound editor for the **Korg X5, X5D, X5DR and 05R/W** that runs right in your browser (Chrome or Edge) using Web MIDI. Create or tweak a Program (a sound, or "patch") and hear it on the synth instantly, without the old 1990s editing software.
 
-The whole app is a single file, `x5studio.html`. Nothing to install, and no Internet connection needed.
+The app is one HTML file, `x5studio.html`, plus a `lang/` folder holding the translations. Nothing to install, and no Internet connection needed. Keep the `lang/` folder next to `x5studio.html`: without it, the app still works, but in English only.
 
-The interface is available in **English, French, Italian, Spanish and German**: click a flag at the top right. On first launch, the app uses your browser's language.
+The interface is available in **English, French, Italian, Spanish and German**: click a flag at the top right. On first launch, the app uses your browser's language. English is built into the page; the other languages come from the `lang/` folder (see [Translations](#translations)).
 
 Two views: **Essential** (the main settings, for building or tweaking a sound quickly) and **Full** (every Program parameter), switched left of the tabs.
 
@@ -104,6 +104,24 @@ Korg SysEx messages, Model ID `36h`:
 | Write | `F0 42 3n 36 11 00 pp F7` |
 
 `n` = MIDI channel − 1.
+
+## Translations
+
+English is written directly in `x5studio.html`. Each other language is one file in `lang/`:
+
+```
+x5studio.html
+lang/
+  fr.js   it.js   es.js   de.js
+```
+
+Each file maps every English text of the interface to its translation, and also holds the "?" help window. To fix a translation, edit the right file. To add a language:
+
+1. copy `lang/fr.js` to `lang/xx.js` (`xx` = the language code, for example `pt`);
+2. change `code` and `name` at the top, then translate the right-hand side of each line and the help;
+3. add `<script src="lang/xx.js"></script>` next to the other language lines in the `<head>` of `x5studio.html`.
+
+Keep the `{0}`, `{1}` placeholders and the HTML tags as they are. A missing text is simply shown in English.
 
 ## Acknowledgements
 

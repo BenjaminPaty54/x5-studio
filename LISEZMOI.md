@@ -4,9 +4,9 @@
 
 Éditeur de sons pour **Korg X5, X5D, X5DR et 05R/W**, qui fonctionne directement dans le navigateur (Chrome ou Edge) grâce à Web MIDI. Il permet de créer ou de retoucher un Program (un son, ou « patch ») et de l'entendre aussitôt sur le synthé, sans le vieux logiciel d'édition des années 1990.
 
-L'application tient en un seul fichier : `x5studio.html`. Rien à installer, aucune connexion Internet nécessaire.
+L'application tient en un fichier HTML, `x5studio.html`, accompagné d'un dossier `lang/` qui contient les traductions. Rien à installer, aucune connexion Internet nécessaire. Garde le dossier `lang/` à côté de `x5studio.html` : sans lui, l'appli fonctionne quand même, mais uniquement en anglais.
 
-L'interface existe en **français, anglais, italien, espagnol et allemand** : clique sur un drapeau en haut à droite. Au premier lancement, l'application prend la langue du navigateur.
+L'interface existe en **français, anglais, italien, espagnol et allemand** : clique sur un drapeau en haut à droite. Au premier lancement, l'application prend la langue du navigateur. L'anglais est intégré à la page ; les autres langues viennent du dossier `lang/` (voir [Traductions](#traductions)).
 
 Deux vues : **Essentiel** (les réglages principaux, pour fabriquer ou retoucher un son vite) et **Complet** (tous les paramètres du Program), à basculer à gauche des onglets.
 
@@ -104,6 +104,24 @@ Messages Korg SysEx, Model ID `36h` :
 | Écriture | `F0 42 3n 36 11 00 pp F7` |
 
 `n` = canal MIDI − 1.
+
+## Traductions
+
+L'anglais est écrit directement dans `x5studio.html`. Chaque autre langue est un fichier du dossier `lang/` :
+
+```
+x5studio.html
+lang/
+  fr.js   it.js   es.js   de.js
+```
+
+Chaque fichier associe chaque texte anglais de l'interface à sa traduction, et contient aussi l'aide de la fenêtre « ? ». Pour corriger une traduction, il suffit de modifier le bon fichier. Pour ajouter une langue :
+
+1. copie `lang/fr.js` en `lang/xx.js` (`xx` = le code de la langue, par exemple `pt`) ;
+2. change `code` et `name` en haut du fichier, puis traduis la partie droite de chaque ligne et l'aide ;
+3. ajoute `<script src="lang/xx.js"></script>` à côté des autres lignes de langue, dans le `<head>` de `x5studio.html`.
+
+Garde tels quels les repères `{0}`, `{1}` et les balises HTML. Un texte manquant s'affiche simplement en anglais.
 
 ## Remerciements
 

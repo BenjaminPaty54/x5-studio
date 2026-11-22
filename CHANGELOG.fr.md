@@ -4,6 +4,16 @@
 
 Toutes les modifications notables de X5 Studio sont listées ici. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et la numérotation suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.5.1] — 2026-11-22
+
+### Modifié
+- **L'anglais devient la langue de base de l'interface**, écrite directement dans `x5studio.html`.
+- **Le français, l'italien, l'espagnol et l'allemand passent dans un dossier `lang/`**, à raison d'un fichier par langue (`lang/fr.js`, `it.js`, `es.js`, `de.js`). Chaque fichier contient les textes de l'interface et l'aide « ? ». Corriger ou ajouter une langue ne demande plus de toucher au code de l'application.
+- Au premier lancement, la langue suit toujours celle du navigateur, et le dernier choix reste mémorisé.
+- Si le dossier `lang/` est absent, l'appli continue de fonctionner en anglais et le signale dans le journal.
+
+Aucun changement de fonctions ni de comportement MIDI.
+
 ## [1.5] — 2026-11-22
 
 ### Ajouté
@@ -68,5 +78,6 @@ Ces corrections viennent des tables MIDI officielles du X5DR transcrites dans le
 - Les sensibilités à la vélocité et au clavier ont leurs trois états (−/0/+).
 - Le suivi de clavier a ses quatre modes (Off/Bas/Haut/Tout).
 
+[1.5.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.1
 [1.5]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5
 [1.4]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.4
