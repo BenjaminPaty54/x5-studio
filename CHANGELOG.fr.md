@@ -4,6 +4,15 @@
 
 Toutes les modifications notables de X5 Studio sont listées ici. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et la numérotation suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.7] — 2026-11-22
+
+### Ajouté
+- **Numéros de page du X5 sur les cartes** (par exemple `4A–4E`), qui correspondent aux pages d'édition Program du X5 (PROG → EDIT). Ils suivent le mode d'oscillateur (Simple/Batterie ou Double) et l'oscillateur édité ; quand les deux oscillateurs sont liés, les deux séries de pages s'affichent.
+
+### Modifié
+- **Effets :** le placement (page 20A en mode Double) et les balances sec/effet des deux effets (page 20B) sont maintenant réunis dans une seule carte **Placement & balance**, visible dans les deux vues.
+- Le réglage Sinus/Triangle des effets s'appelle désormais **Wave Shape** en anglais, comme sur l'écran du X5.
+
 ## [1.6] — 2026-11-22
 
 ### Ajouté
@@ -97,6 +106,7 @@ Ces corrections viennent des tables MIDI officielles du X5DR transcrites dans le
 - Les sensibilités à la vélocité et au clavier ont leurs trois états (−/0/+).
 - Le suivi de clavier a ses quatre modes (Off/Bas/Haut/Tout).
 
+[1.7]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7
 [1.6]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.6
 [1.5.2]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.2
 [1.5.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5.1

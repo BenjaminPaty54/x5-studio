@@ -10,6 +10,8 @@ L'interface existe en **français, anglais, italien, espagnol et allemand** : cl
 
 Deux vues : **Essentiel** (les réglages principaux, pour fabriquer ou retoucher un son vite) et **Complet** (tous les paramètres du Program), à basculer à gauche des onglets.
 
+Chaque carte affiche, en haut à droite, le numéro de la **page d'édition correspondante sur le X5** (PROG → EDIT), par exemple `4A–4E`. Les numéros suivent le mode d'oscillateur (Simple/Batterie ou Double) et l'oscillateur édité.
+
 Deux thèmes : **Atelier** (clair, inspiré de l'esthétique des modules Eurorack) et **Nuit** (sombre), à basculer avec le bouton ☾ / ☀.
 
 © 2026 Benjamin PATY (BenjaminPaty54)

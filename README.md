@@ -10,6 +10,8 @@ The interface is available in **English, French, Italian, Spanish and German**: 
 
 Two views: **Essential** (the main settings, for building or tweaking a sound quickly) and **Full** (every Program parameter), switched left of the tabs.
 
+Each card shows, top right, the number of the matching **edit page on the X5** (PROG → EDIT), such as `4A–4E`. Numbers follow the oscillator mode (Single/Drums or Double) and the oscillator being edited.
+
 Two themes: **Atelier** (light, inspired by the look of Eurorack modules) and **Nuit** (dark), switched with the ☾ / ☀ button.
 
 © 2026 Benjamin PATY (BenjaminPaty54)

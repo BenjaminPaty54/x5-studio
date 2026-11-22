@@ -203,8 +203,11 @@ footer{background:var(--hdr);border-top:1px solid var(--hdrline);padding:8px 14p
 html[data-view="simple"] .adv{display:none!important}
 html[data-view="full"] .simple-only{display:none!important}
 .fxsep{border-top:1px dashed var(--line);margin:10px 0 6px}
+.pgno{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;font-weight:600;color:var(--sec);border:1px solid var(--sec);border-radius:3px;padding:1px 6px;text-transform:none;white-space:nowrap}
+.fxsub{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin:12px 0 2px;color:var(--mute)}
 .fxoff .fxon{display:none}
 .cards.fxcards{grid-template-columns:repeat(auto-fill,minmax(420px,1fr))}
+.cards.fxcards .row{grid-template-columns:132px 1fr 66px}
 .cards.fxcards .card.wide .row{max-width:520px}
 #btnEdit{font-weight:600;min-width:92px}
 #btnEdit.on{color:var(--neg);border-color:var(--neg)}
@@ -225,7 +228,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
 <body>
 <div class="app">
 <header>
-  <div class="brand" title="X5 Studio v1.6 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
+  <div class="brand" title="X5 Studio v1.7 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
   <span id="midiState" class="pill">MIDI : en attente</span>
   <div class="grp">
     <span class="led" id="ledOut" title="MIDI output"></span><select id="outSel" title="MIDI output to the X5"></select>
@@ -339,13 +342,14 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
     <li><b>SysEx</b> button: a small window (movable, resizable from its corner) showing every message sent ↑ and received ↓, decoded in plain words. The <b>Delay</b> slider adds a pause after each SysEx message (20 ms by default).</li>
     <li>The macros on the Quick tab spring back to the centre: each gesture <i>adds to</i> or <i>takes away from</i> the current sound.</li>
     <li>The flags at the top right change the interface language.</li>
+    <li>The <b>boxed numbers</b> at the top of the cards (for example <code>4A–4E</code>) point to the X5's own edit pages (PROG → EDIT). They change between Single/Drums and Double mode, and with the oscillator being edited.</li>
     <li><b>Essential / Full</b> (left of the tabs): Essential keeps the main settings, Full shows every Program parameter. Both modes edit the same sound.</li>
     <li><b>● Editing / ○ Play</b> button: shows whether the X5 is in edit mode. One click hands control back to it (Program mode); it is also put back in play mode when you close the page. If the X5 rejects a change (for example after using its front panel), the app puts it back in edit mode and resends the sound.</li>
   </ul>
   <h3>Limitations</h3>
   <p class="note">This version edits <b>Programs</b> (sounds) only, effects included (Full view). <b>Combinations</b> and Global settings cannot be edited.</p>
   <p class="note">Protocol: Korg SysEx, Model ID 36h (shared by X5 / X5D / X5DR / 05R/W). Live parameters: function 41h; full sound: function 40h.</p>
-  <p class="note" style="margin-top:12px">X5 Studio v1.6 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
+  <p class="note" style="margin-top:12px">X5 Studio v1.7 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
 </div><div style="text-align:right"><button class="pri">OK</button></div></form></dialog>
 
 <script>
@@ -450,7 +454,7 @@ function initLang(){
   setLang(l, true);
   i18nObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['title','placeholder']});
 }
-/* X5 Studio v1.6 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
+/* X5 Studio v1.7 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
 /* ============================================================
    1. Données de référence
    ============================================================ */
@@ -1097,6 +1101,30 @@ function triGroup(prefix, title){   // ex. prefix 'vdf.v' → A D S R
 /* Mode Essentiel : les éléments marqués adv() sont masqués (voir html[data-view=simple]) */
 function adv(el){ el.classList.add('adv'); return el; }
 function card(title, ...kids){ return h('div',{class:'card'},h('h3',{},title),...kids); }
+/* Numéros des pages d'édition Program du X5 (PROG → EDIT), fournis par l'utilisateur d'après son X5.
+   [mode Simple/Batterie, mode Double pour l'osc 1, mode Double pour l'osc 2]. La page dépend
+   donc du mode et de l'oscillateur édité (portée « Éditer : Osc 1 / Osc 2 / les deux »). */
+const PAGES = {
+  arch:['0A–0B','0A–0B'], osc1:['1A–1D','1A–1D'], osc2:[null,'2A–2F'], o12:[null,'2A–2F'],
+  peg:['2A–2C','3A–3C'],
+  vdf:['3A–3E','4A–4E','6A–6E'], vdfv:['4A–4E','5A–5E','7A–7E'],
+  vda:['5A–5C','8A–8C','10A–10C'], vdav:['6A–6E','9A–9E','11A–11E'],
+  pm:['7A–7E','12A–12E','13A–13E'], fmg:['8A–8C','14A–14C'], ctl:['9A–9D','15A–15D'],
+  fx1:['10–11','16–17'], fx2:['12–13','18–19'], route:['14A–14B','20A–20B'], write:['16A–16B','22A–22B'],
+};
+function pageText(k){
+  const e=PAGES[k]; if (!e) return '';
+  if (!isDouble()) return e[0]||'';
+  if (e.length<3) return e[1]||'';
+  return scope==='both' ? e[1]+' · '+e[2] : scope===2 ? e[2] : e[1];
+}
+/* pastille de page dans le titre d'une carte */
+function pg(el, k){
+  const b=h('span',{class:'pgno',title:'Page on the X5 (PROG → EDIT)'});
+  const h3=el.querySelector('h3'); h3.append(b);
+  binds.push({keys:['mode'],upd:()=>{ const t=pageText(k); b.textContent=t; b.style.display=t?'':'none'; }}); binds.at(-1).upd();
+  return el;
+}
 
 /* ============================================================
    7. Éditeur d'enveloppes (glisser les points)
@@ -1311,11 +1339,12 @@ function panRow(o){
 function buildOsc(){
   const p=$('#p-osc');
   const g=h('div',{class:'cards'});
-  g.append(card('Structure', choice('mode',0), toggle('mono',0,'Mono (legato)'), adv(toggle('hold',0,'Hold')),
-    h('p',{class:'note'},'Single = 1 oscillator (32 voices). Double = 2 oscillators (16 voices). Drums = a percussion kit.')));
-  const o2=card('Osc 1 ↔ Osc 2', slider('interval',0), slider('detune',0), adv(slider('delay',0))); o2.dataset.needDouble=1; g.append(o2);
+  g.append(pg(card('Structure', choice('mode',0), toggle('mono',0,'Mono (legato)'), adv(toggle('hold',0,'Hold')),
+    h('p',{class:'note'},'Single = 1 oscillator (32 voices). Double = 2 oscillators (16 voices). Drums = a percussion kit.')),'arch'));
+  const o2=pg(card('Osc 1 ↔ Osc 2', slider('interval',0), slider('detune',0), adv(slider('delay',0))),'o12'); o2.dataset.needDouble=1; g.append(o2);
   for (const o of [1,2]){
     const c=card('Oscillator '+o, wavePicker(o), choice('oct',o), slider('lvl',o), adv(slider('pitch',o,{label:'Pitch EG'})), adv(panRow(o)), adv(slider('sendC',o)), adv(slider('sendD',o)));
+    pg(c, o===1?'osc1':'osc2');
     if (o===2) c.dataset.needDouble=1;
     g.append(c);
   }
@@ -1325,44 +1354,44 @@ function buildOsc(){
 function buildVDF(){
   const p=$('#p-vdf'); p.append(scopeBar());
   const g=h('div',{class:'cards'});
-  g.append(h('div',{class:'card wide'},h('h3',{},'Filter envelope'),egEditor('vdf')));
-  g.append(card('Filter', slider('vdf.cut',0), slider('vdf.eint',0), slider('vdf.col',0), adv(slider('vdf.colv',0))));
-  g.append(adv(card('EG times & levels', ...['at','al','dt','bp','st','sl','rt','rl'].map(s=>slider('vdf.'+s,0)))));
-  g.append(card('Velocity', slider('vdf.vint',0), adv(slider('vdf.vtim',0)), adv(triGroup('vdf.v','Affected times:'))));
-  g.append(adv(card('Keyboard tracking', choice('vdf.kmode',0), slider('vdf.kkey',0), slider('vdf.kint',0), slider('vdf.ktim',0), triGroup('vdf.k','Affected times:'))));
+  g.append(pg(h('div',{class:'card wide'},h('h3',{},'Filter envelope'),egEditor('vdf')),'vdf'));
+  g.append(pg(card('Filter', slider('vdf.cut',0), slider('vdf.eint',0), slider('vdf.col',0), adv(slider('vdf.colv',0))),'vdf'));
+  g.append(adv(pg(card('EG times & levels', ...['at','al','dt','bp','st','sl','rt','rl'].map(s=>slider('vdf.'+s,0))),'vdf')));
+  g.append(pg(card('Velocity', slider('vdf.vint',0), adv(slider('vdf.vtim',0)), adv(triGroup('vdf.v','Affected times:'))),'vdfv'));
+  g.append(adv(pg(card('Keyboard tracking', choice('vdf.kmode',0), slider('vdf.kkey',0), slider('vdf.kint',0), slider('vdf.ktim',0), triGroup('vdf.k','Affected times:')),'vdfv')));
   p.append(g);
 }
 /* --- VDA --- */
 function buildVDA(){
   const p=$('#p-vda'); p.append(scopeBar());
   const g=h('div',{class:'cards'});
-  g.append(h('div',{class:'card wide'},h('h3',{},'Volume envelope'),egEditor('vda')));
-  g.append(adv(card('Times & levels', ...['at','al','dt','bp','st','sl','rt'].map(s=>slider('vda.'+s,0)))));
-  g.append(card('Velocity', slider('vda.vamp',0), adv(slider('vda.vtim',0)), adv(triGroup('vda.v','Affected times:'))));
-  g.append(adv(card('Keyboard tracking', choice('vda.kmode',0), slider('vda.kkey',0), slider('vda.kamp',0), slider('vda.ktim',0), triGroup('vda.k','Affected times:'))));
+  g.append(pg(h('div',{class:'card wide'},h('h3',{},'Volume envelope'),egEditor('vda')),'vda'));
+  g.append(adv(pg(card('Times & levels', ...['at','al','dt','bp','st','sl','rt'].map(s=>slider('vda.'+s,0))),'vda')));
+  g.append(pg(card('Velocity', slider('vda.vamp',0), adv(slider('vda.vtim',0)), adv(triGroup('vda.v','Affected times:'))),'vdav'));
+  g.append(adv(pg(card('Keyboard tracking', choice('vda.kmode',0), slider('vda.kkey',0), slider('vda.kamp',0), slider('vda.ktim',0), triGroup('vda.k','Affected times:')),'vdav')));
   p.append(g);
 }
 /* --- Hauteur & LFO --- */
 function buildMod(){
   const p=$('#p-mod');
   const g=h('div',{class:'cards'});
-  g.append(h('div',{class:'card wide adv'},h('h3',{},'Pitch EG (shared by both oscillators)'),egEditor('peg'),
+  g.append(pg(h('div',{class:'card wide adv'},h('h3',{},'Pitch EG (shared by both oscillators)'),egEditor('peg'),
     h('div',{class:'cols2'},h('div',{},...['peg.sl','peg.at','peg.al','peg.dt'].map(k=>slider(k,0))),h('div',{},...['peg.rt','peg.rl','peg.vlev','peg.vtim'].map(k=>slider(k,0)))),
-    h('p',{class:'note'},'The effect on each oscillator depends on its “Pitch EG” setting (Oscillators tab).')));
-  g.append(card('Filter LFO (VDF MG)', choice('fmg.wave',0), slider('fmg.freq',0), slider('fmg.int',0), adv(slider('fmg.del',0)), choice('fmg.osc',0), adv(toggle('fmg.sync',0))));
+    h('p',{class:'note'},'The effect on each oscillator depends on its “Pitch EG” setting (Oscillators tab).')),'peg'));
+  g.append(pg(card('Filter LFO (VDF MG)', choice('fmg.wave',0), slider('fmg.freq',0), slider('fmg.int',0), adv(slider('fmg.del',0)), choice('fmg.osc',0), adv(toggle('fmg.sync',0))),'fmg'));
   p.append(g);
   p.append(h('div',{style:'margin-top:12px'},scopeBar()));
   const g2=h('div',{class:'cards'});
-  g2.append(card('Pitch LFO (vibrato)', choice('pm.wave',0), slider('pm.freq',0), slider('pm.int',0), slider('pm.del',0), slider('pm.fade',0), adv(toggle('pm.sync',0)), adv(slider('pm.ktrk',0))));
-  g2.append(adv(card('Vibrato from controllers', slider('pm.aft',0), slider('pm.joy',0), slider('pm.atjoy',0))));
+  g2.append(pg(card('Pitch LFO (vibrato)', choice('pm.wave',0), slider('pm.freq',0), slider('pm.int',0), slider('pm.del',0), slider('pm.fade',0), adv(toggle('pm.sync',0)), adv(slider('pm.ktrk',0))),'pm'));
+  g2.append(adv(pg(card('Vibrato from controllers', slider('pm.aft',0), slider('pm.joy',0), slider('pm.atjoy',0)),'pm')));
   p.append(g2);
 }
 /* --- Contrôleurs --- */
 /* Contrôleurs (aftertouch, joystick) : en bas de l'onglet Modulation, vue Complet uniquement */
 function buildCtl(){
   const p=$('#p-mod'); const g=h('div',{class:'cards adv',style:'margin-top:14px'});
-  g.append(card('Aftertouch', slider('at.bend',0), slider('at.fc',0), slider('at.mg',0), slider('at.amp',0)));
-  g.append(card('Joystick', slider('joy.bend',0), slider('joy.vdf',0), slider('joy.mg',0)));
+  g.append(pg(card('Aftertouch', slider('at.bend',0), slider('at.fc',0), slider('at.mg',0), slider('at.amp',0)),'ctl'));
+  g.append(pg(card('Joystick', slider('joy.bend',0), slider('joy.vdf',0), slider('joy.mg',0)),'ctl'));
   p.append(g);
 }
 /* --- Effets ---------------------------------------------------------------
@@ -1384,7 +1413,7 @@ const FX_GROUPS = [
   [[13,14], [['Delay Time L',0,'w',0,500,'ms'],['Delay Time R',4,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
   [[15], [['Delay Time L',0,'w',0,500,'ms'],['Feedback L',2,'s',-99,99],['High Damp L',3,'u',0,99],['Delay Time R',4,'w',0,500,'ms'],['Feedback R',6,'s',-99,99],['High Damp R',7,'u',0,99]]],
   [[16,17,18], [['Delay Time 1',0,'w',0,500,'ms'],['Delay Time 2',2,'w',0,500,'ms'],['Feedback',4,'s',-99,99],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
-  [[19,20], [['Mod Depth',0,'u',0,99],['Mod Speed',1,'hz',0,216,'Hz'],['LFO Waveform',2,'mg',0,1],['Delay Time',4,'u',0,200,'ms'],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
+  [[19,20], [['Mod Depth',0,'u',0,99],['Mod Speed',1,'hz',0,216,'Hz'],['Wave Shape',2,'mg',0,1],['Delay Time',4,'u',0,200,'ms'],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
   [[21,22], [['Delay Time L',0,'u',0,250,'ms'],['Delay Time R',1,'u',0,250,'ms'],['Mod Speed',2,'u',1,99],['Mod Depth',3,'u',0,99],['Mod Waveform',4,'qw',-21,20],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
   [[23], [['Delay Time L',0,'w',0,500,'ms'],['Delay Time R',2,'w',0,500,'ms'],['Mod Speed',4,'u',1,99],['Mod Depth',5,'u',0,99],['Filter Split Point',6,'u',0,18]]],
   [[24], [['Mod Depth',0,'u',0,99],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
@@ -1392,14 +1421,14 @@ const FX_GROUPS = [
   [[28], [['Blend',0,'s',-99,99],['Emphatic Point',1,'u',1,10],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
   [[29], [['Harmonic Density',0,'u',1,99],['Hot Spot',1,'u',1,20],['Stereo Width',2,'u',0,99],['Delay',3,'u',1,99],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
   [[30,31], [['Drive',0,'u',1,111],['Hot Spot',1,'u',0,99],['Resonance',2,'u',0,99],['Out Level',3,'u',0,99],['EQ Low',6,'s',-12,12,'dB'],['EQ High',7,'s',-12,12,'dB']]],
-  [[32,33], [['Mod Depth',0,'u',0,99],['Mod Speed',1,'hz',0,216,'Hz'],['LFO Waveform',2,'mg',0,1],['Feedback',3,'s',-99,99],['Manual',4,'u',0,99]]],
+  [[32,33], [['Mod Depth',0,'u',0,99],['Mod Speed',1,'hz',0,216,'Hz'],['Wave Shape',2,'mg',0,1],['Feedback',3,'s',-99,99],['Manual',4,'u',0,99]]],
   [[34], [['Vibrato Depth',0,'u',0,15],['Acceleration',1,'u',1,15],['Slow Speed',2,'u',1,99],['Fast Speed',3,'u',1,99]]],
-  [[35,36], [['Depth',0,'u',0,99],['Speed',1,'hz',0,216,'Hz'],['LFO Waveform',2,'mg',0,1],['Shape',3,'s',-99,99],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
+  [[35,36], [['Depth',0,'u',0,99],['Speed',1,'hz',0,216,'Hz'],['Wave Shape',2,'mg',0,1],['Shape',3,'s',-99,99],['EQ High',6,'s',-12,12,'dB'],['EQ Low',7,'s',-12,12,'dB']]],
   [[37], [['Low Freq',0,'u',0,29],['Low Gain',1,'s',-12,12,'dB'],['Mid Freq',2,'u',0,99],['Mid Gain',3,'s',-12,12,'dB'],['Mid Width',4,'u',0,99],['High Freq',5,'u',0,29],['High Gain',6,'s',-12,12,'dB']]],
   [[38,39], [['Delay Time',0,'u',0,50,'ms'],['Mod Speed',1,'u',1,99],['Mod Depth',2,'u',0,99],['Feedback',3,'s',-99,99],['Delay Time 2',4,'x2',0,225,'ms'],['Feedback 2',5,'s',-99,99]]],
   [[40], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['Reverb Time',4,'rt',0,97],['Reverb High Damp',5,'u',0,99],['Pre Delay',6,'u',0,150,'ms']]],
   [[41], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['Reverb Time',4,'rt',0,47],['Reverb High Damp',6,'u',0,99],['Pre Delay',7,'u',0,150,'ms']]],
-  [[42,43], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['Depth',4,'u',0,99],['Speed',5,'hz',0,216,'Hz'],['LFO Waveform',6,'mg',0,1],['Feedback 2',7,'s',-99,99]]],
+  [[42,43], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['Depth',4,'u',0,99],['Speed',5,'hz',0,216,'Hz'],['Wave Shape',6,'mg',0,1],['Feedback 2',7,'s',-99,99]]],
   [[44,45], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['Drive',3,'u',1,111],['Hot Spot',4,'u',1,99],['Resonance',5,'u',0,99],['Out Level',6,'u',1,99]]],
   [[46], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['High Damp',3,'u',0,99],['Depth',4,'u',0,99],['Speed',5,'hz',0,216,'Hz'],['Feedback 2',6,'s',-99,99]]],
   [[47], [['Delay Time',0,'w',0,500,'ms'],['Feedback',2,'s',-99,99],['Acceleration',3,'u',1,15],['Slow Speed',4,'u',1,99],['Fast Speed',5,'u',1,99]]],
@@ -1483,38 +1512,42 @@ function fxCard(slot){
       s.upd(); extra.push(s); params.append(s.row);
     }
   };
-  // balance sec/effet : L et R liés par défaut
-  const link=h('input',{type:'checkbox',checked:''});
-  const balL=fxSlider('Effect balance L', ()=>cur[FXO.bal[slot]], v=>{ cur[FXO.bal[slot]]=v; if (link.checked) cur[FXO.bal[slot]+1]=v; }, 0, 100, v=>v+' %');
-  const balR=fxSlider('Effect balance R', ()=>cur[FXO.bal[slot]+1], v=>{ cur[FXO.bal[slot]+1]=v; if (link.checked) cur[FXO.bal[slot]]=v; }, 0, 100, v=>v+' %');
   const ms=h('select',{style:'width:100%'}, ...FX_MODSRC.map((n,i)=>h('option',{value:i},n)));
   ms.onchange=()=>{ cur[FXO.mod[slot]]=+ms.value; commit(); fxChanged(); };
   const ma=fxSlider('Modulation amount', ()=>{ const v=cur[FXO.mod[slot]+1]; return v>127?v-256:v; }, v=>{ cur[FXO.mod[slot]+1]=(v+256)&255; }, -15, 15, v=>(v>0?'+':'')+v);
-  const on1=h('div',{class:'fxon'},h('div',{class:'row'},h('label',{},'Balance L = R'),h('div',{},link),h('span')), balL.row, balR.row, h('div',{class:'fxsep'}));
+  const on1=h('div',{class:'fxsep'});
   const on2=h('div',{class:'fxon'},h('div',{class:'fxsep'}), h('div',{class:'row'},h('label',{},'Modulation source'),ms,h('span')), ma.row);
   const detail=h('div',{class:'adv'}, on1, params, on2);
   binds.push({keys:[tkey,'fx'],upd:()=>{
     on.checked = (cur[FXO.io] & onBits)===onBits;
     if (val(tkey)!==shown) render();
     for (const s of extra) s.upd();
-    balL.upd(); balR.upd(); link.checked = cur[FXO.bal[slot]]===cur[FXO.bal[slot]+1] ? link.checked : false;
     ms.value=Math.min(cur[FXO.mod[slot]],FX_MODSRC.length-1); ma.upd();
   }});
   binds.at(-1).upd();
-  const c=card(slot===1?'Effect 1':'Effect 2',
-    h('div',{class:'row'},h('label',{},'On'),h('div',{},on),h('span')), choice(tkey,0,{label:'Type'}), detail);
+  const c=pg(card(slot===1?'Effect 1':'Effect 2',
+    h('div',{class:'row'},h('label',{},'On'),h('div',{},on),h('span')), choice(tkey,0,{label:'Type'}), detail),'fx'+slot);
   shown=-1; binds.at(-1).upd();
   return c;
+}
+/* balance sec:effet d'un effet (page 20B en mode Double), L et R liés par défaut */
+function fxBalance(slot){
+  const link=h('input',{type:'checkbox',checked:''});
+  const balL=fxSlider('Balance L', ()=>cur[FXO.bal[slot]], v=>{ cur[FXO.bal[slot]]=v; if (link.checked) cur[FXO.bal[slot]+1]=v; }, 0, 100, v=>v+' %');
+  const balR=fxSlider('Balance R', ()=>cur[FXO.bal[slot]+1], v=>{ cur[FXO.bal[slot]+1]=v; if (link.checked) cur[FXO.bal[slot]]=v; }, 0, 100, v=>v+' %');
+  binds.push({keys:['fx','fx1.type','fx2.type'],upd:()=>{ balL.upd(); balR.upd(); if (cur[FXO.bal[slot]]!==cur[FXO.bal[slot]+1]) link.checked=false; }});
+  return h('div',{class:'fxbal'}, h('div',{class:'fxsub'}, slot===1?'Effect 1':'Effect 2'),
+    h('div',{class:'row'},h('label',{},'Balance L = R'),h('div',{},link),h('span')), balL.row, balR.row);
 }
 function buildFX(){
   const p=$('#p-fx'); const g=h('div',{class:'cards'});
   const warn=h('p',{class:'note warn'});
   binds.push({keys:['fx1.type','fx2.type'],upd:()=>{ const a=val('fx1.type'),b=val('fx2.type'); const bad=new Set([19,20,21,22,23,24,32,33,34,35,36,38,39,42,43,46,47]);
     warn.textContent = ((a===24 && bad.has(b)) || (b===24 && bad.has(a))) ? T('Symphonic Ensemble cannot be combined with the other selected effect: the X5 will refuse it.') : ''; }}); binds.at(-1).upd();
-  const rt=card('Routing', choice('fx.place',0), warn,
+  const rt=card('Routing & balance', choice('fx.place',0), warn, h('div',{class:'cols2'}, fxBalance(1), fxBalance(2)),
     h('p',{class:'note adv'},'Effect settings are sent to the X5 as a whole sound (a fraction of a second after you move a control).'),
     h('p',{class:'note simple-only'},'Switch to Full view to edit each effect in detail.'));
-  rt.classList.add('wide');
+  rt.classList.add('wide'); pg(rt,'route');
   g.append(rt, fxCard(1), fxCard(2)); g.classList.add('fxcards');
   p.append(g);
 }
