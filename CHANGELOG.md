@@ -4,6 +4,12 @@
 
 All notable changes to X5 Studio are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.5] — 2026-11-22
+
+### Added
+- **Essential / Full** switch, left of the tabs, remembered between sessions. **Essential** (default) keeps the main settings: multisounds, filter and amp envelopes, cutoff, colour, velocity depth, vibrato, filter LFO, effect types. **Full** shows every Program parameter, as before. Both views edit the same sound; switching never sends anything to the X5.
+- In Essential view, these are hidden: the Controllers tab, the detailed EG time/level sliders (the envelope editors remain), keyboard tracking, the −/0/+ sensitivity switches, Pitch EG, pan and C/D sends, osc 2 delay, Hold, and LFO sync/key tracking.
+
 ## [1.4] — 2026-11-21
 
 First public release on GitHub.
@@ -62,4 +68,5 @@ These fixes come from the official X5DR MIDI implementation tables transcribed i
 - Velocity and keyboard sensitivity switches now have their three states (−/0/+).
 - Keyboard tracking has its four modes (Off/Low/High/All).
 
+[1.5]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5
 [1.4]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.4

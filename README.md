@@ -8,6 +8,8 @@ The whole app is a single file, `x5studio.html`. Nothing to install, and no Inte
 
 The interface is available in **English, French, Italian, Spanish and German**: click a flag at the top right. On first launch, the app uses your browser's language.
 
+Two views: **Essential** (the main settings, for building or tweaking a sound quickly) and **Full** (every Program parameter), switched left of the tabs.
+
 Two themes: **Atelier** (light, inspired by the look of Eurorack modules) and **Nuit** (dark), switched with the ☾ / ☀ button.
 
 © 2026 Benjamin PATY (BenjaminPaty54)

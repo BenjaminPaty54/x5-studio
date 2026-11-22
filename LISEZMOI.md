@@ -8,6 +8,8 @@ L'application tient en un seul fichier : `x5studio.html`. Rien à installer, auc
 
 L'interface existe en **français, anglais, italien, espagnol et allemand** : clique sur un drapeau en haut à droite. Au premier lancement, l'application prend la langue du navigateur.
 
+Deux vues : **Essentiel** (les réglages principaux, pour fabriquer ou retoucher un son vite) et **Complet** (tous les paramètres du Program), à basculer à gauche des onglets.
+
 Deux thèmes : **Atelier** (clair, inspiré de l'esthétique des modules Eurorack) et **Nuit** (sombre), à basculer avec le bouton ☾ / ☀.
 
 © 2026 Benjamin PATY (BenjaminPaty54)

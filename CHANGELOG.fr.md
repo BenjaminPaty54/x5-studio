@@ -4,6 +4,12 @@
 
 Toutes les modifications notables de X5 Studio sont listées ici. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et la numérotation suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.5] — 2026-11-22
+
+### Ajouté
+- Interrupteur **Essentiel / Complet**, à gauche des onglets, mémorisé d'une séance à l'autre. **Essentiel** (par défaut) garde les réglages principaux : multisounds, enveloppes du filtre et de l'ampli, cutoff, couleur, sensibilité à la vélocité, vibrato, LFO de filtre, type des effets. **Complet** affiche tous les paramètres du Program, comme avant. Les deux vues modifient le même son ; basculer de l'une à l'autre n'envoie rien au X5.
+- En vue Essentiel sont masqués : l'onglet Contrôleurs, les curseurs détaillés des temps et niveaux d'EG (les éditeurs d'enveloppe restent), le suivi de clavier, les interrupteurs de sensibilité −/0/+, le Pitch EG, le panoramique et les envois C/D, le retard de l'osc 2, Hold, ainsi que la synchro et le suivi de clavier des LFO.
+
 ## [1.4] — 2026-11-21
 
 Première publication sur GitHub.
@@ -62,4 +68,5 @@ Ces corrections viennent des tables MIDI officielles du X5DR transcrites dans le
 - Les sensibilités à la vélocité et au clavier ont leurs trois états (−/0/+).
 - Le suivi de clavier a ses quatre modes (Off/Bas/Haut/Tout).
 
+[1.5]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.5
 [1.4]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.4
