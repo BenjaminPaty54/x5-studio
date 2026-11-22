@@ -4,6 +4,24 @@
 
 Toutes les modifications notables de X5 Studio sont listées ici. Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et la numérotation suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.8.2] — 2026-11-22
+
+### Ajouté
+- Deux captures d'écran dans `docs/screenshots/` (onglet Rapide et onglet Filtre), affichées dans README.md (anglais) et LISEZMOI.md (français).
+
+### Corrigé
+- Le moniteur SysEx affichait les longs messages avec « (194 o) », une unité française restée dans l'interface anglaise. Il indique désormais « 194 bytes », traduit dans chaque langue (« 194 octets » en français).
+
+## [1.8.1] — 2026-11-22
+
+### Corrigé
+- **Varier** produisait des changements trop petits pour être entendus : avec l'ampleur par défaut, le cutoff du filtre bougeait d'environ 3 crans sur 99. Le curseur **Ampleur** indique maintenant l'écart maximal en % de la plage de chaque réglage (±12 % par défaut, jusqu'à ±40 %, affiché à côté du curseur), et le cutoff pèse un peu plus.
+- Les valeurs en butée (un niveau à 99, une couleur à 0) ne restent plus bloquées : elles rebondissent, si bien que chaque tirage change vraiment chaque réglage coché.
+- La case **Timbre** ne modifie plus « Couleur ← vélocité », qui ne s'entend qu'en jouant plus ou moins fort.
+
+### Ajouté
+- Une ligne de résumé sous les boutons Varier indique ce qui a bougé, les plus grands changements d'abord (par exemple « Cutoff 70→81 · Couleur 0→9 »).
+
 ## [1.8] — 2026-11-22
 
 ### Ajouté
@@ -122,6 +140,8 @@ Ces corrections viennent des tables MIDI officielles du X5DR transcrites dans le
 - Les sensibilités à la vélocité et au clavier ont leurs trois états (−/0/+).
 - Le suivi de clavier a ses quatre modes (Off/Bas/Haut/Tout).
 
+[1.8.2]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.8.2
+[1.8.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.8.1
 [1.8]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.8
 [1.7.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7.1
 [1.7]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7

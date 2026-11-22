@@ -4,6 +4,24 @@
 
 All notable changes to X5 Studio are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.8.2] — 2026-11-22
+
+### Added
+- Two screenshots in `docs/screenshots/` (Quick tab and Filter tab), shown in README.md (English) and LISEZMOI.md (French).
+
+### Fixed
+- The SysEx monitor showed long messages as "(194 o)", a French unit left in the English interface. It now reads "194 bytes", translated in every language.
+
+## [1.8.1] — 2026-11-22
+
+### Fixed
+- **Vary** made changes too small to hear: with the default amount, the filter cutoff moved by about 3 steps out of 99. The **Amount** slider now means the largest change in % of each parameter's range (±12 % by default, up to ±40 %, shown next to the slider), and the cutoff weighs a little more.
+- Values at a limit (a level at 99, a colour at 0) no longer get stuck: they bounce back, so every draw really changes each ticked parameter.
+- The **Tone** box no longer changes "Colour ← velocity", which is only heard when playing harder or softer.
+
+### Added
+- A summary line under the Vary buttons lists what moved, biggest changes first (for example "Cutoff 70→81 · Colour 0→9").
+
 ## [1.8] — 2026-11-22
 
 ### Added
@@ -122,6 +140,8 @@ These fixes come from the official X5DR MIDI implementation tables transcribed i
 - Velocity and keyboard sensitivity switches now have their three states (−/0/+).
 - Keyboard tracking has its four modes (Off/Low/High/All).
 
+[1.8.2]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.8.2
+[1.8.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.8.1
 [1.8]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.8
 [1.7.1]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7.1
 [1.7]: https://github.com/BenjaminPaty54/x5-studio/releases/tag/v1.7

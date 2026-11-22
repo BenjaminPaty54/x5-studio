@@ -14,6 +14,14 @@ Each card shows, top right, the number of the matching **edit page on the X5** (
 
 The look is inspired by Eurorack modules: light module faces, white knobs, one colour per section.
 
+![Quick tab in the Essential view: Inspiration card, macro knobs, Vary and the volume envelope](docs/screenshots/quick-en.png)
+
+*Quick tab (Essential view): create a sound from a family, shape it with macros, vary it.*
+
+![Filter tab in the Full view: draggable filter envelope and every VDF parameter, with X5 page numbers](docs/screenshots/filter-en.png)
+
+*Filter tab (Full view): drag the envelope points; the red boxes give the matching X5 edit pages.*
+
 © 2026 Benjamin PATY (BenjaminPaty54)
 
 ---

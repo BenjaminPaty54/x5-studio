@@ -219,6 +219,7 @@ html[data-view="full"] .simple-only{display:none!important}
 .fxsub{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin:12px 0 2px;color:var(--mute)}
 .fxoff .fxon{display:none}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
+.varsum{font-family:var(--mono);font-size:11.5px;color:var(--sec);min-height:16px;margin-top:8px;line-height:1.5}
 .chips button{border-radius:99px;padding:6px 14px;font-weight:600}
 .chips button:hover{border-color:var(--sec);color:var(--sec)}
 .cards.fxcards{grid-template-columns:repeat(auto-fill,minmax(420px,1fr))}
@@ -243,7 +244,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
 <body>
 <div class="app">
 <header>
-  <div class="brand" title="X5 Studio v1.8 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
+  <div class="brand" title="X5 Studio v1.8.2 — © 2026 Benjamin PATY (BenjaminPaty54)">X5 <b>Studio</b></div>
   <span id="midiState" class="pill">MIDI : en attente</span>
   <div class="grp">
     <span class="led" id="ledOut" title="MIDI output"></span><select id="outSel" title="MIDI output to the X5"></select>
@@ -368,7 +369,7 @@ kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line
   <h3>Limitations</h3>
   <p class="note">This version edits <b>Programs</b> (sounds) only, effects included (Full view). <b>Combinations</b> and Global settings cannot be edited.</p>
   <p class="note">Protocol: Korg SysEx, Model ID 36h (shared by X5 / X5D / X5DR / 05R/W). Live parameters: function 41h; full sound: function 40h.</p>
-  <p class="note" style="margin-top:12px">X5 Studio v1.8 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
+  <p class="note" style="margin-top:12px">X5 Studio v1.8.2 — © 2026 Benjamin PATY (BenjaminPaty54) — MIT License. Korg and X5 are trademarks of Korg Inc.; independent, unaffiliated project.</p>
 </div><div style="text-align:right"><button class="pri">OK</button></div></form></dialog>
 
 <script>
@@ -521,7 +522,7 @@ function initLang(){
   setLang(l, true);
   i18nObs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['title','placeholder']});
 }
-/* X5 Studio v1.8 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
+/* X5 Studio v1.8.2 — Copyright (c) 2026 Benjamin PATY (BenjaminPaty54). Licence MIT / MIT License. */
 /* ============================================================
    1. Reference data
       Fixed lists shown in menus: the 340 multisound names (WAVES, inserted
@@ -1077,7 +1078,7 @@ function mon(dir, bytes){
   const d=Array.from(bytes); if (d[0]===0xF8 || d[0]===0xFE) return;   // horloge / active sensing
   if (d[0]!==0xF0 && !$('#monNotes').checked) return;
   const t=((performance.now()-MON.t0)/1000).toFixed(3);
-  const hx = d.length>48 ? hex(d.slice(0,24))+' … '+hex(d.slice(-4))+' ('+d.length+' o)' : hex(d);
+  const hx = d.length>48 ? hex(d.slice(0,24))+' … '+hex(d.slice(-4))+' ('+T('{0} bytes',d.length)+')' : hex(d);
   const r=h('div',{class:'r '+dir},h('span',{class:'t'},t),h('span',{class:'a'},dir==='o'?'↑':'↓'),h('span',{class:'d'},describe(d)),h('span'),h('span'),h('span',{class:'x'},hx));
   MON.rows.push(t+' '+(dir==='o'?'OUT':'IN ')+' '+describe(d)+' | '+hx);
   if (MON.rows.length>500) MON.rows.shift();
@@ -1392,26 +1393,51 @@ function buildQuick(){
   p.append(h('div',{class:'cards',style:'margin-bottom:14px'},inspireCard()));
   p.append(h('div',{class:'macros'},MACROS.map(macroEl)));
   const sel=h('div',{class:'cols2',style:'margin-top:12px'});
-  const amt=h('input',{type:'range',min:1,max:40,value:12});
+  /* Vary: nudges every parameter of the ticked families around its current value.
+     Amount = largest possible change, in % of each parameter's range (12 % by default).
+     A value pushed past a limit bounces back instead of sticking there, so every draw
+     really changes something; the filter cutoff weighs a little more because it shapes
+     the tone most. A one-line summary then shows what moved. */
+  const amt=h('input',{type:'range',min:2,max:40,value:12}), amtv=h('span',{class:'val'});
+  const showAmt=()=>{ amtv.textContent='±'+amt.value+' %'; }; amt.addEventListener('input',showAmt); showAmt();
   const fam={timbre:h('input',{type:'checkbox',checked:''}),env:h('input',{type:'checkbox',checked:''}),mod:h('input',{type:'checkbox'}),wave:h('input',{type:'checkbox'})};
-  const famDef={timbre:/^vdf\.(cut|eint|col)|^lvl/, env:/^(vdf|vda)\.(at|al|dt|bp|st|sl|rt|rl)$|^peg\./, mod:/^(pm|fmg)\.(freq|int|del|fade)|^(at|joy)\./, wave:/^wave$/};
+  const famDef={timbre:/^(vdf\.(cut|eint|col)|lvl)$/, env:/^((vdf|vda)\.(at|al|dt|bp|st|sl|rt|rl)|peg\..+)$/, mod:/^((pm|fmg)\.(freq|int|del|fade)|(at|joy)\..+)$/, wave:/^wave$/};
+  const WEIGHT={'vdf.cut':1.5};
+  const summary=h('div',{class:'varsum'});
+  const bounce=(v,lo,hi)=>{ for (let i=0;i<4;i++){ if (v>hi) v=hi-(v-hi); else if (v<lo) v=lo+(lo-v); else break; } return Math.max(lo,Math.min(hi,v)); };
   const mutate=()=>{
-    const a=+amt.value;
+    const a=+amt.value/100, moved=[];
     for (const d of Object.values(PDEF)){
       if (d.enc.t==='tri'||d.enc.t==='bit'||d.opts) continue;
       if (d.osc===2 && !isDouble()) continue;
       const fk=Object.keys(fam).find(f=>fam[f].checked && famDef[f].test(d.base)); if (!fk) continue;
-      if (fk==='wave'){ if (Math.random()<.5){ const w=val(d.key); const c=WAVE_CATS.filter(x=>x[0]<=w).at(-1)[0]; const nx=WAVE_CATS.find(x=>x[0]>c); const hi=(nx?nx[0]:340)-1; setParam(d.key, c+Math.floor(Math.random()*(hi-c+1)),{noRefresh:true,noAudition:true}); } continue; }
-      const span=(d.max-d.min); const nv=val(d.key)+(Math.random()*2-1)*span*a/200;
+      const old=val(d.key); let nv;
+      if (fk==='wave'){
+        if (Math.random()>=.5) continue;            // one oscillator in two gets a new multisound, from the same family
+        const c=WAVE_CATS.filter(x=>x[0]<=old).at(-1)[0], nx=WAVE_CATS.find(x=>x[0]>c), hi=(nx?nx[0]:340)-1;
+        nv=c+Math.floor(Math.random()*(hi-c+1));
+      } else {
+        const span=d.max-d.min, w=WEIGHT[d.base]||1;
+        let delta=(Math.random()*2-1)*span*a*w;
+        if (Math.abs(delta)<1) delta = delta<0 ? -1 : 1;      // always move by at least one step
+        nv=Math.round(bounce(old+delta, d.min, d.max));
+      }
+      if (nv===old) continue;
       setParam(d.key,nv,{noRefresh:true,noAudition:true});
+      moved.push({d, old, nv, w: Math.abs(nv-old)/(d.max-d.min||1)});
     }
     commit(); refreshAll(); audition();
+    // summary: the biggest moves first
+    moved.sort((x,y)=>y.w-x.w);
+    const show=moved.slice(0,6).map(m=>(m.d.osc&&isDouble()?'Osc '+m.d.osc+' · ':'')+T(m.d.label)+' '+(m.d.base==='wave'?WAVES[m.old]+'→'+WAVES[m.nv]:fmt(m.d,m.old)+'→'+fmt(m.d,m.nv)));
+    summary.textContent = moved.length ? show.join(' · ')+(moved.length>6?' · '+T('{0} more',moved.length-6):'') : T('Nothing changed: tick at least one family.');
   };
   sel.append(
     card('Vary the sound',
-      h('div',{class:'row'},h('label',{},'Amount'),amt,h('span')),
+      h('div',{class:'row'},h('label',{},'Amount'),amt,amtv),
       h('div',{class:'tris'},...Object.entries({timbre:'Tone',env:'Envelopes',mod:'Modulations',wave:'Multisound'}).map(([k,t])=>h('label',{},fam[k],' '+t))),
-      h('div',{style:'display:flex;gap:8px;margin-top:8px'},h('button',{class:'pri',onclick:mutate},'🎲 Vary'),h('button',{onclick:undo},'↶ Undo the variation')),
+      h('div',{style:'display:flex;gap:8px;margin-top:8px'},h('button',{class:'pri',onclick:mutate},'🎲 Vary'),h('button',{onclick:()=>{ undo(); summary.textContent=''; }},'↶ Undo the variation')),
+      summary,
       h('p',{class:'note'},'Small random variations around the current sound. Alternate “Vary” and “Undo” until you find something you like.')),
     card('Volume (VDA) — all oscillators', egEditor('vda'), h('p',{class:'note'},'Drag the points. Fine settings are in the Amp tab.'))
   );

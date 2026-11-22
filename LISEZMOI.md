@@ -14,6 +14,14 @@ Chaque carte affiche, en haut à droite, le numéro de la **page d'édition corr
 
 L'esthétique s'inspire des modules Eurorack : façades claires, boutons blancs, une couleur par section.
 
+![Onglet Rapide en vue Essentiel : carte Inspiration, macros, Varier et enveloppe de volume](docs/screenshots/quick-fr.png)
+
+*Onglet Rapide (vue Essentiel) : créer un son à partir d'une famille, le sculpter avec les macros, le faire varier.*
+
+![Onglet Filtre en vue Complet : enveloppe du filtre déplaçable et tous les paramètres du VDF, avec les numéros de page du X5](docs/screenshots/filter-fr.png)
+
+*Onglet Filtre (vue Complet) : on tire les points de l'enveloppe ; les cadres rouges indiquent les pages d'édition du X5.*
+
 © 2026 Benjamin PATY (BenjaminPaty54)
 
 ---
